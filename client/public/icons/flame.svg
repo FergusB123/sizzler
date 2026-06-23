@@ -1,0 +1,20 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sizzler">
+  <defs>
+    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd24a"/>
+      <stop offset="0.45" stop-color="#ff8a1e"/>
+      <stop offset="1" stop-color="#ef5511"/>
+    </linearGradient>
+    <linearGradient id="pan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#241c16"/>
+      <stop offset="1" stop-color="#0f0d0c"/>
+    </linearGradient>
+  </defs>
+  <!-- Flame -->
+  <path fill="url(#flame)" d="M256 60c10 52-26 78-49 110-19 27-27 55-12 88 6 13 17 24 17 24s-30-6-44-31c-7-13-9-27-9-27s-26 31-13 78c14 50 64 84 117 84 67 0 121-47 121-113 0-46-25-77-46-104-15-19-28-37-28-61 0-22 11-39 11-39s-39 14-55 49c-3-58-10-78-10-78z"/>
+  <!-- Inner flame -->
+  <path fill="#fff3cf" opacity="0.85" d="M262 250c6 26-14 38-14 60 0 21 18 34 36 34 24 0 41-18 41-43 0-23-15-37-25-53-8-13-14-26-14-43 0 0-26 22-24 45z"/>
+  <!-- Pan handle + body -->
+  <path fill="url(#pan)" d="M96 392h300a14 14 0 0 1 14 14v2a44 44 0 0 1-44 44H126a44 44 0 0 1-44-44v-2a14 14 0 0 1 14-14z"/>
+  <rect x="392" y="404" width="118" height="26" rx="13" fill="url(#pan)"/>
+</svg>

@@ -1,0 +1,123 @@
+/* ============================================================
+   Sizzler — "Noir Editorial" design system
+   Near-black canvas · micro-elevation · hairline dividers
+   Clash Display + General Sans · iris accent as light
+   ============================================================ */
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=general-sans@400,500,600&display=swap');
+
+:root {
+  color-scheme: dark;
+
+  /* Canvas & elevation — tiny luminosity steps, not drop shadows */
+  --bg: #0a0a0b;
+  --surface: #121216;
+  --surface-2: #16161c;
+  --surface-sunk: #1b1b22;
+  --surface-3: #23232c;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.13);
+
+  /* Text */
+  --text: #f4f4f3;
+  --text-dim: #9a9aa6;
+  --text-faint: #5e5e6a;
+
+  /* Accent — iris, used as light. Names kept for back-compat. */
+  --flame-500: #6e6bff;
+  --flame-400: #8a88ff;
+  --flame-300: #b6b4ff;
+  --ember-600: #5b59f0;
+  --gold-400: #b6b4ff;
+  --accent: #6e6bff;
+  --accent-2: #a78bfa;
+  --accent-soft: rgba(110, 107, 255, 0.14);
+  --accent-line: rgba(110, 107, 255, 0.34);
+
+  --leaf-500: #34d399;
+  --berry-500: #a78bfa;
+  --success: #34d399;
+  --pos-soft: rgba(52, 211, 153, 0.14);
+  --danger: #fb7185;
+
+  /* Type */
+  --font: 'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-display: 'Clash Display', 'General Sans', system-ui, sans-serif;
+
+  /* Radii */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 26px;
+  --r-pill: 999px;
+
+  /* Elevation = hairline ring first, shadow second */
+  --shadow-sm: 0 0 0 1px var(--border);
+  --shadow-md: 0 14px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.72), 0 0 0 1px var(--border-strong);
+  --shadow-flame: 0 10px 40px rgba(110, 107, 255, 0.42);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+
+  /* Layout */
+  --nav-h: 76px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --maxw: 540px;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+  letter-spacing: -0.01em;
+}
+button { font-family: inherit; }
+input, textarea, select { font-family: inherit; font-size: 16px; } /* stop iOS zoom */
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.025em; margin: 0; line-height: 1.05; }
+
+/* Faint iris aurora at the top for depth */
+body::before {
+  content: '';
+  position: fixed; inset: 0 0 auto 0; height: 380px; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(60% 80% at 25% -5%, rgba(110, 107, 255, 0.16), transparent 70%),
+    radial-gradient(50% 70% at 95% 0%, rgba(167, 139, 250, 0.10), transparent 70%);
+}
+
+/* ---- Boot splash ---- */
+#boot-splash {
+  position: fixed; inset: 0; z-index: 9999;
+  display: grid; place-content: center; justify-items: center; gap: 20px;
+  background: radial-gradient(120% 90% at 50% 30%, #131318 0%, #08080a 78%);
+  transition: opacity 0.5s var(--ease-out);
+}
+#boot-splash.leaving { opacity: 0; pointer-events: none; }
+.boot-flame {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 6px rgba(110, 107, 255, 0.12), 0 0 50px 10px rgba(110, 107, 255, 0.6);
+  animation: pulse 1.5s var(--ease-out) infinite;
+}
+.boot-word {
+  font-family: var(--font-display); font-weight: 600; font-size: 15px;
+  color: var(--text-dim); letter-spacing: 0.34em; text-transform: uppercase;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(0.7); opacity: 0.6; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

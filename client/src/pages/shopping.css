@@ -1,0 +1,25 @@
+.shop-hint { font-size: 13px; color: var(--text-dim); margin: 12px 2px 14px; line-height: 1.45; }
+.shop-progress { height: 5px; background: var(--surface-3); border-radius: 999px; overflow: hidden; margin-bottom: 22px; }
+.shop-progress span { display: block; height: 100%; background: var(--success); transition: width 0.4s var(--ease-out); }
+
+.shop-group { margin-bottom: 22px; }
+.shop-cat { display: flex; align-items: center; gap: 8px; font-family: var(--font); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin: 0 0 10px 2px; }
+.shop-cat small { margin-left: auto; background: var(--surface-3); color: var(--text-dim); padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+
+.shop-item {
+  width: 100%; display: flex; align-items: center; gap: 13px; text-align: left; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 15px; margin-bottom: 7px;
+  transition: opacity 0.2s, transform 0.12s, border-color 0.2s;
+}
+.shop-item:active { transform: scale(0.99); }
+.shop-check { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--border-strong); display: grid; place-content: center; color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0; transition: all 0.18s var(--ease-spring); }
+/* Home mode = emerald square ticks; in-store = iris round ticks (distinct contexts) */
+.shop-item.home .shop-check.on { background: var(--success); border-color: var(--success); }
+.shop-item.instore .shop-check.on { background: var(--accent); border-color: var(--accent); border-radius: 50%; }
+.shop-name { flex: 1; font-weight: 500; letter-spacing: -0.01em; }
+.shop-qty { color: var(--text-dim); font-size: 13px; font-weight: 600; }
+.shop-item.checked .shop-name { text-decoration: line-through; color: var(--text-faint); }
+.shop-item.checked { opacity: 0.55; border-color: var(--border); }
+
+.shop-add { display: flex; gap: 8px; margin-top: 20px; }
+.shop-add .input { flex: 1; }
