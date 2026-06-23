@@ -10,16 +10,14 @@ async function uploadFile(buffer, originalname, mimetype) {
   const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
 
   if (cloudName && uploadPreset) {
-    const publicId = uuidv4().replace(/-/g, '');
+    // Minimal unsigned upload: only `file` + `upload_preset`. Cloudinary
+    // auto-generates a unique public_id; set any folder/naming in the preset
+    // itself. (Passing public_id/folder here can be rejected by unsigned presets.)
     const ext = (mimetype.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
-    const filename = `${publicId}.${ext}`;
-
     const formData = new FormData();
     const blob = new Blob([buffer], { type: mimetype });
-    formData.append('file', blob, filename);
+    formData.append('file', blob, `${uuidv4()}.${ext}`);
     formData.append('upload_preset', uploadPreset);
-    formData.append('public_id', publicId);
-    formData.append('folder', 'sizzler');
 
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
