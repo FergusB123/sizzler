@@ -1,6 +1,6 @@
 .rd-hero { position: relative; height: 320px; background: var(--surface-2); }
 .rd-hero img { width: 100%; height: 100%; object-fit: cover; }
-.rd-hero-fallback { width: 100%; height: 100%; display: grid; place-content: center; font-family: var(--font-display); font-size: 120px; font-weight: 600; color: rgba(255,255,255,0.14); background: radial-gradient(120% 110% at 28% 16%, #1c1c33, #0c0c0f); }
+.rd-hero-fallback { width: 100%; height: 100%; display: grid; place-content: center; font-family: var(--font-display); font-size: 120px; font-weight: 600; color: rgba(30,30,30,0.16); background: linear-gradient(150deg, #fde7d8, #f3eada); }
 .rd-hero-grad { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 28%, transparent 48%, rgba(0,0,0,0.92) 100%); }
 .rd-hero-top { position: absolute; top: calc(var(--safe-top) + 12px); left: 14px; right: 14px; display: flex; justify-content: space-between; }
 .rd-hero-title { position: absolute; bottom: 18px; left: 18px; right: 18px; color: #fff; }

@@ -2,21 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icons/flame.svg" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0e0e10" />
+    <meta name="theme-color" content="#FBF5EC" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Sizzler" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <title>Sizzler — Cook what you love</title>
+    <title>Sizzler — Plan · Cook · Enjoy</title>
   </head>
   <body>
     <div id="root">
-      <!-- First-paint splash so the cold-start feels instant on mobile -->
+      <!-- First-paint splash: the signature "warming up your kitchen" loader -->
       <div id="boot-splash">
-        <div class="boot-flame"></div>
-        <span class="boot-word">Sizzler</span>
+        <div class="sizzle-load">
+          <span class="sizzle-ring"></span>
+          <span class="sizzle-ring delay"></span>
+          <img class="sizzle-mark" src="/brand/sizzler-mark-ondark.png" alt="Sizzler" />
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div class="sizzle-dots"><span></span><span></span><span></span></div>
+          <span class="sizzle-cap">Warming up your kitchen…</span>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>

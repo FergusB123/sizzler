@@ -10,10 +10,10 @@
 .add-method .am-icon { display: grid; place-content: center; width: 40px; height: 40px; border-radius: 12px; margin-bottom: 8px; }
 .add-method b { font-size: 15.5px; letter-spacing: -0.01em; }
 .add-method .am-desc { font-size: 12.5px; color: var(--text-dim); }
-.tint-a .am-icon { background: rgba(110, 107, 255, 0.16); color: #b6b4ff; }
-.tint-b .am-icon { background: rgba(56, 189, 248, 0.16); color: #7dd3fc; }
-.tint-c .am-icon { background: rgba(167, 139, 250, 0.16); color: #c4b5fd; }
-.tint-d .am-icon { background: rgba(52, 211, 153, 0.16); color: #6ee7b7; }
+.tint-a .am-icon { background: var(--orange-50); color: var(--orange-500); }
+.tint-b .am-icon { background: var(--amber-tint); color: var(--amber-text); }
+.tint-c .am-icon { background: var(--herb-tint); color: var(--herb-text); }
+.tint-d .am-icon { background: #fbe1d6; color: var(--ember); }
 
 .import-hero { display: grid; place-content: center; margin: 12px 0 24px; }
 .import-hero span { display: grid; place-content: center; width: 64px; height: 64px; border-radius: 18px; background: var(--accent-soft); color: var(--flame-300); }

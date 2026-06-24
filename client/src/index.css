@@ -1,63 +1,91 @@
 /* ============================================================
-   Sizzler — "Noir Editorial" design system
-   Near-black canvas · micro-elevation · hairline dividers
-   Clash Display + General Sans · iris accent as light
+   Sizzler — brand design system  (Plan · Cook · Enjoy)
+   Warm Cream canvas · Sizzle Orange · Cast Iron ink
+   Clash Display + General Sans
    ============================================================ */
-@import url('https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=general-sans@400,500,600&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600,700&display=swap');
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Canvas & elevation — tiny luminosity steps, not drop shadows */
-  --bg: #0a0a0b;
-  --surface: #121216;
-  --surface-2: #16161c;
-  --surface-sunk: #1b1b22;
-  --surface-3: #23232c;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.13);
+  /* Brand palette */
+  --orange-50: #fff3ec;
+  --orange-100: #fcdfcf;
+  --orange-300: #f18a5e;
+  --orange-500: #eb4606; /* Sizzle Orange — primary */
+  --orange-600: #c73b07; /* hover / pressed */
+  --orange-700: #97300b; /* text on light for contrast */
+  --ember: #b83417;
+  --amber: #e9a23c;
+  --amber-tint: #fbefd7;
+  --amber-text: #9a6b12;
+  --herb: #3e7c4e;
+  --herb-tint: #ddebdf;
+  --herb-text: #2f6b3e;
 
-  /* Text */
-  --text: #f4f4f3;
-  --text-dim: #9a9aa6;
-  --text-faint: #5e5e6a;
+  --cast-iron: #1e1e1e;
+  --cream: #fbf5ec;
+  --oat: #f3eada;
+  --ash: #b9b9b9;
+  --stone: #6e6963;
+  --white: #ffffff;
 
-  /* Accent — iris, used as light. Names kept for back-compat. */
-  --flame-500: #6e6bff;
-  --flame-400: #8a88ff;
-  --flame-300: #b6b4ff;
-  --ember-600: #5b59f0;
-  --gold-400: #b6b4ff;
-  --accent: #6e6bff;
-  --accent-2: #a78bfa;
-  --accent-soft: rgba(110, 107, 255, 0.14);
-  --accent-line: rgba(110, 107, 255, 0.34);
+  --charcoal: #1b1916; /* dark surface (loaders, hero panels) */
+  --charcoal-text: #f3eada;
+  --charcoal-dim: #b8b0a2;
+  --charcoal-faint: #8c857a;
 
-  --leaf-500: #34d399;
-  --berry-500: #a78bfa;
-  --success: #34d399;
-  --pos-soft: rgba(52, 211, 153, 0.14);
-  --danger: #fb7185;
+  /* Legacy aliases kept so component CSS cascades */
+  --flame-500: var(--orange-500);
+  --flame-400: var(--orange-300);
+  --flame-300: var(--orange-100);
+  --ember-600: var(--orange-600);
+  --gold-400: var(--amber);
+  --leaf-500: var(--herb);
+  --berry-500: var(--amber-text);
+  --accent: var(--orange-500);
+  --accent-soft: var(--orange-50);
+  --accent-line: var(--orange-100);
+
+  --success: var(--herb);
+  --pos-soft: var(--herb-tint);
+  --danger: #c0392b;
+
+  /* Semantic surfaces */
+  --bg: var(--cream);
+  --surface: var(--white);
+  --surface-2: var(--oat);
+  --surface-sunk: var(--oat);
+  --surface-3: var(--orange-50);
+  --text: var(--cast-iron);
+  --text-dim: var(--stone);
+  --text-faint: #8a847a;
+  --border: #ecdfc9;        /* on cream / white */
+  --border-strong: #e4d6bf; /* on oat */
 
   /* Type */
   --font: 'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
   --font-display: 'Clash Display', 'General Sans', system-ui, sans-serif;
 
   /* Radii */
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 20px;
-  --r-xl: 26px;
-  --r-pill: 999px;
+  --r-sm: 9px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-2xl: 24px;
+  --r-pill: 100px;
 
-  /* Elevation = hairline ring first, shadow second */
-  --shadow-sm: 0 0 0 1px var(--border);
-  --shadow-md: 0 14px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border);
-  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.72), 0 0 0 1px var(--border-strong);
-  --shadow-flame: 0 10px 40px rgba(110, 107, 255, 0.42);
+  /* Shadows — soft warm elevation */
+  --shadow-sm: 0 1px 2px rgba(30, 30, 30, 0.04), 0 10px 26px -20px rgba(30, 30, 30, 0.28);
+  --shadow-md: 0 18px 40px -26px rgba(30, 30, 30, 0.35);
+  --shadow-lg: 0 22px 50px -20px rgba(0, 0, 0, 0.32);
+  --shadow-flame: 0 14px 30px -14px rgba(235, 70, 6, 0.5);
 
   /* Motion */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-quick: 150ms;
+  --t-standard: 240ms;
+  --t-expressive: 420ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
 
   /* Layout */
@@ -77,46 +105,44 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overscroll-behavior-y: none;
-  letter-spacing: -0.01em;
 }
 button { font-family: inherit; }
-input, textarea, select { font-family: inherit; font-size: 16px; } /* stop iOS zoom */
+input, textarea, select { font-family: inherit; font-size: 16px; }
 a { color: inherit; text-decoration: none; }
 img { display: block; max-width: 100%; }
 
-h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.025em; margin: 0; line-height: 1.05; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; margin: 0; line-height: 1.04; }
 
-/* Faint iris aurora at the top for depth */
-body::before {
-  content: '';
-  position: fixed; inset: 0 0 auto 0; height: 380px; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(60% 80% at 25% -5%, rgba(110, 107, 255, 0.16), transparent 70%),
-    radial-gradient(50% 70% at 95% 0%, rgba(167, 139, 250, 0.10), transparent 70%);
-}
+.overline, .caption { font-family: var(--font); }
 
-/* ---- Boot splash ---- */
+/* ---- Loading screen / boot splash ---- */
 #boot-splash {
   position: fixed; inset: 0; z-index: 9999;
-  display: grid; place-content: center; justify-items: center; gap: 20px;
-  background: radial-gradient(120% 90% at 50% 30%, #131318 0%, #08080a 78%);
+  display: grid; place-content: center; justify-items: center; gap: 30px;
+  background: var(--charcoal);
   transition: opacity 0.5s var(--ease-out);
 }
 #boot-splash.leaving { opacity: 0; pointer-events: none; }
-.boot-flame {
-  width: 14px; height: 14px; border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 6px rgba(110, 107, 255, 0.12), 0 0 50px 10px rgba(110, 107, 255, 0.6);
-  animation: pulse 1.5s var(--ease-out) infinite;
+.sizzle-load { position: relative; width: 140px; height: 140px; display: grid; place-content: center; }
+.sizzle-ring {
+  position: absolute; top: 50%; left: 50%; width: 140px; height: 140px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(235, 70, 6, 0.4), rgba(235, 70, 6, 0) 65%);
+  animation: scPulseRing 2.4s var(--ease-out) infinite;
 }
-.boot-word {
-  font-family: var(--font-display); font-weight: 600; font-size: 15px;
-  color: var(--text-dim); letter-spacing: 0.34em; text-transform: uppercase;
-}
-@keyframes pulse {
-  0%, 100% { transform: scale(0.7); opacity: 0.6; }
-  50% { transform: scale(1.12); opacity: 1; }
-}
+.sizzle-ring.delay { animation-delay: 1.2s; }
+.sizzle-mark { position: relative; width: 96px; height: auto; animation: scBreathe 2.4s ease-in-out infinite; transform-origin: center; }
+.sizzle-dots { display: flex; gap: 7px; align-items: flex-end; height: 14px; }
+.sizzle-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--orange-500); animation: scDot 1.3s ease-in-out infinite; }
+.sizzle-dots span:nth-child(2) { animation-delay: 0.18s; }
+.sizzle-dots span:nth-child(3) { animation-delay: 0.36s; }
+.sizzle-cap { font-size: 13.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--charcoal-faint); margin-top: 16px; }
+
+@keyframes scBreathe { 0%, 100% { transform: scale(1); opacity: 0.94; } 50% { transform: scale(1.05); opacity: 1; } }
+@keyframes scPulseRing { 0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.6; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
+@keyframes scDot { 0%, 80%, 100% { transform: translateY(0); opacity: 0.35; } 40% { transform: translateY(-7px); opacity: 1; } }
+@keyframes scSpin { to { transform: rotate(360deg); } }
+@keyframes scShimmer { 0% { background-position: -180% 0; } 100% { background-position: 180% 0; } }
+@keyframes scStripe { to { background-position: 48px 0; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }

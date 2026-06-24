@@ -10,7 +10,7 @@ export function formatTime(mins) {
   return m ? `${h}h ${m}m` : `${h}h`
 }
 
-// Typographic fallback when there's no image — initial on a tinted field.
+// Typographic fallback when there's no image — initial on a warm tinted field.
 function Fallback({ recipe }) {
   const initial = (recipe.title || '?').trim().charAt(0).toUpperCase()
   return (
@@ -23,19 +23,15 @@ function Fallback({ recipe }) {
 export default function RecipeCard({ recipe, to, origin }) {
   const total = (recipe.prep_minutes || 0) + (recipe.cook_minutes || 0)
   const meta = [recipe.cuisine, recipe.difficulty].filter(Boolean)
+  const tag = origin === 'community' ? { label: 'Community', cls: 'community' }
+    : origin === 'you' ? { label: 'Yours', cls: 'you' }
+    : recipe.is_shared ? { label: 'Shared', cls: 'community' } : null
   const inner = (
     <div className="recipe-card">
       <div className="rc-media">
         {recipe.image_url ? <img src={recipe.image_url} alt={recipe.title} loading="lazy" /> : <Fallback recipe={recipe} />}
-        <div className="rc-scrim" />
-        {(origin || recipe.is_shared) && (
-          <span className={`rc-tag ${origin === 'community' ? 'community' : 'you'}`}>
-            {origin === 'community' ? 'Community' : origin === 'you' ? 'Yours' : 'Shared'}
-          </span>
-        )}
-        {total > 0 && (
-          <span className="rc-time"><Icon name="clock" size={12} />{formatTime(total)}</span>
-        )}
+        {total > 0 && <span className="rc-time">{formatTime(total)}</span>}
+        {tag && <span className={`rc-tag ${tag.cls}`}>{tag.label}</span>}
       </div>
       <div className="rc-body">
         <h3 className="rc-title">{recipe.title}</h3>

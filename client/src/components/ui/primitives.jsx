@@ -64,22 +64,27 @@ export function EmptyState({ icon = 'sparkle', title, children, action }) {
 }
 
 const SIZZLE_MESSAGES = [
+  'Warming up your kitchen…',
   'Reading the recipe…',
   'Chopping the details…',
-  'Measuring ingredients…',
   'Tasting for seasoning…',
   'Plating it up…',
 ]
+// Signature brand loader: the mark breathing inside expanding glow rings.
 export function SizzleLoader({ message }) {
   const [i, setI] = useState(0)
   useEffect(() => {
     if (message) return
-    const t = setInterval(() => setI((n) => (n + 1) % SIZZLE_MESSAGES.length), 1400)
+    const t = setInterval(() => setI((n) => (n + 1) % SIZZLE_MESSAGES.length), 1500)
     return () => clearInterval(t)
   }, [message])
   return (
     <div className="sizzle">
-      <div className="sizzle-ring" />
+      <div className="sizzle-load">
+        <span className="sizzle-ring" />
+        <span className="sizzle-ring delay" />
+        <img className="sizzle-mark" src="/brand/sizzler-mark.png" alt="" />
+      </div>
       <div className="sizzle-msg">{message || SIZZLE_MESSAGES[i]}</div>
     </div>
   )

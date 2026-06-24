@@ -1,41 +1,42 @@
 .rc-link { display: block; }
-.recipe-card { display: flex; flex-direction: column; transition: transform 0.18s var(--ease-out); }
-.rc-link:active .recipe-card { transform: scale(0.98); }
-
-.rc-media {
-  position: relative; aspect-ratio: 1 / 1; border-radius: var(--r-lg); overflow: hidden;
-  background: var(--surface-2); border: 1px solid var(--border);
+.recipe-card {
+  display: flex; flex-direction: column; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden;
+  box-shadow: var(--shadow-sm); transition: transform 0.18s var(--ease-out), box-shadow 0.2s;
 }
+.rc-link:active .recipe-card { transform: scale(0.985); }
+
+.rc-media { position: relative; aspect-ratio: 16 / 11; background: var(--oat); }
 .rc-media img { width: 100%; height: 100%; object-fit: cover; }
-.rc-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.28) 0%, transparent 32%, transparent 60%, rgba(0,0,0,0.55) 100%); }
 
-/* Typographic fallback */
+/* Warm typographic fallback */
 .rc-fallback { width: 100%; height: 100%; display: grid; place-content: center; }
-.rc-fallback[data-h='0'] { background: radial-gradient(120% 120% at 30% 20%, #1c1c33, #101015); }
-.rc-fallback[data-h='1'] { background: radial-gradient(120% 120% at 30% 20%, #112a26, #101015); }
-.rc-fallback[data-h='2'] { background: radial-gradient(120% 120% at 30% 20%, #2a1a30, #101015); }
-.rc-fallback[data-h='3'] { background: radial-gradient(120% 120% at 30% 20%, #2a2418, #101015); }
-.rc-fallback[data-h='4'] { background: radial-gradient(120% 120% at 30% 20%, #1a2230, #101015); }
-.rc-fallback-initial { font-family: var(--font-display); font-size: 54px; font-weight: 600; color: rgba(255,255,255,0.22); }
+.rc-fallback[data-h='0'] { background: linear-gradient(150deg, #fde7d8, #f7d3bd); }
+.rc-fallback[data-h='1'] { background: linear-gradient(150deg, #e7f0e2, #d7ebd9); }
+.rc-fallback[data-h='2'] { background: linear-gradient(150deg, #fbe6cf, #f6dcb2); }
+.rc-fallback[data-h='3'] { background: linear-gradient(150deg, #f7ddd0, #f0c6b2); }
+.rc-fallback[data-h='4'] { background: linear-gradient(150deg, #f3eada, #e7d6bd); }
+.rc-fallback-initial { font-family: var(--font-display); font-size: 46px; font-weight: 600; color: rgba(30, 30, 30, 0.18); }
 
-.rc-tag {
-  position: absolute; top: 9px; left: 9px; z-index: 2;
-  font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-  padding: 4px 8px; border-radius: 7px; color: #fff;
-  background: rgba(10, 10, 11, 0.6); backdrop-filter: blur(6px);
-}
-.rc-tag.you { color: var(--leaf-500); }
-.rc-tag.community { color: var(--berry-500); }
 .rc-time {
-  position: absolute; bottom: 9px; right: 9px; z-index: 2; display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; font-weight: 600; color: #fff; opacity: 0.95;
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  background: var(--orange-500); color: #fff; font-weight: 600; font-size: 12px;
+  padding: 6px 12px; border-radius: var(--r-pill);
 }
+.rc-tag {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em;
+  padding: 5px 10px; border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.92); color: var(--stone);
+}
+.rc-tag.you { color: var(--herb-text); }
+.rc-tag.community { color: var(--amber-text); }
 
-.rc-body { padding: 11px 2px 4px; }
-.rc-title { font-size: 16px; line-height: 1.15; margin-bottom: 5px; letter-spacing: -0.02em; }
-.rc-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--text-dim); font-weight: 500; }
+.rc-body { padding: 12px 14px 14px; }
+.rc-title { font-size: 17px; line-height: 1.16; margin-bottom: 6px; letter-spacing: -0.015em; }
+.rc-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12.5px; color: var(--text-dim); font-weight: 500; }
 .rc-meta span.cap { text-transform: capitalize; }
-.rc-meta span + span.cap::before { content: '·'; margin-right: 6px; color: var(--text-faint); }
+.rc-meta span + span.cap::before { content: '·'; margin-right: 6px; color: var(--ash); }
 
 /* Library grid */
-.recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+.recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; }

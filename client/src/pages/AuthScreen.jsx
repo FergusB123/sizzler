@@ -32,9 +32,8 @@ export default function AuthScreen() {
   return (
     <div className="auth">
       <div className="auth-hero">
-        <div className="auth-flame" />
-        <h1>Sizzler</h1>
-        <p>Save recipes. Plan the week. Shop in one sweep.</p>
+        <img className="auth-logo" src="/brand/sizzler-logo.png" alt="Sizzler — Plan · Cook · Enjoy" />
+        <p>The spark between a full fridge and a good meal.</p>
       </div>
       <form className="auth-card" onSubmit={submit}>
         <div className="auth-tabs">
