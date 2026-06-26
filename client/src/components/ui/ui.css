@@ -39,6 +39,8 @@
 .btn-soft:hover { background: var(--orange-50); }
 .btn-block { width: 100%; }
 .btn-lg { min-height: 56px; font-size: 16.5px; padding: 17px 30px; }
+.btn-sm { min-height: 40px; font-size: 13.5px; font-weight: 600; padding: 9px 16px; border-radius: var(--r-sm); gap: 6px; }
+.btn-sm svg { width: 16px; height: 16px; }
 .btn svg { width: 19px; height: 19px; }
 
 .icon-btn {

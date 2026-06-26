@@ -36,7 +36,7 @@ export default function Library() {
           <div className="overline">{recipes?.length ?? 0} recipe{recipes?.length === 1 ? '' : 's'}</div>
           <h1 style={{ marginTop: 4 }}>Your recipes</h1>
         </div>
-        <Button variant="dark" onClick={() => navigate('/add')}><Icon name="plus" size={17} /> Add</Button>
+        <Button variant="dark" sm onClick={() => navigate('/add')}><Icon name="plus" size={16} /> Add</Button>
       </div>
 
       <input className="input" placeholder="Search recipes, cuisines, tags…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />

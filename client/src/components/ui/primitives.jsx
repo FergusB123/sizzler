@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Icon from '../Icon'
 import './ui.css'
 
-export function Button({ variant = 'primary', block, lg, loading, children, className = '', ...rest }) {
+export function Button({ variant = 'primary', block, lg, sm, loading, children, className = '', ...rest }) {
   return (
     <button
-      className={`btn btn-${variant} ${block ? 'btn-block' : ''} ${lg ? 'btn-lg' : ''} ${className}`}
+      className={`btn btn-${variant} ${block ? 'btn-block' : ''} ${lg ? 'btn-lg' : ''} ${sm ? 'btn-sm' : ''} ${className}`}
       disabled={loading || rest.disabled}
       {...rest}
     >
