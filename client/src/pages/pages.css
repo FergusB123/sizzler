@@ -25,13 +25,10 @@
   background: var(--charcoal); color: var(--charcoal-text); border-radius: var(--r-2xl);
   padding: 18px 20px 20px; margin-bottom: 18px;
 }
+.plan-hero { background: radial-gradient(95% 135% at 96% 28%, rgba(235, 70, 6, 0.42) 0%, rgba(235, 70, 6, 0) 58%), var(--charcoal); }
 .plan-hero::before {
   content: ''; position: absolute; inset: 0; background-image: var(--pat-dots); background-size: 30px 30px;
   opacity: 0.14; pointer-events: none;
-}
-.plan-hero::after {
-  content: ''; position: absolute; top: -55%; right: -18%; width: 65%; height: 200%;
-  background: radial-gradient(circle, rgba(235, 70, 6, 0.45), transparent 62%); pointer-events: none;
 }
 .plan-hero-top { display: flex; align-items: center; justify-content: space-between; color: var(--charcoal-faint); margin-bottom: 18px; position: relative; z-index: 1; }
 .plan-hero-top .overline.accent { color: var(--orange-300); }
@@ -79,9 +76,12 @@
 /* ---- Home hub ---- */
 .home-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--cast-iron); color: #fff; display: grid; place-content: center; font-family: var(--font-display); font-weight: 600; font-size: 17px; flex-shrink: 0; }
 
-.cook-hero { display: block; position: relative; overflow: hidden; background: var(--charcoal); color: var(--charcoal-text); border-radius: var(--r-2xl); padding: 18px 20px; margin-bottom: 16px; }
+.cook-hero {
+  display: block; position: relative; overflow: hidden; color: var(--charcoal-text);
+  border-radius: var(--r-2xl); padding: 18px 20px; margin-bottom: 16px;
+  background: radial-gradient(95% 135% at 96% 28%, rgba(235, 70, 6, 0.42) 0%, rgba(235, 70, 6, 0) 58%), var(--charcoal);
+}
 .cook-hero::before { content: ''; position: absolute; inset: 0; background-image: var(--pat-scatter); background-size: 62px 62px; opacity: 0.1; pointer-events: none; }
-.cook-hero::after { content: ''; position: absolute; top: -50%; right: -15%; width: 60%; height: 200%; background: radial-gradient(circle, rgba(235, 70, 6, 0.4), transparent 62%); pointer-events: none; }
 .cook-hero > * { position: relative; z-index: 1; }
 .cook-hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; color: var(--charcoal-faint); font-size: 12px; font-weight: 600; }
 .cook-hero-top .overline.accent { color: var(--orange-300); }

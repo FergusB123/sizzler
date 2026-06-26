@@ -20,6 +20,7 @@
 }
 .onb-row.sel { border-color: var(--orange-500); background: var(--orange-50); }
 .onb-row-ic { display: grid; place-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--orange-50); color: var(--orange-500); flex-shrink: 0; }
+.onb-row-ic.emoji { font-size: 21px; background: var(--oat); }
 .onb-row.sel .onb-row-ic { background: var(--orange-100); }
 .onb-row div { flex: 1; }
 .onb-row b { display: block; font-size: 16px; letter-spacing: -0.01em; }

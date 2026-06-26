@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconButton } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
@@ -7,12 +6,11 @@ import './add.css'
 const AI_METHODS = [
   { to: '/add/url', icon: 'link', title: 'Paste a link', desc: 'Import from any recipe website' },
   { to: '/add/photo', icon: 'camera', title: 'Snap a photo', desc: 'From a cookbook or recipe card' },
-  { key: 'social', icon: 'film', title: 'Social link', desc: 'TikTok, Instagram or YouTube' },
+  { to: '/add/social', icon: 'film', title: 'Social link', desc: 'TikTok, Instagram or YouTube' },
 ]
 
 export default function AddHub() {
   const navigate = useNavigate()
-  const [demoFail, setDemoFail] = useState(false)
 
   return (
     <div className="screen no-nav">
@@ -25,17 +23,13 @@ export default function AddHub() {
       </div>
 
       <div className="add-group">
-        {AI_METHODS.map((m, i) => (
-          <button key={m.to || m.key} className="add-row" onClick={() => navigate(m.to || `/add/social${demoFail ? '?demo=fail' : ''}`)}>
+        {AI_METHODS.map((m) => (
+          <button key={m.to} className="add-row" onClick={() => navigate(m.to)}>
             <span className="ar-ic"><Icon name={m.icon} size={20} /></span>
             <div className="ar-txt"><b>{m.title}</b><span>{m.desc}</span></div>
             <span className="ar-ai">AI</span>
           </button>
         ))}
-        <div className="add-demo">
-          <span>Demo: simulate an unreadable link</span>
-          <button className={`switch ${demoFail ? 'on' : ''}`} onClick={() => setDemoFail((v) => !v)} aria-label="Toggle demo" />
-        </div>
       </div>
 
       <button className="add-row dark" onClick={() => navigate('/add/manual')}>

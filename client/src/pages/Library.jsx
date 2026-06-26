@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listRecipes } from '../lib/api'
 import RecipeCard from '../components/RecipeCard'
+import Icon from '../components/Icon'
 import { Button, EmptyState, Chip } from '../components/ui/primitives'
 import { MEAL_OPTIONS } from '../lib/constants'
 import './pages.css'
@@ -35,7 +36,7 @@ export default function Library() {
           <div className="overline">{recipes?.length ?? 0} recipe{recipes?.length === 1 ? '' : 's'}</div>
           <h1 style={{ marginTop: 4 }}>Your recipes</h1>
         </div>
-        <Button variant="dark" onClick={() => navigate('/add')}><span style={{ fontSize: 18, marginRight: 2 }}>+</span> Add</Button>
+        <Button variant="dark" onClick={() => navigate('/add')}><Icon name="plus" size={17} /> Add</Button>
       </div>
 
       <input className="input" placeholder="Search recipes, cuisines, tags…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />

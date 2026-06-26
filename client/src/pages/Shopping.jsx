@@ -105,8 +105,8 @@ export default function Shopping() {
         value={mode}
         onChange={setMode}
         options={[
-          { value: 'home', label: <><Icon name="house" size={16} /> At home</> },
-          { value: 'instore', label: <><Icon name="cart" size={16} /> In store</> },
+          { value: 'home', label: <><span className="seg-emoji">🏠</span> At home</> },
+          { value: 'instore', label: <><span className="seg-emoji">🛒</span> In store</> },
         ]}
       />
       <p className="shop-hint">

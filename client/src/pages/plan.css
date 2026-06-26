@@ -4,8 +4,7 @@
 .choose-h { font-size: 32px; letter-spacing: -0.03em; line-height: 1.04; }
 .choose-card { display: block; width: 100%; text-align: left; cursor: pointer; border-radius: var(--r-2xl); padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); transition: transform 0.14s var(--ease-out); }
 .choose-card:active { transform: scale(0.98); }
-.choose-card.swipe { background: var(--charcoal); border-color: var(--charcoal); position: relative; overflow: hidden; }
-.choose-card.swipe::after { content: ''; position: absolute; top: -40%; right: -10%; width: 55%; height: 180%; background: radial-gradient(circle, rgba(235, 70, 6, 0.4), transparent 62%); pointer-events: none; }
+.choose-card.swipe { border-color: var(--charcoal); position: relative; overflow: hidden; background: radial-gradient(90% 130% at 96% 22%, rgba(235, 70, 6, 0.42) 0%, rgba(235, 70, 6, 0) 58%), var(--charcoal); }
 .choose-card.build { background: var(--surface); box-shadow: var(--shadow-sm); }
 .choose-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; position: relative; z-index: 1; }
 .choose-ic { display: grid; place-content: center; width: 46px; height: 46px; border-radius: 13px; background: var(--orange-500); color: #fff; }

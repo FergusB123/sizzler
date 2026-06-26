@@ -1,5 +1,6 @@
 .segmented button { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .segmented button svg { width: 16px; height: 16px; }
+.seg-emoji { font-size: 15px; line-height: 1; }
 .seg-dark button[aria-selected='true'] { background: var(--charcoal); color: #fff; }
 
 .shop-hint { font-size: 13px; color: var(--text-dim); margin: 12px 2px 16px; line-height: 1.45; }

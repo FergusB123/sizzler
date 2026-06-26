@@ -13,9 +13,9 @@ const HOUSEHOLDS = [
   { k: 'family', icon: 'users', title: 'A family', desc: 'Bigger batches' },
 ]
 const MEALS = [
-  { k: 'breakfast', icon: 'clock', title: 'Breakfast', desc: 'Start the day right' },
-  { k: 'lunch', icon: 'leaf', title: 'Lunch', desc: 'Midday fuel' },
-  { k: 'dinner', icon: 'dish', title: 'Dinner', desc: 'The main event' },
+  { k: 'breakfast', emoji: '🍳', title: 'Breakfast', desc: 'Start the day right' },
+  { k: 'lunch', emoji: '🥗', title: 'Lunch', desc: 'Midday fuel' },
+  { k: 'dinner', emoji: '🍽️', title: 'Dinner', desc: 'The main event' },
 ]
 
 export default function Onboarding() {
@@ -102,7 +102,7 @@ export default function Onboarding() {
               <div className="onb-rows">
                 {MEALS.map((m) => (
                   <button key={m.k} className={`onb-row check ${meals.includes(m.k) ? 'sel' : ''}`} onClick={() => toggleMeal(m.k)}>
-                    <span className="onb-row-ic"><Icon name={m.icon} size={20} /></span>
+                    <span className="onb-row-ic emoji">{m.emoji}</span>
                     <div><b>{m.title}</b><span>{m.desc}</span></div>
                     <span className="onb-check">{meals.includes(m.k) ? <Icon name="check" size={15} /> : null}</span>
                   </button>
