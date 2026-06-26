@@ -31,7 +31,7 @@ export default function Library() {
 
   return (
     <div className="screen">
-      <div className="topbar" style={{ padding: 0, marginBottom: 14, alignItems: 'flex-end' }}>
+      <div className="topbar" style={{ padding: 0, marginBottom: 14, alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
           <div className="overline">{recipes?.length ?? 0} recipe{recipes?.length === 1 ? '' : 's'}</div>
           <h1 style={{ marginTop: 4 }}>Your recipes</h1>
