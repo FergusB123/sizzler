@@ -1,33 +1,47 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconButton } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
 import './add.css'
 
-const METHODS = [
-  { to: '/add/manual', icon: 'pencil', title: 'Manual entry', desc: 'Type it in yourself', tint: 'a' },
-  { to: '/add/url', icon: 'link', title: 'Paste a link', desc: 'Import from any recipe site', tint: 'b' },
-  { to: '/add/photo', icon: 'camera', title: 'Snap a photo', desc: 'A cookbook page or card', tint: 'c' },
-  { to: '/add/social', icon: 'film', title: 'Social video', desc: 'TikTok, Instagram, YouTube', tint: 'd' },
+const AI_METHODS = [
+  { to: '/add/url', icon: 'link', title: 'Paste a link', desc: 'Import from any recipe website' },
+  { to: '/add/photo', icon: 'camera', title: 'Snap a photo', desc: 'From a cookbook or recipe card' },
+  { key: 'social', icon: 'film', title: 'Social link', desc: 'TikTok, Instagram or YouTube' },
 ]
 
 export default function AddHub() {
   const navigate = useNavigate()
+  const [demoFail, setDemoFail] = useState(false)
+
   return (
     <div className="screen no-nav">
-      <div className="topbar" style={{ padding: 0, marginBottom: 8 }}>
+      <div className="topbar" style={{ padding: 0, marginBottom: 6 }}>
         <IconButton onClick={() => navigate(-1)}><Icon name="arrowLeft" size={20} /></IconButton>
-        <h1 style={{ fontSize: 26 }}>Add a recipe</h1>
       </div>
-      <p className="muted" style={{ margin: '0 0 22px' }}>Four ways in — they all land in your cookbook the same.</p>
-      <div className="add-grid">
-        {METHODS.map((m) => (
-          <button key={m.to} className={`add-method tint-${m.tint}`} onClick={() => navigate(m.to)}>
-            <span className="am-icon"><Icon name={m.icon} size={20} /></span>
-            <b>{m.title}</b>
-            <span className="am-desc">{m.desc}</span>
+      <div style={{ marginBottom: 22 }}>
+        <div className="overline">Grow your library</div>
+        <h1 style={{ fontSize: 30, marginTop: 4, letterSpacing: '-0.03em' }}>Add a recipe</h1>
+      </div>
+
+      <div className="add-group">
+        {AI_METHODS.map((m, i) => (
+          <button key={m.to || m.key} className="add-row" onClick={() => navigate(m.to || `/add/social${demoFail ? '?demo=fail' : ''}`)}>
+            <span className="ar-ic"><Icon name={m.icon} size={20} /></span>
+            <div className="ar-txt"><b>{m.title}</b><span>{m.desc}</span></div>
+            <span className="ar-ai">AI</span>
           </button>
         ))}
+        <div className="add-demo">
+          <span>Demo: simulate an unreadable link</span>
+          <button className={`switch ${demoFail ? 'on' : ''}`} onClick={() => setDemoFail((v) => !v)} aria-label="Toggle demo" />
+        </div>
       </div>
+
+      <button className="add-row dark" onClick={() => navigate('/add/manual')}>
+        <span className="ar-ic"><Icon name="pencil" size={20} /></span>
+        <div className="ar-txt"><b>Write it out</b><span>Enter the recipe by hand</span></div>
+      </button>
     </div>
   )
 }

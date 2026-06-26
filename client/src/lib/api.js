@@ -71,6 +71,7 @@ export const createRecipe = (recipe) => data(api.post('/recipes', recipe))
 export const updateRecipe = (id, patch) => data(api.put(`/recipes/${id}`, patch))
 export const deleteRecipe = (id) => data(api.delete(`/recipes/${id}`))
 export const setShared = (id, isShared) => data(api.post(`/recipes/${id}/share`, { is_shared: isShared }))
+export const setFavorite = (id, favorite) => data(api.post(`/recipes/${id}/favorite`, { favorite }))
 
 export async function acceptInferredField(recipe, field) {
   const next = (recipe.ai_inferred_fields || []).filter((f) => f !== field)

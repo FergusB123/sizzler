@@ -1,25 +1,34 @@
-.shop-hint { font-size: 13px; color: var(--text-dim); margin: 12px 2px 14px; line-height: 1.45; }
-.shop-progress { height: 5px; background: var(--surface-3); border-radius: 999px; overflow: hidden; margin-bottom: 22px; }
-.shop-progress span { display: block; height: 100%; background: var(--success); transition: width 0.4s var(--ease-out); }
+.segmented button { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.segmented button svg { width: 16px; height: 16px; }
+.seg-dark button[aria-selected='true'] { background: var(--charcoal); color: #fff; }
+
+.shop-hint { font-size: 13px; color: var(--text-dim); margin: 12px 2px 16px; line-height: 1.45; }
+.shop-hint b { color: var(--text); font-weight: 600; }
+
+.shop-progress { background: var(--charcoal); border-radius: var(--r-lg); padding: 14px 16px 16px; margin-bottom: 24px; }
+.shop-progress-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 11px; }
+.shop-progress-head span { color: var(--charcoal-dim); font-size: 13px; font-weight: 600; }
+.shop-progress-head b { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--orange-500); }
+.shop-progress-track { height: 6px; background: rgba(255, 255, 255, 0.14); border-radius: 999px; overflow: hidden; }
+.shop-progress-track span { display: block; height: 100%; border-radius: 999px; background: repeating-linear-gradient(45deg, #eb4606 0 8px, #f26a30 8px 16px); animation: scStripe 0.7s linear infinite; transition: width 0.4s var(--ease-out); }
 
 .shop-group { margin-bottom: 22px; }
 .shop-cat { display: flex; align-items: center; gap: 8px; font-family: var(--font); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin: 0 0 10px 2px; }
-.shop-cat small { margin-left: auto; background: var(--surface-3); color: var(--text-dim); padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.shop-cat small { margin-left: auto; background: var(--oat); color: var(--text-dim); padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; }
 
 .shop-item {
   width: 100%; display: flex; align-items: center; gap: 13px; text-align: left; cursor: pointer;
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 15px; margin-bottom: 7px;
-  transition: opacity 0.2s, transform 0.12s, border-color 0.2s;
+  box-shadow: var(--shadow-sm); transition: opacity 0.2s, transform 0.12s, border-color 0.2s;
 }
 .shop-item:active { transform: scale(0.99); }
-.shop-check { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--border-strong); display: grid; place-content: center; color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0; transition: all 0.18s var(--ease-spring); }
-/* Home mode = emerald square ticks; in-store = iris round ticks (distinct contexts) */
-.shop-item.home .shop-check.on { background: var(--success); border-color: var(--success); }
-.shop-item.instore .shop-check.on { background: var(--accent); border-color: var(--accent); border-radius: 50%; }
+.shop-check { width: 24px; height: 24px; border-radius: 7px; border: 1.5px solid var(--border-strong); display: grid; place-content: center; color: #fff; flex-shrink: 0; transition: all 0.18s var(--ease-spring); }
+.shop-check.on { background: var(--orange-500); border-color: var(--orange-500); }
 .shop-name { flex: 1; font-weight: 500; letter-spacing: -0.01em; }
 .shop-qty { color: var(--text-dim); font-size: 13px; font-weight: 600; }
+.shop-mult { background: var(--orange-100); color: var(--orange-700); font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: var(--r-pill); }
 .shop-item.checked .shop-name { text-decoration: line-through; color: var(--text-faint); }
-.shop-item.checked { opacity: 0.55; border-color: var(--border); }
+.shop-item.checked { opacity: 0.55; }
 
 .shop-add { display: flex; gap: 8px; margin-top: 20px; }
 .shop-add .input { flex: 1; }

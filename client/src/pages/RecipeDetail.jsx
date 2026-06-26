@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getRecipe, setShared, deleteRecipe, acceptInferredField, getActivePlan, getPlanSlots, assignSlot } from '../lib/api'
+import { getRecipe, setShared, setFavorite, deleteRecipe, acceptInferredField, getActivePlan, getPlanSlots, assignSlot } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Button, IconButton, Badge, SizzleLoader, useToast, Sheet } from '../components/ui/primitives'
 import Icon from '../components/Icon'
@@ -52,6 +52,13 @@ export default function RecipeDetail() {
     catch (e) { toast.error(e.message); setRecipe({ ...recipe, is_shared: !next }) }
   }
 
+  async function toggleFav() {
+    const next = !recipe.favorite
+    setRecipe({ ...recipe, favorite: next })
+    try { await setFavorite(recipe.id, next); toast.success(next ? 'Saved to favourites' : 'Removed from favourites') }
+    catch (e) { toast.error(e.message); setRecipe({ ...recipe, favorite: !next }) }
+  }
+
   async function accept(field) {
     const next = (recipe.ai_inferred_fields || []).filter((f) => f !== field)
     setRecipe({ ...recipe, ai_inferred_fields: next })
@@ -77,10 +84,9 @@ export default function RecipeDetail() {
         <div className="rd-hero-top">
           <IconButton onClick={() => navigate(-1)}><Icon name="arrowLeft" size={20} /></IconButton>
           {isOwner && (
-            <div className="row" style={{ gap: 8 }}>
-              <IconButton onClick={() => navigate(`/recipes/${recipe.id}/edit`)}><Icon name="pencil" size={18} /></IconButton>
-              <IconButton onClick={() => setConfirmDel(true)}><Icon name="trash" size={19} /></IconButton>
-            </div>
+            <button className={`icon-btn rd-fav ${recipe.favorite ? 'on' : ''}`} aria-label="Favourite" onClick={toggleFav}>
+              <Icon name="heart" size={20} />
+            </button>
           )}
         </div>
         <div className="rd-hero-title">
@@ -113,9 +119,10 @@ export default function RecipeDetail() {
         {/* Share toggle (owner only) */}
         {isOwner && (
           <button className={`rd-share ${recipe.is_shared ? 'on' : ''}`} onClick={toggleShare}>
+            <span className="rd-share-ic"><Icon name="globe" size={20} /></span>
             <div>
-              <b>{recipe.is_shared ? 'Shared to community' : 'Private recipe'}</b>
-              <span>{recipe.is_shared ? 'Others can discover this' : 'Only you can see this'}</span>
+              <b>Share to community</b>
+              <span>{recipe.is_shared ? 'Other cooks can discover this' : 'Let other cooks discover it'}</span>
             </div>
             <span className={`switch ${recipe.is_shared ? 'on' : ''}`} />
           </button>
@@ -128,8 +135,8 @@ export default function RecipeDetail() {
         <ul className="rd-ingredients">
           {(recipe.ingredients || []).map((ing, i) => (
             <li key={i}>
+              <span className="rd-ing-name">{ing.name || ing.raw}</span>
               <span className="rd-qty">{[ing.quantity, ing.unit].filter(Boolean).join(' ')}</span>
-              <span>{ing.name || ing.raw}</span>
             </li>
           ))}
         </ul>
@@ -146,6 +153,13 @@ export default function RecipeDetail() {
           <div className="rd-notes">
             {recipe.source && <p><b>Source:</b> {recipe.source}</p>}
             {recipe.notes && <p>{recipe.notes}</p>}
+          </div>
+        )}
+
+        {isOwner && (
+          <div className="rd-owner-actions">
+            <Button variant="ghost" onClick={() => navigate(`/recipes/${recipe.id}/edit`)}><Icon name="pencil" size={17} /> Edit recipe</Button>
+            <Button variant="soft" onClick={() => setConfirmDel(true)}><Icon name="trash" size={17} /> Delete</Button>
           </div>
         )}
       </div>

@@ -23,17 +23,17 @@ export function Badge({ kind = '', children }) {
   return <span className={`badge ${kind ? `badge-${kind}` : ''}`}>{children}</span>
 }
 
-export function Chip({ active, flame, children, ...rest }) {
+export function Chip({ active, flame, fresh, children, ...rest }) {
   return (
-    <button type="button" className={`chip ${flame ? 'chip-flame' : ''}`} aria-pressed={!!active} {...rest}>
+    <button type="button" className={`chip ${flame ? 'chip-flame' : ''} ${fresh ? 'chip-fresh' : ''}`} aria-pressed={!!active} {...rest}>
       {children}
     </button>
   )
 }
 
-export function Segmented({ options, value, onChange }) {
+export function Segmented({ options, value, onChange, className = '' }) {
   return (
-    <div className="segmented" role="tablist">
+    <div className={`segmented ${className}`} role="tablist">
       {options.map((o) => (
         <button key={o.value} role="tab" aria-selected={value === o.value} onClick={() => onChange(o.value)}>
           {o.label}
@@ -52,9 +52,9 @@ export function Field({ label, children }) {
   )
 }
 
-export function EmptyState({ icon = 'sparkle', title, children, action }) {
+export function EmptyState({ icon = 'sparkle', title, children, action, accent }) {
   return (
-    <div className="empty">
+    <div className={`empty ${accent === 'fresh' ? 'fresh' : ''}`}>
       <div className="glyph"><Icon name={icon} /></div>
       <h3>{title}</h3>
       {children && <p>{children}</p>}
@@ -86,6 +86,30 @@ export function SizzleLoader({ message }) {
         <img className="sizzle-mark" src="/brand/sizzler-mark.png" alt="" />
       </div>
       <div className="sizzle-msg">{message || SIZZLE_MESSAGES[i]}</div>
+    </div>
+  )
+}
+
+const EXTRACT_STEPS = ['Reading the content', 'Extracting the recipe', 'Generating an image']
+// Stepped AI loader used during recipe extraction.
+export function ExtractLoader({ title = 'Reading the recipe' }) {
+  const [active, setActive] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setActive((a) => Math.min(EXTRACT_STEPS.length - 1, a + 1)), 2200)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <div className="ex">
+      <div className="ex-mark"><img src="/brand/sizzler-mark-ondark.png" alt="" /></div>
+      <h2 className="ex-title">{title}</h2>
+      <p className="ex-sub">Our AI is pulling out the good stuff…</p>
+      <div className="ex-steps">
+        {EXTRACT_STEPS.map((s, i) => (
+          <div key={i} className={`ex-step ${i < active ? 'done' : i === active ? 'active' : 'pending'}`}>
+            <span className="ex-dot">{i < active ? <Icon name="check" size={13} /> : null}</span>{s}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -136,6 +160,7 @@ export function ToastProvider({ children }) {
           {toasts.map((t) => (
             <motion.div key={t.id} className={`toast ${t.kind}`}
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}>
+              <Icon name={t.kind === 'err' ? 'info' : 'flame'} size={16} className="toast-ic" />
               {t.msg}
             </motion.div>
           ))}

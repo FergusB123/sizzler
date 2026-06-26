@@ -68,30 +68,34 @@ export default function ManualPlanner() {
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 6 }}>
         <IconButton onClick={() => navigate('/plan')}><Icon name="arrowLeft" size={20} /></IconButton>
-        <h1 style={{ fontSize: 22 }}>Build by hand</h1>
-        <span className="plan-progress-pill">{filled}/{slots.length}</span>
+        <div>
+          <h1 style={{ fontSize: 24 }}>Build your plan</h1>
+          <div className="mp-sub">Tap a slot to add a recipe</div>
+        </div>
       </div>
 
       {dates.map((date) => (
         <div key={date} className="mp-day">
           <h3 className="mp-day-h">{dayLabel(date)}</h3>
           {byDate[date].sort((a, b) => mealOrder[a.meal] - mealOrder[b.meal]).map((slot) => (
-            <button key={slot.id} className={`mp-slot ${slot.recipe_id ? 'filled' : ''}`} onClick={() => setPicker(slot)}>
-              <span className="mp-meal">{MEAL_LABEL[slot.meal]}</span>
-              {slot.recipe ? (
-                <span className="mp-recipe">
-                  {slot.recipe.image_url && <img src={slot.recipe.image_url} alt="" />}
-                  <b>{slot.recipe.title}</b>
-                </span>
-              ) : (
-                <span className="mp-empty">Tap to choose →</span>
-              )}
-            </button>
+            <div key={slot.id} className="mp-meal-block">
+              <div className="mp-meal-label">{MEAL_LABEL[slot.meal]}</div>
+              <button className={`mp-slot ${slot.recipe_id ? 'filled' : 'empty'}`} onClick={() => setPicker(slot)}>
+                {slot.recipe ? (
+                  <span className="mp-recipe">
+                    {slot.recipe.image_url ? <img src={slot.recipe.image_url} alt="" /> : <span className="mp-recipe-fb">{(slot.recipe.title || '?').charAt(0).toUpperCase()}</span>}
+                    <b>{slot.recipe.title}</b>
+                  </span>
+                ) : (
+                  <span className="mp-add"><Icon name="plus" size={17} /> Add a recipe</span>
+                )}
+              </button>
+            </div>
           ))}
         </div>
       ))}
 
-      {filled === slots.length && <Button block lg style={{ marginTop: 22 }} onClick={() => navigate('/shopping')}><Icon name="cart" size={18} /> Generate shopping list</Button>}
+      <Button block lg className="mp-done" onClick={() => navigate('/shopping')}>Done — build shopping list</Button>
 
       <Sheet open={!!picker} onClose={() => { setPicker(null); setQ('') }} title={picker ? `${MEAL_LABEL[picker.meal]} · ${dayLabel(picker.slot_date)}` : ''}>
         <input className="input" placeholder="Search your recipes…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />

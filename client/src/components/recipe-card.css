@@ -23,14 +23,13 @@
   background: var(--orange-500); color: #fff; font-weight: 600; font-size: 12px;
   padding: 6px 12px; border-radius: var(--r-pill);
 }
-.rc-tag {
-  position: absolute; top: 10px; right: 10px; z-index: 2;
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em;
-  padding: 5px 10px; border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.92); color: var(--stone);
+.rc-corner {
+  position: absolute; top: 10px; right: 10px; z-index: 2; width: 28px; height: 28px;
+  display: grid; place-content: center; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92); color: var(--herb); box-shadow: var(--shadow-sm);
 }
-.rc-tag.you { color: var(--herb-text); }
-.rc-tag.community { color: var(--amber-text); }
+.rc-corner.fav { color: var(--orange-500); }
+.rc-corner.community { color: var(--amber-text); }
 
 .rc-body { padding: 12px 14px 14px; }
 .rc-title { font-size: 17px; line-height: 1.16; margin-bottom: 6px; letter-spacing: -0.015em; }

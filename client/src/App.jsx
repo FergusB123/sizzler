@@ -14,7 +14,7 @@ import AddHub from './pages/add/AddHub'
 import AddManual from './pages/add/AddManual'
 import AddImport from './pages/add/AddImport'
 import EditRecipe from './pages/add/EditRecipe'
-import Plan from './pages/Plan'
+import PlanChoose from './pages/PlanChoose'
 import SwipePlanner from './pages/SwipePlanner'
 import ManualPlanner from './pages/ManualPlanner'
 import Shopping from './pages/Shopping'
@@ -25,7 +25,7 @@ function FullLoader() {
   return <div className="app-shell" style={{ display: 'grid', placeContent: 'center' }}><SizzleLoader message="Warming up…" /></div>
 }
 
-const NAV_ROUTES = ['/', '/recipes', '/plan', '/shopping', '/community']
+const NAV_ROUTES = ['/', '/recipes', '/shopping', '/settings', '/community']
 
 export default function App() {
   const { user, loading: authLoading } = useAuth()
@@ -57,7 +57,7 @@ export default function App() {
             <Route path="/add/url" element={<AddImport mode="url" />} />
             <Route path="/add/photo" element={<AddImport mode="photo" />} />
             <Route path="/add/social" element={<AddImport mode="social" />} />
-            <Route path="/plan" element={<Plan />} />
+            <Route path="/plan" element={<PlanChoose />} />
             <Route path="/plan/swipe" element={<SwipePlanner />} />
             <Route path="/plan/manual" element={<ManualPlanner />} />
             <Route path="/shopping" element={<Shopping />} />

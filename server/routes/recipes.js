@@ -160,6 +160,18 @@ router.post('/:id/share', auth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ---- favourite toggle ----
+router.post('/:id/favorite', auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'UPDATE recipes SET favorite = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+      [!!req.body.favorite, req.params.id, req.user.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Recipe not found' });
+    res.json(rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ---- delete own ----
 router.delete('/:id', auth, async (req, res) => {
   try {

@@ -1,5 +1,22 @@
 .plan-progress-pill { background: var(--surface-3); color: var(--text); font-weight: 600; padding: 6px 13px; border-radius: var(--r-pill); font-size: 13px; border: 1px solid var(--border); }
 
+/* Plan chooser */
+.choose-h { font-size: 32px; letter-spacing: -0.03em; line-height: 1.04; }
+.choose-card { display: block; width: 100%; text-align: left; cursor: pointer; border-radius: var(--r-2xl); padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); transition: transform 0.14s var(--ease-out); }
+.choose-card:active { transform: scale(0.98); }
+.choose-card.swipe { background: var(--charcoal); border-color: var(--charcoal); position: relative; overflow: hidden; }
+.choose-card.swipe::after { content: ''; position: absolute; top: -40%; right: -10%; width: 55%; height: 180%; background: radial-gradient(circle, rgba(235, 70, 6, 0.4), transparent 62%); pointer-events: none; }
+.choose-card.build { background: var(--surface); box-shadow: var(--shadow-sm); }
+.choose-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; position: relative; z-index: 1; }
+.choose-ic { display: grid; place-content: center; width: 46px; height: 46px; border-radius: 13px; background: var(--orange-500); color: #fff; }
+.choose-card.build .choose-ic { background: var(--orange-50); color: var(--orange-500); margin-bottom: 16px; }
+.choose-badge { background: var(--orange-500); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; padding: 5px 12px; border-radius: var(--r-pill); }
+.choose-card b { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.02em; display: block; position: relative; z-index: 1; }
+.choose-card.swipe b { color: #fff; }
+.choose-card p { font-size: 14px; line-height: 1.5; margin: 8px 0 0; position: relative; z-index: 1; }
+.choose-card.swipe p { color: var(--charcoal-dim); }
+.choose-card.build p { color: var(--text-dim); }
+
 .plan-fill-cta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
 .plan-fill {
   display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; text-align: left;

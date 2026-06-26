@@ -40,7 +40,7 @@ export default function Community() {
       {recipes === null ? (
         <div className="recipe-grid">{[0, 1, 2, 3].map((i) => <div key={i} className="skeleton" style={{ height: 210 }} />)}</div>
       ) : recipes.length === 0 ? (
-        <EmptyState icon="globe" title="Nothing shared yet">
+        <EmptyState icon="globe" accent="fresh" title="Nothing shared yet">
           When people share recipes, they'll show up here. Share one of yours from its detail page to kick things off!
         </EmptyState>
       ) : (

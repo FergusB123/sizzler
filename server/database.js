@@ -50,11 +50,13 @@ async function initDatabase() {
       ai_inferred_fields JSONB DEFAULT '[]',
       is_shared BOOLEAN DEFAULT FALSE,
       shared_at TIMESTAMPTZ,
+      favorite BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS recipes_user_idx ON recipes(user_id);
     CREATE INDEX IF NOT EXISTS recipes_shared_idx ON recipes(is_shared) WHERE is_shared = TRUE;
+    ALTER TABLE recipes ADD COLUMN IF NOT EXISTS favorite BOOLEAN DEFAULT FALSE;
 
     CREATE TABLE IF NOT EXISTS meal_plans (
       id SERIAL PRIMARY KEY,

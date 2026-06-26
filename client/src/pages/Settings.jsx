@@ -35,9 +35,9 @@ export default function Settings() {
 
   return (
     <div className="screen">
-      <div className="topbar" style={{ padding: 0, marginBottom: 16 }}>
-        <IconButton onClick={() => navigate(-1)}><Icon name="arrowLeft" size={20} /></IconButton>
-        <h1>Settings</h1>
+      <div style={{ marginBottom: 18 }}>
+        <div className="overline">{p.display_name || 'Your account'}</div>
+        <h1 style={{ fontSize: 34, letterSpacing: '-0.03em', marginTop: 4 }}>You</h1>
       </div>
 
       <div className="settings-group">
@@ -156,7 +156,7 @@ function EditDiet({ p, onSave }) {
   return (
     <div style={{ paddingTop: 8 }}>
       <div className="chip-row" style={{ marginBottom: 14 }}>
-        {DIETARY_OPTIONS.map((d) => <Chip key={d.value} active={diet.includes(d.value)} onClick={() => toggle(d.value)}>{d.label}</Chip>)}
+        {DIETARY_OPTIONS.map((d) => <Chip key={d.value} fresh active={diet.includes(d.value)} onClick={() => toggle(d.value)}>{d.label}</Chip>)}
       </div>
       <input className="input" placeholder="Custom, comma separated" value={custom} onChange={(e) => setCustom(e.target.value)} style={{ marginBottom: 16 }} />
       <Button block onClick={() => onSave({ dietary_prefs: [...diet, ...custom.split(',').map((s) => s.trim()).filter(Boolean)] })}>Save</Button>

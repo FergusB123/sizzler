@@ -1,14 +1,16 @@
-.mp-day { margin-bottom: 22px; }
-.mp-day-h { font-size: 12px; margin: 0 0 10px 2px; color: var(--text-faint); font-family: var(--font); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
-.mp-slot {
-  width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; cursor: pointer;
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 13px 14px; margin-bottom: 8px;
-  min-height: 60px; transition: border-color 0.18s;
-}
-.mp-slot:active { border-color: var(--border-strong); }
-.mp-meal { font-size: 11px; font-weight: 600; color: var(--text-faint); width: 70px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.04em; }
-.mp-empty { color: var(--flame-300); font-weight: 600; font-size: 14px; }
+.mp-sub { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+.mp-day { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 16px; }
+.mp-day-h { font-family: var(--font-display); font-size: 18px; margin: 0 0 12px; letter-spacing: -0.02em; }
+.mp-meal-block { margin-bottom: 12px; }
+.mp-meal-block:last-child { margin-bottom: 0; }
+.mp-meal-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; }
+.mp-slot { width: 100%; display: flex; align-items: center; text-align: left; cursor: pointer; border-radius: var(--r-md); padding: 13px 14px; min-height: 52px; transition: all 0.15s; }
+.mp-slot.empty { border: 1.5px dashed var(--border-strong); background: none; }
+.mp-slot.empty:active { background: var(--orange-50); border-color: var(--orange-300); }
+.mp-slot.filled { background: var(--surface-2); border: 1px solid var(--border); }
+.mp-add { display: inline-flex; align-items: center; gap: 8px; color: var(--orange-600); font-weight: 600; font-size: 14px; }
 .mp-recipe { display: flex; align-items: center; gap: 11px; }
-.mp-recipe img { width: 40px; height: 40px; border-radius: 9px; object-fit: cover; }
+.mp-recipe img { width: 38px; height: 38px; border-radius: 9px; object-fit: cover; }
+.mp-recipe-fb { width: 38px; height: 38px; border-radius: 9px; display: grid; place-content: center; background: var(--oat); font-family: var(--font-display); font-weight: 600; color: var(--text-faint); }
 .mp-recipe b { font-size: 15px; letter-spacing: -0.01em; }
-.mp-slot.filled { border-color: var(--border-strong); }
+.mp-done { margin-top: 8px; }

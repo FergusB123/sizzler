@@ -35,6 +35,15 @@ export default function AuthScreen() {
         <img className="auth-logo" src="/brand/sizzler-logo.png" alt="Sizzler — Plan · Cook · Enjoy" />
         <p>The spark between a full fridge and a good meal.</p>
       </div>
+      <div className="tape" aria-hidden="true">
+        <div className="tape-track">
+          {Array.from({ length: 6 }).map((_, k) => (
+            <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 20 }}>
+              <span>PLAN</span><i /><span>COOK</span><i /><span>ENJOY</span><i />
+            </span>
+          ))}
+        </div>
+      </div>
       <form className="auth-card" onSubmit={submit}>
         <div className="auth-tabs">
           <button type="button" aria-selected={mode === 'signup'} onClick={() => setMode('signup')}>Sign up</button>

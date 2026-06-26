@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import RecipeForm from '../../components/RecipeForm'
-import { IconButton, Button, SizzleLoader, useToast } from '../../components/ui/primitives'
+import { IconButton, Button, ExtractLoader, useToast } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
 import { extractFromUrl, extractFromImage, createRecipe, uploadRecipeImage } from '../../lib/api'
 import './add.css'
@@ -20,6 +20,8 @@ const SIZZLE_BY_MODE = {
 
 export default function AddImport({ mode }) {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
+  const demoFail = params.get('demo') === 'fail'
   const toast = useToast()
   const copy = COPY[mode]
 
@@ -39,6 +41,10 @@ export default function AddImport({ mode }) {
 
   async function runExtract() {
     setError(null)
+    if (mode === 'social' && demoFail) {
+      setError("We couldn't read that social link — these often block automated access. Try pasting the recipe text manually.")
+      return
+    }
     setPhase('extracting')
     try {
       let recipe
@@ -74,9 +80,9 @@ export default function AddImport({ mode }) {
 
   if (phase === 'extracting') {
     return (
-      <div className="screen no-nav" style={{ minHeight: '80dvh', display: 'grid', placeContent: 'center' }}>
-        <SizzleLoader message={SIZZLE_BY_MODE[mode]} />
-        <p className="muted" style={{ textAlign: 'center', marginTop: 10 }}>Claude is structuring the recipe…</p>
+      <div className="screen no-nav">
+        <div className="topbar" style={{ padding: 0 }}><IconButton onClick={() => setPhase('input')}><Icon name="arrowLeft" size={20} /></IconButton></div>
+        <ExtractLoader title={mode === 'photo' ? 'Reading your photo' : mode === 'social' ? 'Reading the post' : 'Reading the page'} />
       </div>
     )
   }

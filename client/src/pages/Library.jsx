@@ -10,33 +10,40 @@ export default function Library() {
   const navigate = useNavigate()
   const [recipes, setRecipes] = useState(null)
   const [q, setQ] = useState('')
-  const [meal, setMeal] = useState(null)
+  const [filter, setFilter] = useState('all') // all | saved | shared | <meal>
 
   useEffect(() => { listRecipes().then(setRecipes) }, [])
 
   const filtered = useMemo(() => {
     if (!recipes) return []
     return recipes.filter((r) => {
-      if (meal && !r.meal_types.includes(meal)) return false
+      if (filter === 'saved' && !r.favorite) return false
+      else if (filter === 'shared' && !r.is_shared) return false
+      else if (['breakfast', 'lunch', 'dinner'].includes(filter) && !r.meal_types.includes(filter)) return false
       if (q) {
         const hay = `${r.title} ${r.cuisine} ${r.category} ${(r.tags || []).join(' ')}`.toLowerCase()
         if (!hay.includes(q.toLowerCase())) return false
       }
       return true
     })
-  }, [recipes, q, meal])
+  }, [recipes, q, filter])
 
   return (
     <div className="screen">
-      <div className="topbar" style={{ padding: 0, marginBottom: 14 }}>
-        <h1>Recipes</h1>
-        <Button onClick={() => navigate('/add')}>+ Add</Button>
+      <div className="topbar" style={{ padding: 0, marginBottom: 14, alignItems: 'flex-end' }}>
+        <div>
+          <div className="overline">{recipes?.length ?? 0} recipe{recipes?.length === 1 ? '' : 's'}</div>
+          <h1 style={{ marginTop: 4 }}>Your recipes</h1>
+        </div>
+        <Button variant="dark" onClick={() => navigate('/add')}><span style={{ fontSize: 18, marginRight: 2 }}>+</span> Add</Button>
       </div>
 
       <input className="input" placeholder="Search recipes, cuisines, tags…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />
-      <div className="chip-row" style={{ marginBottom: 18 }}>
-        <Chip flame active={!meal} onClick={() => setMeal(null)}>All</Chip>
-        {MEAL_OPTIONS.map((m) => <Chip key={m.value} flame active={meal === m.value} onClick={() => setMeal(m.value)}>{m.label}</Chip>)}
+      <div className="chip-row chip-scroll" style={{ marginBottom: 18 }}>
+        <Chip flame active={filter === 'all'} onClick={() => setFilter('all')}>All</Chip>
+        <Chip flame active={filter === 'saved'} onClick={() => setFilter('saved')}>Saved</Chip>
+        <Chip flame active={filter === 'shared'} onClick={() => setFilter('shared')}>Shared</Chip>
+        {MEAL_OPTIONS.map((m) => <Chip key={m.value} flame active={filter === m.value} onClick={() => setFilter(m.value)}>{m.label}</Chip>)}
       </div>
 
       {recipes === null ? (
@@ -47,7 +54,9 @@ export default function Library() {
           Everything you save lives here — add by hand, paste a link, snap a photo, or drop a social video.
         </EmptyState>
       ) : filtered.length === 0 ? (
-        <EmptyState icon="search" title="No matches">Try a different search or filter.</EmptyState>
+        <EmptyState icon={filter === 'saved' ? 'heart' : 'search'} title={filter === 'saved' ? 'No favourites yet' : 'No matches'}>
+          {filter === 'saved' ? 'Tap the heart on a recipe to save it here.' : 'Try a different search or filter.'}
+        </EmptyState>
       ) : (
         <div className="recipe-grid">
           {filtered.map((r) => <RecipeCard key={r.id} recipe={r} to={`/recipes/${r.id}`} origin="you" />)}

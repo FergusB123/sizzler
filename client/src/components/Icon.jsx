@@ -19,6 +19,7 @@ const paths = {
   bookmark: <path d="M7 4.5h10v16l-5-3.4-5 3.4Z" {...P} />,
   dish: <><path d="M4 16a8 8 0 0 1 16 0" {...P} /><path d="M2.8 16h18.4M12 8V6.4" {...P} /></>,
   // ---- supporting (drawn to match stroke/grid) ----
+  house: <><path d="M3 10.8 12 3.5l9 7.3" {...P} /><path d="M5.5 9.8V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.8" {...P} /></>,
   plus: <path d="M12 5v14M5 12h14" {...P} strokeWidth="2" />,
   minus: <path d="M5 12h14" {...P} strokeWidth="2" />,
   sparkle: <><path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" {...P} /><path d="M19 14l.6 1.6 1.6.6-1.6.6L19 19l-.6-1.6-1.6-.6 1.6-.6z" {...P} /></>,

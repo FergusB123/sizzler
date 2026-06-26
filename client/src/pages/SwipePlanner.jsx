@@ -124,11 +124,13 @@ export default function SwipePlanner() {
       </div>
 
       {!done && (
-        <div className="swipe-actions">
-          <button className="swipe-act skip" onClick={() => decide(pool[index], false)}><Icon name="x" size={24} /></button>
-          <button className="swipe-act info" onClick={() => navigate(`/recipes/${pool[index].id}`)}><Icon name="info" size={20} /></button>
-          <button className="swipe-act like" onClick={() => decide(pool[index], true)}><Icon name="heart" size={24} /></button>
-        </div>
+        <>
+          <div className="swipe-actions">
+            <button className="swipe-act skip" onClick={() => decide(pool[index], false)}><Icon name="x" size={26} /></button>
+            <button className="swipe-act like" onClick={() => decide(pool[index], true)}><Icon name="heart" size={26} /></button>
+          </div>
+          <p className="swipe-cap">Swipe right to shortlist · left to skip</p>
+        </>
       )}
     </div>
   )

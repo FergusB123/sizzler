@@ -1,10 +1,10 @@
-.swipe-screen { min-height: 100dvh; display: flex; flex-direction: column; padding: calc(var(--safe-top) + 12px) 20px calc(var(--safe-bottom) + 20px); }
+.swipe-screen { min-height: 100dvh; display: flex; flex-direction: column; background: var(--charcoal); color: var(--charcoal-text); padding: calc(var(--safe-top) + 12px) 20px calc(var(--safe-bottom) + 20px); }
 .swipe-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
 .swipe-progress { flex: 1; }
-.swipe-bar { height: 6px; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
-.swipe-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.4s var(--ease-out); }
-.swipe-progress small { font-size: 12px; color: var(--text-dim); font-weight: 600; margin-top: 6px; display: block; }
-.swipe-undo { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: var(--text-dim); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 6px; transition: opacity 0.2s; }
+.swipe-bar { height: 6px; background: rgba(255, 255, 255, 0.16); border-radius: 999px; overflow: hidden; }
+.swipe-bar span { display: block; height: 100%; border-radius: 999px; transition: width 0.4s var(--ease-out); background: repeating-linear-gradient(45deg, #eb4606 0 8px, #f26a30 8px 16px); animation: scStripe 0.7s linear infinite; }
+.swipe-progress small { font-size: 12px; color: var(--charcoal-dim); font-weight: 600; margin-top: 6px; display: block; }
+.swipe-undo { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: var(--charcoal-dim); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 6px; transition: opacity 0.2s; }
 .swipe-undo:disabled { opacity: 0.3; cursor: default; }
 
 .swipe-stack { flex: 1; position: relative; display: grid; place-items: center; margin: 8px 0; }
@@ -30,14 +30,14 @@
 .sc-stamp.like { right: 22px; color: var(--success); border-color: var(--success); transform: rotate(10deg); }
 .sc-stamp.nope { left: 22px; color: var(--danger); border-color: var(--danger); transform: rotate(-10deg); }
 
-.swipe-actions { display: flex; justify-content: center; align-items: center; gap: 20px; padding-top: 14px; }
-.swipe-act { width: 62px; height: 62px; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--surface-2); cursor: pointer; display: grid; place-content: center; transition: transform 0.14s var(--ease-spring), background 0.2s; }
+.swipe-cap { text-align: center; font-size: 13px; color: var(--charcoal-faint); margin-top: 14px; }
+.swipe-actions { display: flex; justify-content: center; align-items: center; gap: 26px; padding-top: 16px; }
+.swipe-act { width: 66px; height: 66px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-content: center; transition: transform 0.14s var(--ease-spring), background 0.2s; }
 .swipe-act:active { transform: scale(0.88); }
-.swipe-act.skip { color: var(--danger); }
-.swipe-act.like { color: var(--success); }
-.swipe-act.like:active { background: var(--pos-soft); }
-.swipe-act.info { width: 48px; height: 48px; color: var(--text-dim); }
+.swipe-act.skip { background: #fff; color: var(--cast-iron); }
+.swipe-act.like { background: var(--orange-500); color: #fff; box-shadow: var(--shadow-flame); }
+.swipe-act.like:active { background: var(--orange-600); }
 
-.swipe-done { text-align: center; display: grid; gap: 16px; justify-items: center; }
-.swipe-done-ic { width: 64px; height: 64px; border-radius: 50%; display: grid; place-content: center; background: var(--pos-soft); color: var(--success); }
-.swipe-done h2 { font-size: 26px; letter-spacing: -0.02em; }
+.swipe-done { text-align: center; display: grid; gap: 16px; justify-items: center; color: var(--charcoal-text); }
+.swipe-done-ic { width: 64px; height: 64px; border-radius: 50%; display: grid; place-content: center; background: rgba(62, 124, 78, 0.25); color: #6ee7a8; }
+.swipe-done h2 { font-size: 26px; letter-spacing: -0.02em; color: #fff; }
