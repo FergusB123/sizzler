@@ -98,6 +98,32 @@ export default function Library() {
     })
   }, [recipes, q, sel])
 
+  // Faceted availability: for each group, how many recipes each option would
+  // match given the OTHER groups' current selections (+ search). A group's own
+  // selections don't constrain its own options (within-group is OR). Options
+  // that would yield 0 get disabled — unless already selected (so you can
+  // always deselect).
+  const avail = useMemo(() => {
+    const out = {}
+    if (!recipes) return out
+    const ql = q.trim().toLowerCase()
+    for (const g of GROUPS) {
+      const base = recipes.filter((r) => {
+        for (const other of GROUPS) {
+          if (other.key === g.key) continue
+          const set = sel[other.key]
+          if (set.size && !other.options.some((o) => set.has(o.v) && o.test(r))) return false
+        }
+        if (ql && !`${r.title} ${r.cuisine} ${r.category} ${(r.tags || []).join(' ')}`.toLowerCase().includes(ql)) return false
+        return true
+      })
+      const counts = {}
+      for (const o of g.options) counts[o.v] = base.reduce((n, r) => n + (o.test(r) ? 1 : 0), 0)
+      out[g.key] = counts
+    }
+    return out
+  }, [recipes, q, sel])
+
   // Flat list of active filters for the removable summary chips.
   const activeChips = GROUPS.flatMap((g) =>
     [...sel[g.key]].map((v) => ({ gkey: g.key, ...g.options.find((o) => o.v === v) })))
@@ -162,11 +188,15 @@ export default function Library() {
           <div key={g.key} className="filter-group">
             <div className="filter-group-label">{g.label}</div>
             <div className="chip-row" style={{ flexWrap: 'wrap', gap: 8 }}>
-              {g.options.map((o) => (
-                <Chip key={o.v} flame active={sel[g.key].has(o.v)} onClick={() => toggle(g.key, o.v)}>
-                  {o.emoji ? <span style={{ marginRight: 5 }}>{o.emoji}</span> : null}{o.label}
-                </Chip>
-              ))}
+              {g.options.map((o) => {
+                const selected = sel[g.key].has(o.v)
+                const disabled = !selected && (avail[g.key]?.[o.v] ?? 0) === 0
+                return (
+                  <Chip key={o.v} flame active={selected} disabled={disabled} onClick={() => toggle(g.key, o.v)}>
+                    {o.emoji ? <span style={{ marginRight: 5 }}>{o.emoji}</span> : null}{o.label}
+                  </Chip>
+                )
+              })}
             </div>
           </div>
         ))}
