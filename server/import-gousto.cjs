@@ -1,12 +1,13 @@
-// Importer: pull real recipes from Gousto's public cookbook API, normalise them
-// through Sizzler's own Claude parser, and ADD them to the demo user's library.
+// Importer: pull real recipes from Gousto's public cookbook API and ADD them to
+// the demo user's library. Gousto's data is already structured (ingredients with
+// quantities, clean HTML method, cuisine, times) so we parse it directly — no AI
+// call per recipe, which makes bulk imports fast and reliable.
 // Idempotent: skips recipes already imported (matched by source URL), so it
 // never duplicates and never deletes existing recipes or meal-plan slots.
 //   node server/import-gousto.cjs [count]   (default 10)
 require('dotenv').config({ override: true });
 const pool = require('./database');
 const { initDatabase } = require('./database');
-const { extractFromText } = require('./services/claude');
 
 const TARGET = Number(process.argv[2]) || 10;
 // Allow more per cuisine on bigger batches, while keeping some variety.
@@ -46,31 +47,74 @@ function cleanIngredients(ingredients) {
   return [...byName.values()].map((v) => v.clean);
 }
 
-function buildContent(e) {
-  const ingredients = cleanIngredients(e.ingredients);
-  const basics = (e.basics || []).map((b) => b.title).filter(Boolean);
-  const steps = (e.cooking_instructions || [])
+// Parse a cleaned Gousto ingredient label into {name, quantity, unit, raw}.
+// e.g. "Ground turmeric (0.5tsp)" → name "Ground turmeric", qty "0.5", unit "tsp";
+//      "Tomato" → name only.
+function parseIngredient(label) {
+  const m = label.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  if (!m) return { name: label.trim(), quantity: '', unit: '', raw: label.trim() };
+  const name = m[1].trim();
+  const amount = m[2].trim();
+  const am = amount.match(/^([\d.,/]+)\s*(.*)$/);
+  const quantity = am ? am[1] : '';
+  const unit = am ? am[2].trim() : amount;
+  return { name, quantity, unit, raw: `${amount} ${name}`.trim() };
+}
+
+// Method steps: split Gousto's grouped HTML instructions into individual lines.
+function stepsFrom(e) {
+  return (e.cooking_instructions || [])
     .sort((a, b) => (a.order || 0) - (b.order || 0))
-    .map((s, i) => `${i + 1}. ${stripHtml(s.instruction)}`);
-  return [
-    `Recipe: ${e.title}`,
-    e.description ? `Description: ${stripHtml(e.description)}` : '',
-    e.cuisine?.title ? `Cuisine: ${e.cuisine.title}` : '',
-    `Serves: 4`,
-    e.prep_times?.for_4 ? `Total time: ${e.prep_times.for_4} minutes` : '',
-    '',
-    'Ingredients (for 4 servings):',
-    ...ingredients.map((i) => `- ${i}`),
-    ...(basics.length ? ['Store-cupboard basics:', ...basics.map((b) => `- ${b}`)] : []),
-    '',
-    'Method:',
-    ...steps,
-  ].filter((l) => l !== '').join('\n');
+    .flatMap((s) => stripHtml(s.instruction).split('\n'))
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+function inferDifficulty(stepCount, totalMins) {
+  if (totalMins >= 55 || stepCount >= 13) return 'hard';
+  if (totalMins && totalMins <= 25 && stepCount <= 8) return 'easy';
+  return 'medium';
 }
 
 function largestImage(media) {
   const imgs = (media?.images || []).slice().sort((a, b) => (a.width || 0) - (b.width || 0));
   return imgs.length ? imgs[imgs.length - 1].image : null;
+}
+
+const BREAKFAST_RE = /\b(breakfast|brunch|pancake|porridge|oat|oats|granola|waffle|omelette|frittata|shakshuka|egg|eggs|french toast|smoothie|muesli|bagel|crumpet|hash brown)\b/i;
+const LUNCH_RE = /\b(sandwich|salad|soup|wrap|toastie|flatbread|baguette|panini|ciabatta|taco|tacos|quesadilla|burrito|pitta|pita|bao|melt|sub|roll|toast)\b/i;
+
+// One primary meal per recipe (from its title) — used to balance the batch so
+// dinner doesn't crowd out breakfast/lunch.
+function primaryMeal(title) {
+  if (BREAKFAST_RE.test(title)) return 'breakfast';
+  if (LUNCH_RE.test(title)) return 'lunch';
+  return 'dinner';
+}
+
+// Final stored meal_types: breakfast dishes → breakfast; lunchy or quick/light
+// dishes also suit lunch; everything else is dinner. Unioned with the parser's
+// own guess so the planner has options for every meal.
+function mealTypesFor(title, category, totalMins, parsedMeals) {
+  const hay = `${title} ${category || ''}`;
+  const meals = new Set(parsedMeals || []);
+  if (BREAKFAST_RE.test(hay)) meals.add('breakfast');
+  if (LUNCH_RE.test(hay) || (totalMins && totalMins <= 30)) meals.add('lunch');
+  const onlyBreakfast = meals.has('breakfast') && meals.size === 1;
+  if (!onlyBreakfast) meals.add('dinner');
+  if (!meals.size) meals.add('dinner');
+  return [...meals];
+}
+
+// Collapse Gousto's near-duplicates (same dish as thigh/breast, brown/white
+// rice, "free range"/"lean", etc.) so a big import isn't full of repeats.
+function normTitle(t) {
+  return String(t).toLowerCase()
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\b(free range|organic|lean|jumbo|king|extra special|simply perfect|ultimate|homemade|classic|special|style)\b/g, ' ')
+    .replace(/\b(thigh|thighs|breast|breasts|fillet|fillets|leg|legs|rump|loin|mince)\b/g, ' ')
+    .replace(/\b(brown|white|basmati|long grain|wholewheat|wholemeal|jasmine)\b/g, ' ')
+    .replace(/\s+/g, ' ').trim();
 }
 
 async function run() {
@@ -80,118 +124,117 @@ async function run() {
   if (!userRows[0]) throw new Error(`Demo user ${DEMO_EMAIL} not found — run \`npm run seed\` first.`);
   const userId = userRows[0].id;
 
-  // What's already in the library — so we skip duplicates and keep cuisine
-  // balance across the whole library (not just this batch).
+  // What's already in the library — skip exact + near-duplicate titles and keep
+  // cuisine balance across the whole library (not just this batch).
   const { rows: existing } = await pool.query(
-    'SELECT cuisine, source_url FROM recipes WHERE user_id = $1', [userId]);
+    'SELECT title, cuisine, source_url FROM recipes WHERE user_id = $1', [userId]);
   const existingSlugs = new Set(existing.map((r) => (r.source_url || '').split('/').filter(Boolean).pop()).filter(Boolean));
+  const seenNorm = new Set(existing.map((r) => normTitle(r.title)));
   const cuisineCount = {};
   for (const r of existing) if (r.cuisine) cuisineCount[r.cuisine] = (cuisineCount[r.cuisine] || 0) + 1;
 
-  // Page through the listing, collecting new candidates (not already imported)
-  // until we have a comfortable surplus to pick a diverse spread from. The API
-  // ignores count/page (always returns ~16 featured recipes) but DOES honour
-  // `offset`, so we window through the full catalogue 16 at a time.
-  const want = TARGET * 5;
+  // Meal-mix targets. Gousto skews heavily to dinner, so breakfast/lunch get
+  // reserved slots in pass 1 and dinner soaks up the remainder in pass 2.
+  const bfTarget = Math.round(TARGET * 0.18);
+  const lunchTarget = Math.round(TARGET * 0.37);
+  const MEAL_TARGET = { breakfast: bfTarget, lunch: lunchTarget, dinner: TARGET - bfTarget - lunchTarget };
+
+  // Window through the catalogue (API ignores page/count, honours offset),
+  // collecting new, non-duplicate candidates tagged with a primary meal.
   const PAGE = 16;
-  const seen = new Set();
+  const seenSlug = new Set();
   const candidates = [];
-  for (let offset = 0; offset < 4000 && candidates.length < want; offset += PAGE) {
+  for (let offset = 0; offset < 9000; offset += PAGE) {
     let list;
     try { list = await getJson(`${API}/recipes?count=${PAGE}&offset=${offset}`); } catch { break; }
     const entries = list.data?.entries || [];
     if (!entries.length) break;
-    let fresh = 0;
     for (const e of entries) {
       if (!e.url || !largestImage(e.media)) continue;
       const slug = e.url.split('/').filter(Boolean).pop();
-      if (!slug || seen.has(slug) || existingSlugs.has(slug)) continue;
-      seen.add(slug);
-      candidates.push({ ...e, slug });
-      fresh++;
+      if (!slug || seenSlug.has(slug) || existingSlugs.has(slug)) continue;
+      const norm = normTitle(e.title);
+      if (seenNorm.has(norm)) continue; // near-duplicate of something we have / already queued
+      seenSlug.add(slug); seenNorm.add(norm);
+      candidates.push({ slug, title: e.title, media: e.media, primary: primaryMeal(e.title) });
     }
-    // Stop if a page yields nothing new for several windows (end of catalogue / loop).
-    if (!fresh && offset > 0 && candidates.length >= TARGET) break;
+    const bf = candidates.filter((c) => c.primary === 'breakfast').length;
+    const ln = candidates.filter((c) => c.primary === 'lunch').length;
+    // Stop early once we have plenty plus enough breakfast/lunch for the mix.
+    if (candidates.length >= TARGET * 3 && bf >= bfTarget && ln >= lunchTarget) break;
+    await sleep(35);
   }
-  console.log(`Found ${candidates.length} new candidate recipes (library already has ${existing.length}).\n`);
+  const poolByMeal = (m) => candidates.filter((c) => c.primary === m).length;
+  console.log(`Found ${candidates.length} new candidates (breakfast ${poolByMeal('breakfast')}, lunch ${poolByMeal('lunch')}, dinner ${poolByMeal('dinner')}); library has ${existing.length}.\n`);
 
   const imported = [];
+  const mealCount = { breakfast: 0, lunch: 0, dinner: 0 };
 
-  for (const c of candidates) {
-    if (imported.length >= TARGET) break;
-    const slug = c.slug;
+  async function attempt(c) {
+    c.done = true;
     try {
-      const detail = await getJson(`${API}/recipe/${slug}`);
+      const detail = await getJson(`${API}/recipe/${c.slug}`);
       const e = detail.data?.entry || detail.data?.entries?.[0] || detail.data;
-      if (!e || !e.ingredients?.length || !e.cooking_instructions?.length) { continue; }
-
+      if (!e || !e.ingredients?.length || !e.cooking_instructions?.length) return;
       const cuisine = e.cuisine?.title || 'Other';
-      if ((cuisineCount[cuisine] || 0) >= MAX_PER_CUISINE) continue;
+      if ((cuisineCount[cuisine] || 0) >= MAX_PER_CUISINE) return;
 
-      process.stdout.write(`• ${e.title}  [${cuisine}] … `);
-      const parsed = await extractFromText(buildContent(e));
-      if (!parsed?.title || parsed.title === 'NOT_A_RECIPE') { console.log('skipped (not parsed)'); continue; }
-
-      // Use Gousto's public CDN image directly. Re-hosting only makes sense with
-      // Cloudinary configured; without it we'd get local /uploads paths that break
-      // on Vercel. The CDN URL is stable and resolves everywhere.
-      const imageUrl = largestImage(e.media);
-
+      const ingredients = cleanIngredients(e.ingredients).map(parseIngredient);
+      const steps = stepsFrom(e);
+      if (!ingredients.length || !steps.length) return;
+      const total = e.prep_times?.for_4 ?? e.prep_times?.for_2 ?? null;
+      const category = e.categories?.[0]?.title || null;
+      const meal_types = mealTypesFor(e.title, category, total, []);
       const recipe = {
-        title: e.title.trim(),
-        cuisine,
-        category: parsed.category || (e.categories?.[0]?.title) || null,
-        description: parsed.description || stripHtml(e.description).split('\n')[0] || null,
-        ingredients: parsed.ingredients || [],
-        steps: parsed.steps || [],
-        image_url: imageUrl,
-        prep_minutes: parsed.prep_minutes ?? null,
-        cook_minutes: parsed.cook_minutes ?? (e.prep_times?.for_4 ?? null),
-        difficulty: parsed.difficulty || 'medium',
-        servings: 4,
-        meal_types: parsed.meal_types?.length ? parsed.meal_types : ['dinner'],
-        tags: [...new Set([...(parsed.tags || []), ...((e.tags || []).map((t) => t.title).filter(Boolean))])].slice(0, 6),
-        source: 'Gousto',
-        source_url: `https://www.gousto.co.uk/cookbook/recipes/${slug}`,
+        title: e.title.trim(), cuisine, category,
+        description: stripHtml(e.description).split('\n')[0] || null,
+        ingredients, steps,
+        image_url: largestImage(e.media),
+        prep_minutes: null,
+        cook_minutes: total,
+        difficulty: inferDifficulty(steps.length, total || 0), servings: 4, meal_types,
+        tags: [...new Set((e.tags || []).map((t) => t.title).filter(Boolean))].slice(0, 6),
+        source: 'Gousto', source_url: `https://www.gousto.co.uk/cookbook/recipes/${c.slug}`,
       };
-
-      cuisineCount[cuisine] = (cuisineCount[cuisine] || 0) + 1;
-      imported.push(recipe);
-      console.log(`ok (${recipe.ingredients.length} ingredients, ${recipe.steps.length} steps)`);
-      await sleep(400);
-    } catch (err) {
-      console.log(`FAILED: ${err.message}`);
-    }
-  }
-
-  if (!imported.length) { console.log('\nNothing new to import — library is already up to date.'); await pool.end(); return; }
-
-  // Append the new batch in one transaction (no deletes — existing recipes and
-  // any meal-plan slots referencing them are left untouched).
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    for (const r of imported) {
-      await client.query(
+      // Insert immediately so progress is durable — a crash/timeout mid-run
+      // never loses work, and a re-run resumes (dedup skips what's saved).
+      await pool.query(
         `INSERT INTO recipes (user_id, title, cuisine, category, description, ingredients, steps,
            image_url, image_is_generated, prep_minutes, cook_minutes, difficulty, servings,
            meal_types, tags, source, source_kind, source_url)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,FALSE,$9,$10,$11,$12,$13,$14,$15,'url',$16)`,
-        [userId, r.title, r.cuisine, r.category, r.description, J(r.ingredients), J(r.steps),
-         r.image_url, r.prep_minutes, r.cook_minutes, r.difficulty, r.servings, J(r.meal_types),
-         J(r.tags), r.source, r.source_url]
+        [userId, recipe.title, recipe.cuisine, recipe.category, recipe.description, J(recipe.ingredients), J(recipe.steps),
+         recipe.image_url, recipe.prep_minutes, recipe.cook_minutes, recipe.difficulty, recipe.servings, J(recipe.meal_types),
+         J(recipe.tags), recipe.source, recipe.source_url]
       );
-    }
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
+      cuisineCount[cuisine] = (cuisineCount[cuisine] || 0) + 1;
+      mealCount[c.primary]++;
+      imported.push(recipe);
+      console.log(`• [${imported.length}] ${recipe.title.slice(0, 44)}  [${cuisine}/${meal_types.join('+')}]`);
+      await sleep(60);
+    } catch { /* skip failures (recipe simply not counted) */ }
   }
 
-  console.log(`\n✅ Added ${imported.length} new Gousto recipes for ${DEMO_EMAIL}:`);
-  imported.forEach((r, i) => console.log(`  ${i + 1}. ${r.title} — ${r.cuisine} · ${(r.cook_minutes || '?')}min · ${r.meal_types.join('/')}`));
+  // Pass 1 — honour the meal mix so dinner doesn't crowd out breakfast/lunch.
+  for (const c of candidates) {
+    if (imported.length >= TARGET) break;
+    if (mealCount[c.primary] >= MEAL_TARGET[c.primary]) continue; // reserve for pass 2
+    await attempt(c);
+  }
+  // Pass 2 — fill any remaining slots regardless of meal bucket.
+  for (const c of candidates) {
+    if (imported.length >= TARGET) break;
+    if (!c.done) await attempt(c);
+  }
+
+  if (!imported.length) { console.log('\nNothing new to import — library is already up to date.'); await pool.end(); return; }
+
+  const dist = { breakfast: 0, lunch: 0, dinner: 0 };
+  imported.forEach((r) => r.meal_types.forEach((m) => { if (dist[m] !== undefined) dist[m]++; }));
+  const cuisines = [...new Set(imported.map((r) => r.cuisine))].sort();
+  console.log(`\n✅ Added ${imported.length} new Gousto recipes for ${DEMO_EMAIL}.`);
+  console.log(`   Meal coverage — breakfast: ${dist.breakfast}, lunch: ${dist.lunch}, dinner: ${dist.dinner}`);
+  console.log(`   ${cuisines.length} cuisines: ${cuisines.join(', ')}`);
   await pool.end();
 }
 
