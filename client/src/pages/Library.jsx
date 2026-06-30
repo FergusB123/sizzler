@@ -7,11 +7,45 @@ import { Button, EmptyState, Chip } from '../components/ui/primitives'
 import { MEAL_OPTIONS } from '../lib/constants'
 import './pages.css'
 
+// Graphical quick-filters: cuisines + key ingredients/attributes.
+const FACETS = [
+  { key: 'chicken', emoji: '🐔', label: 'Chicken' },
+  { key: 'beef', emoji: '🥩', label: 'Beef' },
+  { key: 'fish', emoji: '🐟', label: 'Fish' },
+  { key: 'veggie', emoji: '🥦', label: 'Veggie' },
+  { key: 'spicy', emoji: '🌶️', label: 'Spicy' },
+  { key: 'pasta', emoji: '🍝', label: 'Pasta' },
+  { key: 'british', emoji: '🇬🇧', label: 'British' },
+  { key: 'italian', emoji: '🇮🇹', label: 'Italian' },
+  { key: 'indian', emoji: '🇮🇳', label: 'Indian' },
+  { key: 'mexican', emoji: '🇲🇽', label: 'Mexican' },
+  { key: 'spanish', emoji: '🇪🇸', label: 'Spanish' },
+  { key: 'asian', emoji: '🥢', label: 'Asian' },
+]
+const cuisineIs = (r, re) => re.test(r.cuisine || '')
+const FACET_TEST = {
+  chicken: (r, hay) => /chicken/.test(hay),
+  beef: (r, hay) => /\b(beef|steak|mince|cottage pie|bolognese|brisket)\b/.test(hay),
+  fish: (r, hay) => /\b(fish|salmon|cod|basa|prawn|hake|tuna|seafood|pollock|haddock|mackerel|trout)\b/.test(hay),
+  veggie: (r, hay) => /(vegetarian|veggie|meat-?free|plant-?based|vegan|paneer|halloumi|tofu)/.test(hay),
+  spicy: (r, hay) => /(spicy|chilli|chili|curry|jalfrezi|tikka|sriracha|fiery|harissa|katsu|rogan|madras|vindaloo|nduja)/.test(hay),
+  pasta: (r, hay) => /(pasta|spaghetti|tagliatelle|risotto|gnocchi|lasagne|lasagna|linguine|penne|carbonara|orzo|ravioli|cacio)/.test(hay),
+  british: (r) => cuisineIs(r, /british|welsh|english|scottish/i),
+  italian: (r) => cuisineIs(r, /italian/i),
+  indian: (r) => cuisineIs(r, /indian|south asian/i),
+  mexican: (r) => cuisineIs(r, /mexican/i),
+  spanish: (r) => cuisineIs(r, /spanish/i),
+  asian: (r) => cuisineIs(r, /asian|chinese|thai|japanese|korean|vietnamese|malaysian|indonesian|cambodian/i),
+}
+const facetHay = (r) =>
+  `${r.title} ${r.cuisine || ''} ${r.category || ''} ${(r.tags || []).join(' ')} ${(r.ingredients || []).map((i) => i.name).join(' ')}`.toLowerCase()
+
 export default function Library() {
   const navigate = useNavigate()
   const [recipes, setRecipes] = useState(null)
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState('all') // all | saved | shared | <meal>
+  const [facet, setFacet] = useState(null) // graphical cuisine/ingredient filter
 
   useEffect(() => { listRecipes().then(setRecipes) }, [])
 
@@ -21,13 +55,14 @@ export default function Library() {
       if (filter === 'saved' && !r.favorite) return false
       else if (filter === 'shared' && !r.is_shared) return false
       else if (['breakfast', 'lunch', 'dinner'].includes(filter) && !r.meal_types.includes(filter)) return false
+      if (facet && !FACET_TEST[facet](r, facetHay(r))) return false
       if (q) {
         const hay = `${r.title} ${r.cuisine} ${r.category} ${(r.tags || []).join(' ')}`.toLowerCase()
         if (!hay.includes(q.toLowerCase())) return false
       }
       return true
     })
-  }, [recipes, q, filter])
+  }, [recipes, q, filter, facet])
 
   return (
     <div className="screen">
@@ -37,6 +72,14 @@ export default function Library() {
           <h1 style={{ marginTop: 4 }}>Your recipes</h1>
         </div>
         <Button variant="dark" sm onClick={() => navigate('/add')}><Icon name="plus" size={16} /> Add</Button>
+      </div>
+
+      <div className="facet-row">
+        {FACETS.map((f) => (
+          <button key={f.key} className={`facet ${facet === f.key ? 'active' : ''}`} onClick={() => setFacet(facet === f.key ? null : f.key)}>
+            <span className="facet-emoji">{f.emoji}</span>{f.label}
+          </button>
+        ))}
       </div>
 
       <input className="input" placeholder="Search recipes, cuisines, tags…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />

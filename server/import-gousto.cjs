@@ -70,15 +70,26 @@ function stepsFrom(e) {
     .filter(Boolean);
 }
 
-function inferDifficulty(stepCount, totalMins) {
-  if (totalMins >= 55 || stepCount >= 13) return 'hard';
-  if (totalMins && totalMins <= 25 && stepCount <= 8) return 'easy';
+// Difficulty from total cook time (step counts are unreliable once Gousto's
+// grouped instructions are split into lines).
+function inferDifficulty(totalMins) {
+  if (!totalMins) return 'medium';
+  if (totalMins <= 25) return 'easy';
+  if (totalMins >= 50) return 'hard';
   return 'medium';
 }
 
 function largestImage(media) {
   const imgs = (media?.images || []).slice().sort((a, b) => (a.width || 0) - (b.width || 0));
   return imgs.length ? imgs[imgs.length - 1].image : null;
+}
+
+// A right-sized image for cards/hero (~700px) — much smaller payload than the
+// 1500px original, so a library grid loads fast. Falls back to the largest.
+function pickImage(media, target = 700) {
+  const imgs = (media?.images || []).filter((i) => i.image).sort((a, b) => (a.width || 0) - (b.width || 0));
+  if (!imgs.length) return null;
+  return (imgs.find((i) => (i.width || 0) >= target) || imgs[imgs.length - 1]).image;
 }
 
 const BREAKFAST_RE = /\b(breakfast|brunch|pancake|porridge|oat|oats|granola|waffle|omelette|frittata|shakshuka|egg|eggs|french toast|smoothie|muesli|bagel|crumpet|hash brown)\b/i;
@@ -189,10 +200,10 @@ async function run() {
         title: e.title.trim(), cuisine, category,
         description: stripHtml(e.description).split('\n')[0] || null,
         ingredients, steps,
-        image_url: largestImage(e.media),
+        image_url: pickImage(e.media, 700),
         prep_minutes: null,
         cook_minutes: total,
-        difficulty: inferDifficulty(steps.length, total || 0), servings: 4, meal_types,
+        difficulty: inferDifficulty(total), servings: 4, meal_types,
         tags: [...new Set((e.tags || []).map((t) => t.title).filter(Boolean))].slice(0, 6),
         source: 'Gousto', source_url: `https://www.gousto.co.uk/cookbook/recipes/${c.slug}`,
       };
