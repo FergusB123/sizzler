@@ -1,15 +1,16 @@
-// One-off importer: pull real recipes from Gousto's public cookbook API,
-// normalise them through Sizzler's own Claude parser, re-host the hero image
-// to Cloudinary, and write them into the demo user's library (replacing the
-// placeholder seed recipes).
-//   node server/import-gousto.cjs [count]
+// Importer: pull real recipes from Gousto's public cookbook API, normalise them
+// through Sizzler's own Claude parser, and ADD them to the demo user's library.
+// Idempotent: skips recipes already imported (matched by source URL), so it
+// never duplicates and never deletes existing recipes or meal-plan slots.
+//   node server/import-gousto.cjs [count]   (default 10)
 require('dotenv').config({ override: true });
 const pool = require('./database');
 const { initDatabase } = require('./database');
 const { extractFromText } = require('./services/claude');
 
 const TARGET = Number(process.argv[2]) || 10;
-const MAX_PER_CUISINE = 2;
+// Allow more per cuisine on bigger batches, while keeping some variety.
+const MAX_PER_CUISINE = Math.max(3, Math.ceil(TARGET / 8));
 const DEMO_EMAIL = 'demo@sizzler.app';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const API = 'https://production-api.gousto.co.uk/cmsreadbroker/v1';
@@ -79,17 +80,46 @@ async function run() {
   if (!userRows[0]) throw new Error(`Demo user ${DEMO_EMAIL} not found — run \`npm run seed\` first.`);
   const userId = userRows[0].id;
 
-  // List candidates (more than we need, so we can pick a diverse spread).
-  const list = await getJson(`${API}/recipes?count=80&page=1`);
-  const candidates = (list.data?.entries || []).filter((e) => e.url && largestImage(e.media));
-  console.log(`Fetched ${candidates.length} candidate recipes from Gousto.\n`);
-
+  // What's already in the library — so we skip duplicates and keep cuisine
+  // balance across the whole library (not just this batch).
+  const { rows: existing } = await pool.query(
+    'SELECT cuisine, source_url FROM recipes WHERE user_id = $1', [userId]);
+  const existingSlugs = new Set(existing.map((r) => (r.source_url || '').split('/').filter(Boolean).pop()).filter(Boolean));
   const cuisineCount = {};
+  for (const r of existing) if (r.cuisine) cuisineCount[r.cuisine] = (cuisineCount[r.cuisine] || 0) + 1;
+
+  // Page through the listing, collecting new candidates (not already imported)
+  // until we have a comfortable surplus to pick a diverse spread from. The API
+  // ignores count/page (always returns ~16 featured recipes) but DOES honour
+  // `offset`, so we window through the full catalogue 16 at a time.
+  const want = TARGET * 5;
+  const PAGE = 16;
+  const seen = new Set();
+  const candidates = [];
+  for (let offset = 0; offset < 4000 && candidates.length < want; offset += PAGE) {
+    let list;
+    try { list = await getJson(`${API}/recipes?count=${PAGE}&offset=${offset}`); } catch { break; }
+    const entries = list.data?.entries || [];
+    if (!entries.length) break;
+    let fresh = 0;
+    for (const e of entries) {
+      if (!e.url || !largestImage(e.media)) continue;
+      const slug = e.url.split('/').filter(Boolean).pop();
+      if (!slug || seen.has(slug) || existingSlugs.has(slug)) continue;
+      seen.add(slug);
+      candidates.push({ ...e, slug });
+      fresh++;
+    }
+    // Stop if a page yields nothing new for several windows (end of catalogue / loop).
+    if (!fresh && offset > 0 && candidates.length >= TARGET) break;
+  }
+  console.log(`Found ${candidates.length} new candidate recipes (library already has ${existing.length}).\n`);
+
   const imported = [];
 
   for (const c of candidates) {
     if (imported.length >= TARGET) break;
-    const slug = c.url.split('/').filter(Boolean).pop();
+    const slug = c.slug;
     try {
       const detail = await getJson(`${API}/recipe/${slug}`);
       const e = detail.data?.entry || detail.data?.entries?.[0] || detail.data;
@@ -134,14 +164,13 @@ async function run() {
     }
   }
 
-  if (!imported.length) throw new Error('Nothing imported — leaving existing recipes untouched.');
+  if (!imported.length) { console.log('\nNothing new to import — library is already up to date.'); await pool.end(); return; }
 
-  // Atomic replace: wipe the demo library and insert the fresh batch together,
-  // so a partial run can never leave the library empty or duplicated.
+  // Append the new batch in one transaction (no deletes — existing recipes and
+  // any meal-plan slots referencing them are left untouched).
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const { rows: old } = await client.query('DELETE FROM recipes WHERE user_id = $1 RETURNING title', [userId]);
     for (const r of imported) {
       await client.query(
         `INSERT INTO recipes (user_id, title, cuisine, category, description, ingredients, steps,
@@ -154,7 +183,6 @@ async function run() {
       );
     }
     await client.query('COMMIT');
-    console.log(`\nReplaced ${old.length} old recipe(s): ${old.map((r) => r.title).join(', ') || '(none)'}`);
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -162,7 +190,7 @@ async function run() {
     client.release();
   }
 
-  console.log(`\n✅ Imported ${imported.length} Gousto recipes for ${DEMO_EMAIL}:`);
+  console.log(`\n✅ Added ${imported.length} new Gousto recipes for ${DEMO_EMAIL}:`);
   imported.forEach((r, i) => console.log(`  ${i + 1}. ${r.title} — ${r.cuisine} · ${(r.cook_minutes || '?')}min · ${r.meal_types.join('/')}`));
   await pool.end();
 }
