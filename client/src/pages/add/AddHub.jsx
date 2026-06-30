@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { IconButton } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
+import { useGoBack } from '../../lib/useGoBack'
 import './add.css'
 
 const AI_METHODS = [
@@ -11,11 +12,12 @@ const AI_METHODS = [
 
 export default function AddHub() {
   const navigate = useNavigate()
+  const goBack = useGoBack('/')
 
   return (
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 6 }}>
-        <IconButton onClick={() => navigate(-1)}><Icon name="arrowLeft" size={20} /></IconButton>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
       </div>
       <div style={{ marginBottom: 22 }}>
         <div className="overline">Grow your library</div>

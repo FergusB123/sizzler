@@ -2,11 +2,13 @@ import { useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
 import { IconButton } from '../components/ui/primitives'
 import Icon from '../components/Icon'
+import { useGoBack } from '../lib/useGoBack'
 import './plan.css'
 
 // "How do you want to plan?" — pick Swipe (fun, auto-build) or Build by hand.
 export default function PlanChoose() {
   const navigate = useNavigate()
+  const goBack = useGoBack('/')
   const { profile } = useProfile()
   const days = profile?.planning_horizon_days || 7
   const meals = (profile?.planned_meals || ['breakfast', 'lunch', 'dinner']).length
@@ -14,7 +16,7 @@ export default function PlanChoose() {
   return (
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 8 }}>
-        <IconButton onClick={() => navigate('/')}><Icon name="arrowLeft" size={20} /></IconButton>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
       </div>
       <h1 className="choose-h">How do you want to plan?</h1>
       <p className="muted" style={{ margin: '8px 0 24px', lineHeight: 1.5 }}>

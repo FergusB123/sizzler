@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { Button, IconButton, Badge, SizzleLoader, useToast, Sheet } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import { formatTime } from '../components/RecipeCard'
+import { useGoBack } from '../lib/useGoBack'
 import { INFERRED_LABELS } from '../lib/constants'
 import './recipe-detail.css'
 
@@ -13,6 +14,7 @@ const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' }
 export default function RecipeDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const goBack = useGoBack('/recipes')
   const toast = useToast()
   const { user } = useAuth()
   const [recipe, setRecipe] = useState(null)
@@ -82,7 +84,7 @@ export default function RecipeDetail() {
           : <div className="rd-hero-fallback">{(recipe.title || '?').charAt(0).toUpperCase()}</div>}
         <div className="rd-hero-grad" />
         <div className="rd-hero-top">
-          <IconButton onClick={() => navigate(-1)}><Icon name="arrowLeft" size={20} /></IconButton>
+          <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
           {isOwner && (
             <button className={`icon-btn rd-fav ${recipe.favorite ? 'on' : ''}`} aria-label="Favourite" onClick={toggleFav}>
               <Icon name="heart" size={20} />

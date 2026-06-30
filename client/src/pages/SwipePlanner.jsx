@@ -7,10 +7,12 @@ import { autoAllocate, targetShortlistSize } from '../lib/planner'
 import { Button, SizzleLoader, EmptyState, Badge, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import { formatTime } from '../components/RecipeCard'
+import { useGoBack } from '../lib/useGoBack'
 import './swipe.css'
 
 export default function SwipePlanner() {
   const navigate = useNavigate()
+  const goBack = useGoBack('/plan')
   const toast = useToast()
   const { profile } = useProfile()
   const [loading, setLoading] = useState(true)
@@ -47,7 +49,8 @@ export default function SwipePlanner() {
       const assignments = autoAllocate(slots, finalShortlist)
       await assignSlots(assignments)
       toast.success('Plan filled with variety')
-      navigate('/plan', { replace: true })
+      // Land on the filled day-by-day plan (not the chooser) so the result is visible.
+      navigate('/plan/manual', { replace: true })
     } catch (e) {
       toast.error(e.message)
       setAllocating(false)
@@ -80,7 +83,7 @@ export default function SwipePlanner() {
   if (pool.length === 0) {
     return (
       <div className="screen no-nav">
-        <div className="topbar" style={{ padding: 0 }}><IconButton onClick={() => navigate('/plan')}><Icon name="arrowLeft" size={20} /></IconButton><h1 style={{ fontSize: 22 }}>Swipe</h1></div>
+        <div className="topbar" style={{ padding: 0 }}><IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton><h1 style={{ fontSize: 22 }}>Swipe</h1></div>
         <EmptyState icon="book" title="Nothing to swipe yet" action={<Button onClick={() => navigate('/add')}>Add recipes</Button>}>
           Add a few of your own recipes, or check the community feed, then come back to swipe.
         </EmptyState>
@@ -94,7 +97,7 @@ export default function SwipePlanner() {
   return (
     <div className="swipe-screen">
       <div className="swipe-top">
-        <IconButton onClick={() => navigate('/plan')}><Icon name="arrowLeft" size={20} /></IconButton>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
         <div className="swipe-progress">
           <div className="swipe-bar"><span style={{ width: `${Math.min(100, (shortlist.length / target) * 100)}%` }} /></div>
           <small>{shortlist.length} of ~{target} chosen</small>

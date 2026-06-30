@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import RecipeForm from '../../components/RecipeForm'
 import { IconButton, useToast } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
+import { useGoBack } from '../../lib/useGoBack'
 import { createRecipe, uploadRecipeImage } from '../../lib/api'
 
 export default function AddManual() {
   const navigate = useNavigate()
+  const goBack = useGoBack('/add')
   const toast = useToast()
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState('')
@@ -35,7 +37,7 @@ export default function AddManual() {
   return (
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 14 }}>
-        <IconButton onClick={() => navigate(-1)}><Icon name="arrowLeft" size={20} /></IconButton>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
         <h1 style={{ fontSize: 22 }}>New recipe</h1>
       </div>
       <RecipeForm onSubmit={save} submitting={saving} imagePreview={preview} onPickImage={pickImage} sourceKind="manual" />

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import RecipeForm from '../../components/RecipeForm'
 import { IconButton, Button, ExtractLoader, useToast } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
+import { useGoBack } from '../../lib/useGoBack'
 import { extractFromUrl, extractFromImage, createRecipe, uploadRecipeImage } from '../../lib/api'
 import './add.css'
 
@@ -20,8 +21,7 @@ const SIZZLE_BY_MODE = {
 
 export default function AddImport({ mode }) {
   const navigate = useNavigate()
-  const [params] = useSearchParams()
-  const demoFail = params.get('demo') === 'fail'
+  const goBack = useGoBack('/add')
   const toast = useToast()
   const copy = COPY[mode]
 
@@ -41,10 +41,6 @@ export default function AddImport({ mode }) {
 
   async function runExtract() {
     setError(null)
-    if (mode === 'social' && demoFail) {
-      setError("We couldn't read that social link — these often block automated access. Try pasting the recipe text manually.")
-      return
-    }
     setPhase('extracting')
     try {
       let recipe
@@ -117,7 +113,7 @@ export default function AddImport({ mode }) {
   return (
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 8 }}>
-        <IconButton onClick={() => navigate('/add')}><Icon name="arrowLeft" size={20} /></IconButton>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
         <h1 style={{ fontSize: 22 }}>{copy.title}</h1>
       </div>
 

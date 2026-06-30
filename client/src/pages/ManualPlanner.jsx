@@ -5,6 +5,7 @@ import { getActivePlan, createPlan, getPlanSlots, assignSlot, listRecipes } from
 import { Button, SizzleLoader, Sheet, Chip, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import { formatTime } from '../components/RecipeCard'
+import { useGoBack } from '../lib/useGoBack'
 import './manual-planner.css'
 
 const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' }
@@ -13,6 +14,7 @@ const dayLabel = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, 
 
 export default function ManualPlanner() {
   const navigate = useNavigate()
+  const goBack = useGoBack('/')
   const toast = useToast()
   const { profile } = useProfile()
   const [loading, setLoading] = useState(true)
@@ -67,7 +69,7 @@ export default function ManualPlanner() {
   return (
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 6 }}>
-        <IconButton onClick={() => navigate('/plan')}><Icon name="arrowLeft" size={20} /></IconButton>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
         <div>
           <h1 style={{ fontSize: 24 }}>Build your plan</h1>
           <div className="mp-sub">Tap a slot to add a recipe</div>

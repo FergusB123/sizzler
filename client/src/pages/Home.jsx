@@ -73,7 +73,7 @@ export default function Home() {
 
       {hasPlan ? (
         <>
-          <Link to="/plan" className="cook-hero">
+          <Link to="/plan/manual" className="cook-hero">
             <div className="cook-hero-top"><span className="overline accent">{heroLabel}</span><span>{planDays}-day plan</span></div>
             <div className="cook-hero-meals">
               {heroSlots.slice(0, 3).map((s) => (
@@ -107,7 +107,7 @@ export default function Home() {
             {dates.map((d) => {
               const day = filled.filter((s) => s.slot_date === d).sort((a, b) => mealOrder[a.meal] - mealOrder[b.meal])
               return (
-                <Link to="/plan" className="week-row" key={d}>
+                <Link to="/plan/manual" className="week-row" key={d}>
                   <span className="week-day">{shortDay(d)}</span>
                   <div className="week-meals">
                     {day.slice(0, 3).map((s) => (

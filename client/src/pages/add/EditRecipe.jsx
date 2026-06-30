@@ -3,12 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom'
 import RecipeForm from '../../components/RecipeForm'
 import { IconButton, SizzleLoader, useToast } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
+import { useGoBack } from '../../lib/useGoBack'
 import { getRecipe, updateRecipe, uploadRecipeImage } from '../../lib/api'
 
 // Reuses RecipeForm to edit an existing recipe (title, ingredients, steps, image…).
 export default function EditRecipe() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const goBack = useGoBack(`/recipes/${id}`)
   const toast = useToast()
   const [recipe, setRecipe] = useState(null)
   const [file, setFile] = useState(null)
@@ -48,7 +50,7 @@ export default function EditRecipe() {
   return (
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 14 }}>
-        <IconButton onClick={() => navigate(-1)}><Icon name="arrowLeft" size={20} /></IconButton>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
         <h1 style={{ fontSize: 22 }}>Edit recipe</h1>
       </div>
       <RecipeForm initial={recipe} onSubmit={save} submitting={saving} imagePreview={preview} onPickImage={pickImage}
