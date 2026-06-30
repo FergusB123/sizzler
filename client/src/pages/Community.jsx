@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listCommunity, createRecipe } from '../lib/api'
 import RecipeCard from '../components/RecipeCard'
-import { EmptyState, SizzleLoader, Sheet, Button, Badge, useToast } from '../components/ui/primitives'
+import { EmptyState, SizzleLoader, Sheet, Button, Badge, IconButton, useToast } from '../components/ui/primitives'
 import { formatTime } from '../components/RecipeCard'
+import Icon from '../components/Icon'
+import { useGoBack } from '../lib/useGoBack'
 import './pages.css'
 
 export default function Community() {
   const navigate = useNavigate()
+  const goBack = useGoBack('/recipes')
   const toast = useToast()
   const [recipes, setRecipes] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -33,8 +36,11 @@ export default function Community() {
   }
 
   return (
-    <div className="screen">
-      <div className="topbar" style={{ padding: 0, marginBottom: 4 }}><h1>Discover</h1></div>
+    <div className="screen no-nav">
+      <div className="topbar" style={{ padding: 0, marginBottom: 4 }}>
+        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
+        <h1>Discover</h1>
+      </div>
       <p className="muted" style={{ margin: '0 0 18px', fontSize: 14 }}>Recipes shared by the Sizzler community.</p>
 
       {recipes === null ? (

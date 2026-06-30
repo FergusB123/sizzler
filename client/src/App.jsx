@@ -25,7 +25,7 @@ function FullLoader() {
   return <div className="app-shell" style={{ display: 'grid', placeContent: 'center' }}><SizzleLoader message="Warming up…" /></div>
 }
 
-const NAV_ROUTES = ['/', '/recipes', '/shopping', '/settings', '/community']
+const NAV_ROUTES = ['/', '/recipes', '/shopping', '/settings']
 
 export default function App() {
   const { user, loading: authLoading } = useAuth()
