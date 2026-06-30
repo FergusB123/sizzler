@@ -3,7 +3,7 @@
    Web Push display, and notification click routing. */
 import { precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
-import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
+import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
 self.skipWaiting()
@@ -25,10 +25,12 @@ registerRoute(
   }),
 )
 
-// API GETs — stale-while-revalidate so the library opens offline.
+// API GETs — network-first so online users always get fresh data (new recipes,
+// plan changes), falling back to cache only when offline. (StaleWhileRevalidate
+// here served a stale list on every open, hiding newly-added recipes.)
 registerRoute(
   ({ url, request }) => url.pathname.startsWith('/api/') && request.method === 'GET',
-  new StaleWhileRevalidate({ cacheName: 'sizzler-api' }),
+  new NetworkFirst({ cacheName: 'sizzler-api', networkTimeoutSeconds: 8 }),
 )
 
 // Offline fallback for navigations.
