@@ -15,6 +15,17 @@ const cronRoutes = require('./routes/cron');
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
+
+// On Vercel the serverless runtime pre-parses and consumes the request body,
+// populating req.body itself. If we then run express.json()/urlencoded() they
+// try to re-read the already-consumed stream and throw, surfacing as a 500 on
+// every POST with a body (login, register, imports…). Marking req._body tells
+// body-parser to skip. Locally (plain node) req.body is undefined here, so the
+// parsers run normally — this is a no-op in dev.
+app.use((req, _res, next) => {
+  if (req.body !== undefined && req.body !== null) req._body = true;
+  next();
+});
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
@@ -37,7 +48,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Dat
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Internal server error' });
+  res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
 
 module.exports = app;
