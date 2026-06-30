@@ -39,6 +39,7 @@ const paths = {
   user: <><circle cx="12" cy="8" r="4" {...P} /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" {...P} /></>,
   users: <><circle cx="9" cy="8.5" r="3.4" {...P} /><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 5.5a3.4 3.4 0 0 1 0 6.6M17 19a5.5 5.5 0 0 0-3-4.9" {...P} /></>,
   info: <><circle cx="12" cy="12" r="9" {...P} /><path d="M12 11v5M12 7.6v.1" {...P} /></>,
+  filter: <path d="M4 5.5h16l-6.2 7.4v5.4l-3.6 1.8v-7.2L4 5.5Z" {...P} />,
 }
 
 export default function Icon({ name, size = 24, className = '', style }) {
