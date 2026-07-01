@@ -8,6 +8,7 @@ import { Button, SizzleLoader, EmptyState, Badge, IconButton, useToast } from '.
 import Icon from '../components/Icon'
 import { formatTime } from '../components/RecipeCard'
 import { useGoBack } from '../lib/useGoBack'
+import { useRecipeFilters, FilterButton, ActiveFilterChips, FilterSheet } from '../lib/recipeFilters'
 import './swipe.css'
 
 export default function SwipePlanner() {
@@ -43,6 +44,13 @@ export default function SwipePlanner() {
 
   const target = useMemo(() => targetShortlistSize(slots), [slots])
 
+  // Same recipe filters as the library, applied to the swipe deck so you can
+  // shape the week before you start swiping.
+  const f = useRecipeFilters(pool)
+  const deck = f.filtered
+  // Changing filters gives a fresh deck — restart from the top.
+  useEffect(() => { setIndex(0); setShortlist([]); setHistory([]) }, [f.sel])
+
   async function allocate(finalShortlist) {
     setAllocating(true)
     try {
@@ -64,7 +72,7 @@ export default function SwipePlanner() {
     const nextIndex = index + 1
     setIndex(nextIndex)
     // Stop when we have enough, or we run out of cards.
-    if (nextShortlist.length >= target || nextIndex >= pool.length) {
+    if (nextShortlist.length >= target || nextIndex >= deck.length) {
       if (nextShortlist.length >= 1) allocate(nextShortlist)
     }
   }
@@ -91,8 +99,26 @@ export default function SwipePlanner() {
     )
   }
 
-  const done = index >= pool.length || shortlist.length >= target
-  const visible = pool.slice(index, index + 3).reverse() // back-to-front for stacking
+  // Pool has recipes but the current filters exclude them all.
+  if (deck.length === 0) {
+    return (
+      <div className="screen no-nav">
+        <div className="topbar" style={{ padding: 0, justifyContent: 'space-between' }}>
+          <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
+          <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} />
+        </div>
+        <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
+        <EmptyState icon="search" title="No recipes match" action={<Button variant="soft" onClick={f.clearAll}>Clear filters</Button>}>
+          Loosen your filters to find dishes to swipe through.
+        </EmptyState>
+        <FilterSheet open={f.open} onClose={() => f.setOpen(false)} sel={f.sel} toggle={f.toggle}
+          clearAll={f.clearAll} activeCount={f.activeCount} avail={f.avail} count={deck.length} countLabel="match" />
+      </div>
+    )
+  }
+
+  const done = index >= deck.length || shortlist.length >= target
+  const visible = deck.slice(index, index + 3).reverse() // back-to-front for stacking
 
   return (
     <div className="swipe-screen">
@@ -102,10 +128,13 @@ export default function SwipePlanner() {
           <div className="swipe-bar"><span style={{ width: `${Math.min(100, (shortlist.length / target) * 100)}%` }} /></div>
           <small>{shortlist.length} of ~{target} chosen</small>
         </div>
+        <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} className="swipe-filter" />
         <button className="swipe-undo" onClick={undo} disabled={!history.length || done} aria-label="Undo last swipe">
           <Icon name="arrowLeft" size={16} /> Undo
         </button>
       </div>
+
+      <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
 
       <div className="swipe-stack">
         {done ? (
@@ -129,12 +158,15 @@ export default function SwipePlanner() {
       {!done && (
         <>
           <div className="swipe-actions">
-            <button className="swipe-act skip" onClick={() => decide(pool[index], false)}><Icon name="x" size={26} /></button>
-            <button className="swipe-act like" onClick={() => decide(pool[index], true)}><Icon name="heart" size={26} /></button>
+            <button className="swipe-act skip" onClick={() => decide(deck[index], false)}><Icon name="x" size={26} /></button>
+            <button className="swipe-act like" onClick={() => decide(deck[index], true)}><Icon name="heart" size={26} /></button>
           </div>
           <p className="swipe-cap">Swipe right to shortlist · left to skip</p>
         </>
       )}
+
+      <FilterSheet open={f.open} onClose={() => f.setOpen(false)} sel={f.sel} toggle={f.toggle}
+        clearAll={f.clearAll} activeCount={f.activeCount} avail={f.avail} count={deck.length} countLabel="recipe" />
     </div>
   )
 }

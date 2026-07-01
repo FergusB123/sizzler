@@ -7,6 +7,11 @@
 .swipe-undo { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: var(--charcoal-dim); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 6px; transition: opacity 0.2s; }
 .swipe-undo:disabled { opacity: 0.3; cursor: default; }
 
+/* Filter button + active chips styled for the dark swipe screen */
+.swipe-filter { width: 44px; background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); color: var(--charcoal-text); box-shadow: none; }
+.swipe-filter.on { background: var(--orange-500); border-color: var(--orange-500); color: #fff; }
+.swipe-screen .active-filters { margin: 0 -20px 8px; padding: 0 20px 2px; }
+
 .swipe-stack { flex: 1; position: relative; display: grid; place-items: center; margin: 8px 0; }
 .swipe-card {
   position: absolute; width: 100%; max-width: 360px; aspect-ratio: 3 / 4.2;

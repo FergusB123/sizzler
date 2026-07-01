@@ -1,132 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listRecipes } from '../lib/api'
 import RecipeCard from '../components/RecipeCard'
 import Icon from '../components/Icon'
-import { Button, EmptyState, Chip, Sheet } from '../components/ui/primitives'
+import { Button, EmptyState } from '../components/ui/primitives'
+import { useRecipeFilters, FilterButton, ActiveFilterChips, FilterSheet } from '../lib/recipeFilters'
 import './pages.css'
-
-const cuisineIs = (r, re) => re.test(r.cuisine || '')
-const hay = (r) =>
-  `${r.title} ${r.cuisine || ''} ${r.category || ''} ${(r.tags || []).join(' ')} ${(r.ingredients || []).map((i) => i.name).join(' ')}`.toLowerCase()
-
-// Grouped, multi-select filters. Within a group the options are OR'd; across
-// groups they're AND'd.
-const GROUPS = [
-  {
-    key: 'country', label: 'Country', options: [
-      { v: 'british', label: 'British', emoji: '🥧', test: (r) => cuisineIs(r, /british|welsh|english|scottish/i) },
-      { v: 'italian', label: 'Italian', emoji: '🍝', test: (r) => cuisineIs(r, /italian/i) },
-      { v: 'indian', label: 'Indian', emoji: '🍛', test: (r) => cuisineIs(r, /indian|south asian/i) },
-      { v: 'mexican', label: 'Mexican', emoji: '🌯', test: (r) => cuisineIs(r, /mexican/i) },
-      { v: 'spanish', label: 'Spanish', emoji: '🦐', test: (r) => cuisineIs(r, /spanish/i) },
-      { v: 'chinese', label: 'Chinese', emoji: '🥟', test: (r) => cuisineIs(r, /chinese/i) },
-      { v: 'thai', label: 'Thai', emoji: '🍜', test: (r) => cuisineIs(r, /thai/i) },
-      { v: 'japanese', label: 'Japanese', emoji: '🍣', test: (r) => cuisineIs(r, /japanese/i) },
-      { v: 'korean', label: 'Korean', emoji: '🍲', test: (r) => cuisineIs(r, /korean/i) },
-      { v: 'french', label: 'French', emoji: '🥖', test: (r) => cuisineIs(r, /french/i) },
-      { v: 'american', label: 'American', emoji: '🍔', test: (r) => cuisineIs(r, /american/i) },
-      { v: 'medi', label: 'Mediterranean', emoji: '🫒', test: (r) => cuisineIs(r, /mediterranean|greek|turkish/i) },
-      { v: 'mideast', label: 'Middle Eastern', emoji: '🧆', test: (r) => cuisineIs(r, /middle eastern|moroccan|israeli|lebanese/i) },
-      { v: 'vietnamese', label: 'Vietnamese', emoji: '🇻🇳', test: (r) => cuisineIs(r, /vietnamese|cambodian/i) },
-    ],
-  },
-  {
-    key: 'meal', label: 'Meal type', options: [
-      { v: 'breakfast', label: 'Breakfast', emoji: '🍳', test: (r) => r.meal_types?.includes('breakfast') },
-      { v: 'lunch', label: 'Lunch', emoji: '🥗', test: (r) => r.meal_types?.includes('lunch') },
-      { v: 'dinner', label: 'Dinner', emoji: '🍽️', test: (r) => r.meal_types?.includes('dinner') },
-    ],
-  },
-  {
-    key: 'ingredient', label: 'Lead ingredient', options: [
-      { v: 'chicken', label: 'Chicken', emoji: '🐔', test: (r) => /chicken/.test(hay(r)) },
-      { v: 'beef', label: 'Beef', emoji: '🥩', test: (r) => /\b(beef|steak|mince|cottage pie|bolognese|brisket)\b/.test(hay(r)) },
-      { v: 'pork', label: 'Pork', emoji: '🥓', test: (r) => /\b(pork|bacon|sausage|chorizo|gammon|ham)\b/.test(hay(r)) },
-      { v: 'lamb', label: 'Lamb', emoji: '🐑', test: (r) => /\blamb\b/.test(hay(r)) },
-      { v: 'fish', label: 'Fish & seafood', emoji: '🐟', test: (r) => /\b(fish|salmon|cod|basa|prawn|hake|tuna|seafood|pollock|haddock|mackerel|trout)\b/.test(hay(r)) },
-      { v: 'veggie', label: 'Veggie', emoji: '🥦', test: (r) => /(vegetarian|veggie|meat-?free|plant-?based|vegan|paneer|halloumi|tofu)/.test(hay(r)) },
-      { v: 'pastarice', label: 'Pasta & rice', emoji: '🍝', test: (r) => /(pasta|spaghetti|tagliatelle|risotto|gnocchi|lasagne|linguine|penne|noodle|fried rice|biryani)/.test(hay(r)) },
-    ],
-  },
-  {
-    key: 'time', label: 'Cooking time', options: [
-      { v: 'quick', label: 'Under 20 min', emoji: '⚡', test: (r) => r.cook_minutes > 0 && r.cook_minutes <= 20 },
-      { v: 'mid', label: '20–40 min', emoji: '⏱️', test: (r) => r.cook_minutes > 20 && r.cook_minutes <= 40 },
-      { v: 'long', label: 'Over 40 min', emoji: '🕰️', test: (r) => r.cook_minutes > 40 },
-    ],
-  },
-  {
-    key: 'type', label: 'Recipe type', options: [
-      { v: 'saved', label: 'Saved', emoji: '❤️', test: (r) => r.favorite },
-      { v: 'shared', label: 'Shared', emoji: '🌍', test: (r) => r.is_shared },
-    ],
-  },
-]
-
-const emptySel = () => Object.fromEntries(GROUPS.map((g) => [g.key, new Set()]))
 
 export default function Library() {
   const navigate = useNavigate()
   const [recipes, setRecipes] = useState(null)
   const [q, setQ] = useState('')
-  const [sel, setSel] = useState(emptySel)
-  const [sheet, setSheet] = useState(false)
+  const f = useRecipeFilters(recipes, q)
 
   useEffect(() => { listRecipes().then(setRecipes) }, [])
-
-  const toggle = (gkey, v) => setSel((prev) => {
-    const set = new Set(prev[gkey])
-    set.has(v) ? set.delete(v) : set.add(v)
-    return { ...prev, [gkey]: set }
-  })
-  const clearAll = () => setSel(emptySel())
-  const activeCount = GROUPS.reduce((n, g) => n + sel[g.key].size, 0)
-
-  const filtered = useMemo(() => {
-    if (!recipes) return []
-    return recipes.filter((r) => {
-      for (const g of GROUPS) {
-        const set = sel[g.key]
-        if (set.size && !g.options.some((o) => set.has(o.v) && o.test(r))) return false
-      }
-      if (q) {
-        const h = `${r.title} ${r.cuisine} ${r.category} ${(r.tags || []).join(' ')}`.toLowerCase()
-        if (!h.includes(q.toLowerCase())) return false
-      }
-      return true
-    })
-  }, [recipes, q, sel])
-
-  // Faceted availability: for each group, how many recipes each option would
-  // match given the OTHER groups' current selections (+ search). A group's own
-  // selections don't constrain its own options (within-group is OR). Options
-  // that would yield 0 get disabled — unless already selected (so you can
-  // always deselect).
-  const avail = useMemo(() => {
-    const out = {}
-    if (!recipes) return out
-    const ql = q.trim().toLowerCase()
-    for (const g of GROUPS) {
-      const base = recipes.filter((r) => {
-        for (const other of GROUPS) {
-          if (other.key === g.key) continue
-          const set = sel[other.key]
-          if (set.size && !other.options.some((o) => set.has(o.v) && o.test(r))) return false
-        }
-        if (ql && !`${r.title} ${r.cuisine} ${r.category} ${(r.tags || []).join(' ')}`.toLowerCase().includes(ql)) return false
-        return true
-      })
-      const counts = {}
-      for (const o of g.options) counts[o.v] = base.reduce((n, r) => n + (o.test(r) ? 1 : 0), 0)
-      out[g.key] = counts
-    }
-    return out
-  }, [recipes, q, sel])
-
-  // Flat list of active filters for the removable summary chips.
-  const activeChips = GROUPS.flatMap((g) =>
-    [...sel[g.key]].map((v) => ({ gkey: g.key, ...g.options.find((o) => o.v === v) })))
 
   return (
     <div className="screen">
@@ -143,22 +30,10 @@ export default function Library() {
           <Icon name="search" size={18} className="lib-search-ic" />
           <input className="input" placeholder="Search recipes…" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
-        <button className={`filter-btn ${activeCount ? 'on' : ''}`} onClick={() => setSheet(true)} aria-label="Filters">
-          <Icon name="filter" size={18} />
-          {activeCount > 0 && <span className="filter-badge">{activeCount}</span>}
-        </button>
+        <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} />
       </div>
 
-      {activeChips.length > 0 && (
-        <div className="active-filters">
-          {activeChips.map((c) => (
-            <button key={c.gkey + c.v} className="active-chip" onClick={() => toggle(c.gkey, c.v)}>
-              {c.emoji ? `${c.emoji} ` : ''}{c.label}<Icon name="x" size={13} />
-            </button>
-          ))}
-          <button className="active-clear" onClick={clearAll}>Clear all</button>
-        </div>
-      )}
+      <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
 
       <button className="discover-banner" onClick={() => navigate('/community')}>
         <span className="db-ic"><Icon name="globe" size={18} /></span>
@@ -173,38 +48,18 @@ export default function Library() {
           action={<Button lg onClick={() => navigate('/add')}>Add your first recipe</Button>}>
           Everything you save lives here — add by hand, paste a link, snap a photo, or drop a social video.
         </EmptyState>
-      ) : filtered.length === 0 ? (
-        <EmptyState icon="search" title="No matches" action={<Button variant="soft" onClick={clearAll}>Clear filters</Button>}>
+      ) : f.filtered.length === 0 ? (
+        <EmptyState icon="search" title="No matches" action={<Button variant="soft" onClick={f.clearAll}>Clear filters</Button>}>
           Try fewer filters or a different search.
         </EmptyState>
       ) : (
         <div className="recipe-grid">
-          {filtered.map((r) => <RecipeCard key={r.id} recipe={r} to={`/recipes/${r.id}`} origin="you" />)}
+          {f.filtered.map((r) => <RecipeCard key={r.id} recipe={r} to={`/recipes/${r.id}`} origin="you" />)}
         </div>
       )}
 
-      <Sheet open={sheet} onClose={() => setSheet(false)} title="Filters">
-        {GROUPS.map((g) => (
-          <div key={g.key} className="filter-group">
-            <div className="filter-group-label">{g.label}</div>
-            <div className="chip-row" style={{ flexWrap: 'wrap', gap: 8 }}>
-              {g.options.map((o) => {
-                const selected = sel[g.key].has(o.v)
-                const disabled = !selected && (avail[g.key]?.[o.v] ?? 0) === 0
-                return (
-                  <Chip key={o.v} flame active={selected} disabled={disabled} onClick={() => toggle(g.key, o.v)}>
-                    {o.emoji ? <span style={{ marginRight: 5 }}>{o.emoji}</span> : null}{o.label}
-                  </Chip>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-        <div className="filter-actions">
-          <Button variant="soft" onClick={clearAll} disabled={!activeCount}>Clear all</Button>
-          <Button onClick={() => setSheet(false)}>Show {filtered.length} recipe{filtered.length === 1 ? '' : 's'}</Button>
-        </div>
-      </Sheet>
+      <FilterSheet open={f.open} onClose={() => f.setOpen(false)} sel={f.sel} toggle={f.toggle}
+        clearAll={f.clearAll} activeCount={f.activeCount} avail={f.avail} count={f.filtered.length} />
     </div>
   )
 }
