@@ -24,7 +24,7 @@ export const GROUPS = [
       { v: 'american', label: 'American', emoji: '🍔', test: (r) => cuisineIs(r, /american/i) },
       { v: 'medi', label: 'Mediterranean', emoji: '🫒', test: (r) => cuisineIs(r, /mediterranean|greek|turkish/i) },
       { v: 'mideast', label: 'Middle Eastern', emoji: '🧆', test: (r) => cuisineIs(r, /middle eastern|moroccan|israeli|lebanese/i) },
-      { v: 'vietnamese', label: 'Vietnamese', emoji: '🇻🇳', test: (r) => cuisineIs(r, /vietnamese|cambodian/i) },
+      { v: 'vietnamese', label: 'Vietnamese', emoji: '🥢', test: (r) => cuisineIs(r, /vietnamese|cambodian/i) },
     ],
   },
   {
