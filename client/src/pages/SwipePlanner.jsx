@@ -48,8 +48,9 @@ export default function SwipePlanner() {
   // shape the week before you start swiping.
   const f = useRecipeFilters(pool)
   const deck = f.filtered
-  // Changing filters gives a fresh deck — restart from the top.
-  useEffect(() => { setIndex(0); setShortlist([]); setHistory([]) }, [f.sel])
+  // Changing filters re-shapes the deck — restart from the top of the new deck,
+  // but KEEP what's already been shortlisted (don't lose the user's picks).
+  useEffect(() => { setIndex(0); setHistory([]) }, [f.sel])
 
   async function allocate(finalShortlist) {
     setAllocating(true)
@@ -66,7 +67,7 @@ export default function SwipePlanner() {
   }
 
   function decide(recipe, like) {
-    const nextShortlist = like ? [...shortlist, recipe] : shortlist
+    const nextShortlist = like && !shortlist.some((s) => s.id === recipe.id) ? [...shortlist, recipe] : shortlist
     if (like) setShortlist(nextShortlist)
     setHistory((h) => [...h, { liked: like }])
     const nextIndex = index + 1

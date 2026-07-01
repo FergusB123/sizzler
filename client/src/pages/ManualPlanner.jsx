@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
 import { getActivePlan, createPlan, getPlanSlots, assignSlot, listRecipes } from '../lib/api'
-import { Button, SizzleLoader, Sheet, Chip, IconButton, useToast } from '../components/ui/primitives'
+import { Button, SizzleLoader, Sheet, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import { formatTime } from '../components/RecipeCard'
 import { useGoBack } from '../lib/useGoBack'
+import { useRecipeFilters, FilterButton, ActiveFilterChips, FilterSheet } from '../lib/recipeFilters'
 import './manual-planner.css'
 
 const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' }
@@ -21,11 +22,10 @@ export default function ManualPlanner() {
   const [slots, setSlots] = useState([])
   const [recipes, setRecipes] = useState([])
   const [picker, setPicker] = useState(null)
-
-  // picker filters
   const [q, setQ] = useState('')
-  const [cookFilter, setCookFilter] = useState(null) // 'fast' | 'mid' | null
-  const [dietFilter, setDietFilter] = useState(null)
+
+  // Same grouped filters as the library, applied to the recipes offered in the picker.
+  const f = useRecipeFilters(recipes)
 
   useEffect(() => {
     (async () => {
@@ -39,42 +39,38 @@ export default function ManualPlanner() {
 
   async function pick(recipeId) {
     const slot = picker
-    setPicker(null); setQ(''); setCookFilter(null); setDietFilter(null)
+    setPicker(null); setQ('')
     setSlots((s) => s.map((x) => x.id === slot.id ? { ...x, recipe_id: recipeId, recipe: recipes.find((r) => r.id === recipeId) } : x))
     try { await assignSlot(slot.id, recipeId) } catch (e) { toast.error(e.message) }
   }
 
-  const filtered = useMemo(() => {
-    return recipes.filter((r) => {
+  // Picker list = globally-filtered recipes, narrowed to the slot's meal + search.
+  const pickList = useMemo(() => {
+    return f.filtered.filter((r) => {
       if (picker && !r.meal_types.includes(picker.meal)) return false
       if (q && !`${r.title} ${r.cuisine} ${(r.tags || []).join(' ')}`.toLowerCase().includes(q.toLowerCase())) return false
-      const cook = (r.prep_minutes || 0) + (r.cook_minutes || 0)
-      if (cookFilter === 'fast' && cook > 30) return false
-      if (cookFilter === 'mid' && (cook <= 30 || cook > 60)) return false
-      if (dietFilter && !(r.tags || []).includes(dietFilter)) return false
       return true
     })
-  }, [recipes, picker, q, cookFilter, dietFilter])
+  }, [f.filtered, picker, q])
 
   if (loading) return <div className="screen no-nav"><SizzleLoader message="Loading planner…" /></div>
 
   const byDate = {}
   slots.forEach((s) => (byDate[s.slot_date] ||= []).push(s))
   const dates = Object.keys(byDate).sort()
-  const filled = slots.filter((s) => s.recipe_id).length
-
-  // dietary chips available from the user's own tags
-  const dietTags = [...new Set(recipes.flatMap((r) => r.tags || []))].slice(0, 8)
 
   return (
     <div className="screen no-nav">
-      <div className="topbar" style={{ padding: 0, marginBottom: 6 }}>
+      <div className="topbar" style={{ padding: 0, marginBottom: 10 }}>
         <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
-        <div>
+        <div style={{ flex: 1 }}>
           <h1 style={{ fontSize: 24 }}>Build your plan</h1>
           <div className="mp-sub">Tap a slot to add a recipe</div>
         </div>
+        <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} />
       </div>
+
+      <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
 
       {dates.map((date) => (
         <div key={date} className="mp-day">
@@ -100,23 +96,21 @@ export default function ManualPlanner() {
       <Button block lg className="mp-done" onClick={() => navigate('/shopping')}>Done — build shopping list</Button>
 
       <Sheet open={!!picker} onClose={() => { setPicker(null); setQ('') }} title={picker ? `${MEAL_LABEL[picker.meal]} · ${dayLabel(picker.slot_date)}` : ''}>
-        <input className="input" placeholder="Search your recipes…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 12 }} />
-        <div className="chip-row" style={{ marginBottom: 14 }}>
-          <Chip active={cookFilter === 'fast'} onClick={() => setCookFilter(cookFilter === 'fast' ? null : 'fast')}>Under 30m</Chip>
-          <Chip active={cookFilter === 'mid'} onClick={() => setCookFilter(cookFilter === 'mid' ? null : 'mid')}>30–60m</Chip>
-          {dietTags.map((t) => <Chip key={t} active={dietFilter === t} onClick={() => setDietFilter(dietFilter === t ? null : t)}>#{t}</Chip>)}
-        </div>
+        <input className="input" placeholder="Search your recipes…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 14 }} />
         {picker?.recipe_id && <Button variant="soft" block onClick={() => pick(null)} style={{ marginBottom: 12 }}>Clear this slot</Button>}
         <div className="plan-picker">
-          {filtered.map((r) => (
+          {pickList.map((r) => (
             <button key={r.id} className="plan-picker-item" onClick={() => pick(r.id)}>
               <div className="ppi-img">{r.image_url ? <img src={r.image_url} alt="" /> : <span className="ppi-initial">{(r.title || '?').charAt(0).toUpperCase()}</span>}</div>
               <div className="ppi-body"><b>{r.title}</b><span>{r.cuisine || '—'}{((r.prep_minutes || 0) + (r.cook_minutes || 0)) > 0 ? ` · ${formatTime((r.prep_minutes || 0) + (r.cook_minutes || 0))}` : ''}</span></div>
             </button>
           ))}
-          {filtered.length === 0 && <p className="muted">No recipes match. Add more or adjust filters.</p>}
+          {pickList.length === 0 && <p className="muted">No recipes match. Adjust your filters or search.</p>}
         </div>
       </Sheet>
+
+      <FilterSheet open={f.open} onClose={() => f.setOpen(false)} sel={f.sel} toggle={f.toggle}
+        clearAll={f.clearAll} activeCount={f.activeCount} avail={f.avail} count={f.filtered.length} />
     </div>
   )
 }
