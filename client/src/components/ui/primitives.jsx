@@ -70,7 +70,8 @@ const SIZZLE_MESSAGES = [
   'Tasting for seasoning…',
   'Plating it up…',
 ]
-// Signature brand loader: the mark breathing inside expanding glow rings.
+// Signature brand loader: a kitchen-timer sweep ring around a flickering flame
+// core on charcoal, with a pulsing glow and bouncing dots.
 export function SizzleLoader({ message }) {
   const [i, setI] = useState(0)
   useEffect(() => {
@@ -79,13 +80,22 @@ export function SizzleLoader({ message }) {
     return () => clearInterval(t)
   }, [message])
   return (
-    <div className="sizzle">
-      <div className="sizzle-load">
-        <span className="sizzle-ring" />
-        <span className="sizzle-ring delay" />
-        <img className="sizzle-mark" src="/brand/sizzler-mark.png" alt="" />
+    <div className="sz-loader">
+      <div className="sz-dotfield" />
+      <span className="sz-glow" />
+      <div className="sz-center">
+        <div className="sz-timer">
+          <div className="sz-sweep" />
+          <div className="sz-core">
+            <svg width="46" height="46" viewBox="0 0 24 24" fill="none" className="sz-flame">
+              <path d="M12 21c3.6 0 6.1-2.4 6.1-5.7 0-2.3-1.3-4-2.5-5.2-.4 1.1-1 1.7-1.7 1.8.3-2.2-.8-4.3-3.2-5.7.3 2.3-.5 3.6-1.8 4.8C7.5 12 6 13.5 6 15.8 6 19 8.4 21 12 21Z" fill="#EB4606" />
+              <path d="M12 21c1.9 0 3.2-1.3 3.2-3 0-1.4-1-2.4-2-3.2-.6 1.3-1.5 1.8-2.6 2.2-.9.4-1.6 1.2-1.6 2.3 0 1 .9 1.7 3 1.7Z" fill="#E9A23C" />
+            </svg>
+          </div>
+        </div>
       </div>
-      <div className="sizzle-msg">{message || SIZZLE_MESSAGES[i]}</div>
+      <div className="sz-dots"><i /><i /><i /></div>
+      <span className="sz-cap">{message || SIZZLE_MESSAGES[i]}</span>
     </div>
   )
 }

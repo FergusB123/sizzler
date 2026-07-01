@@ -178,11 +178,49 @@
 .empty p { color: var(--text-dim); max-width: 32ch; margin: 0 auto; line-height: 1.55; }
 
 /* ---- Loaders ---- */
-.sizzle { display: grid; place-items: center; gap: 30px; padding: 50px 30px; }
-.sizzle .sizzle-load { width: 120px; height: 120px; }
-.sizzle .sizzle-ring { width: 120px; height: 120px; }
-.sizzle .sizzle-mark { width: 80px; }
-.sizzle-msg { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+/* Kitchen-timer loading screen (full-bleed charcoal overlay). */
+.sz-loader { position: fixed; inset: 0; z-index: 90; background: #1B1916; overflow: hidden; }
+/* Sizzle-dots pattern, masked to a ring around the middle */
+.sz-dotfield {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(rgba(235, 70, 6, .5) 1.3px, transparent 1.5px),
+    radial-gradient(rgba(233, 162, 60, .36) 1.1px, transparent 1.3px);
+  background-size: 22px 22px, 22px 22px;
+  background-position: 0 0, 11px 11px;
+  opacity: .26;
+  -webkit-mask-image: radial-gradient(circle at 50% 44%, transparent 28%, #000 90%);
+          mask-image: radial-gradient(circle at 50% 44%, transparent 28%, #000 90%);
+}
+.sz-glow {
+  position: absolute; top: 44%; left: 50%;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(235, 70, 6, .3), transparent 62%);
+  transform: translate(-50%, -50%);
+  animation: sz-glow 4s ease-in-out infinite; pointer-events: none;
+}
+.sz-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.sz-timer { position: relative; width: 128px; height: 128px; display: flex; align-items: center; justify-content: center; }
+.sz-sweep {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(#EB4606 0deg, #EB4606 90deg, rgba(243, 234, 218, .08) 90deg, rgba(243, 234, 218, .08) 360deg);
+  animation: sz-sweep 1.4s linear infinite;
+  -webkit-mask: radial-gradient(circle, transparent 52px, #000 53px);
+          mask: radial-gradient(circle, transparent 52px, #000 53px);
+}
+.sz-core { width: 96px; height: 96px; border-radius: 50%; background: #231F1B; display: flex; align-items: center; justify-content: center; }
+.sz-flame { transform-origin: center bottom; animation: sz-flick 1.4s ease-in-out infinite; }
+.sz-dots { position: absolute; left: 50%; transform: translateX(-50%); bottom: 64px; display: flex; gap: 6px; align-items: flex-end; height: 10px; }
+.sz-dots i { width: 7px; height: 7px; border-radius: 50%; background: #EB4606; animation: sz-dot 1.3s ease-in-out infinite; }
+.sz-dots i:nth-child(2) { animation-delay: .18s; }
+.sz-dots i:nth-child(3) { animation-delay: .36s; }
+.sz-cap { position: absolute; left: 0; right: 0; bottom: 34px; text-align: center; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #8C857A; padding: 0 24px; }
+
+@keyframes sz-sweep { to { transform: rotate(360deg); } }
+@keyframes sz-flick { 0%, 100% { transform: scaleY(1) scaleX(1); opacity: 1; } 45% { transform: scaleY(1.18) scaleX(.9); opacity: .85; } 70% { transform: scaleY(.92) scaleX(1.07); opacity: 1; } }
+@keyframes sz-glow { 0%, 100% { opacity: .4; transform: translate(-50%, -50%) scale(1); } 50% { opacity: .8; transform: translate(-50%, -50%) scale(1.1); } }
+@keyframes sz-dot { 0%, 80%, 100% { transform: translateY(0); opacity: .35; } 40% { transform: translateY(-7px); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sz-sweep, .sz-flame, .sz-glow, .sz-dots i { animation: none; } .sz-flame { opacity: 1; } }
 /* two-tone inline spinner */
 .spinner { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgba(255, 255, 255, 0.45); border-top-color: #fff; animation: scSpin 0.85s linear infinite; }
 .spinner-dark { border-color: #f3dece; border-top-color: var(--orange-500); }
