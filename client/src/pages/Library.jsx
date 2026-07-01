@@ -50,10 +50,10 @@ const GROUPS = [
     ],
   },
   {
-    key: 'difficulty', label: 'Difficulty', options: [
-      { v: 'easy', label: 'Easy', test: (r) => r.difficulty === 'easy' },
-      { v: 'medium', label: 'Medium', test: (r) => r.difficulty === 'medium' },
-      { v: 'hard', label: 'Hard', test: (r) => r.difficulty === 'hard' },
+    key: 'time', label: 'Cooking time', options: [
+      { v: 'quick', label: 'Under 20 min', emoji: '⚡', test: (r) => r.cook_minutes > 0 && r.cook_minutes <= 20 },
+      { v: 'mid', label: '20–40 min', emoji: '⏱️', test: (r) => r.cook_minutes > 20 && r.cook_minutes <= 40 },
+      { v: 'long', label: 'Over 40 min', emoji: '🕰️', test: (r) => r.cook_minutes > 40 },
     ],
   },
   {

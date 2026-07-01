@@ -21,7 +21,7 @@ function Fallback({ recipe }) {
 
 export default function RecipeCard({ recipe, to, origin }) {
   const total = (recipe.prep_minutes || 0) + (recipe.cook_minutes || 0)
-  const meta = [recipe.cuisine, recipe.difficulty].filter(Boolean)
+  const meta = [recipe.cuisine].filter(Boolean)
   const inner = (
     <div className="recipe-card">
       <div className="rc-media">
