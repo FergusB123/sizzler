@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Icon from '../Icon'
 import './ui.css'
@@ -79,7 +80,10 @@ export function SizzleLoader({ message }) {
     const t = setInterval(() => setI((n) => (n + 1) % SIZZLE_MESSAGES.length), 1500)
     return () => clearInterval(t)
   }, [message])
-  return (
+  // Rendered via a portal to <body> so its fixed positioning is always
+  // viewport-relative — not captured by an animated (transformed) route wrapper,
+  // which otherwise makes it jump/resize during transitions.
+  return createPortal(
     <div className="sz-loader">
       <div className="sz-dotfield" />
       <span className="sz-glow" />
@@ -96,7 +100,8 @@ export function SizzleLoader({ message }) {
       </div>
       <div className="sz-dots"><i /><i /><i /></div>
       <span className="sz-cap">{message || SIZZLE_MESSAGES[i]}</span>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
