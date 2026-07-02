@@ -24,7 +24,7 @@ router.post('/', auth, async (req, res) => {
   const { startDate, days, meals } = req.body;
   const start = new Date(startDate || Date.now());
   const d = Math.min(30, Math.max(1, parseInt(days, 10) || 7));
-  const mealList = meals?.length ? meals : ['breakfast', 'lunch', 'dinner'];
+  const mealList = meals?.length ? meals : ['dinner'];
   const end = new Date(start); end.setDate(end.getDate() + d - 1);
   const client = await pool.connect();
   try {

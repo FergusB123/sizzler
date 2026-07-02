@@ -32,7 +32,7 @@ export default function SwipePlanner() {
       // Don't silently overwrite a finished plan — start a fresh week instead.
       const fullyFilled = p && s.length > 0 && s.every((x) => x.recipe_id)
       if (!p || fullyFilled) {
-        p = await createPlan({ startDate: new Date(), days: profile?.planning_horizon_days || 7, meals: profile?.planned_meals || ['breakfast', 'lunch', 'dinner'] })
+        p = await createPlan({ startDate: new Date(), days: profile?.planning_horizon_days || 7, meals: profile?.planned_meals || ['dinner'] })
         s = await getPlanSlots(p.id)
       }
       setPlan(p)
@@ -206,8 +206,6 @@ function SwipeCard({ recipe, isTop, depth, onDecide }) {
           <div className="sc-meta">
             {recipe.cuisine && <span>{recipe.cuisine}</span>}
             {total > 0 && <span>{formatTime(total)}</span>}
-            {recipe.difficulty && <span className="cap">{recipe.difficulty}</span>}
-            {recipe.meal_types?.map((m) => <span key={m} className="sc-meal">{m}</span>)}
           </div>
         </div>
       </div>

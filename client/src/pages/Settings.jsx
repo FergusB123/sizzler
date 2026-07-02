@@ -4,7 +4,7 @@ import { useProfile } from '../context/ProfileContext'
 import { useAuth } from '../context/AuthContext'
 import { Button, Chip, Sheet, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
-import { MEAL_OPTIONS, DIETARY_OPTIONS, dietLabel } from '../lib/constants'
+import { DIETARY_OPTIONS, dietLabel } from '../lib/constants'
 import { enablePush, disablePush, permissionState } from '../lib/push'
 import './pages.css'
 
@@ -45,9 +45,6 @@ export default function Settings() {
         <button className="settings-row" onClick={() => setEditing('household')} style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', textAlign: 'left', cursor: 'pointer' }}>
           <span className="lbl">Household</span><span className="spacer" /><span className="val">{householdLabel}</span><Icon name="chevron" size={16} className="row-chevron" />
         </button>
-        <button className="settings-row" onClick={() => setEditing('meals')} style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', textAlign: 'left', cursor: 'pointer' }}>
-          <span className="lbl">Meals planned</span><span className="spacer" /><span className="val">{(p.planned_meals || []).length} selected</span><Icon name="chevron" size={16} className="row-chevron" />
-        </button>
         <button className="settings-row" onClick={() => setEditing('horizon')} style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', textAlign: 'left', cursor: 'pointer' }}>
           <span className="lbl">Planning horizon</span><span className="spacer" /><span className="val">{p.planning_horizon_days} days</span><Icon name="chevron" size={16} className="row-chevron" />
         </button>
@@ -82,9 +79,6 @@ export default function Settings() {
       <Sheet open={editing === 'household'} onClose={() => setEditing(null)} title="Household">
         <EditHousehold p={p} onSave={save} />
       </Sheet>
-      <Sheet open={editing === 'meals'} onClose={() => setEditing(null)} title="Meals you plan for">
-        <EditMeals p={p} onSave={save} />
-      </Sheet>
       <Sheet open={editing === 'horizon'} onClose={() => setEditing(null)} title="Planning horizon">
         <EditHorizon p={p} onSave={save} />
       </Sheet>
@@ -115,19 +109,6 @@ function EditHousehold({ p, onSave }) {
         </div>
       )}
       <Button block onClick={() => onSave({ household_kind: kind, household_size: kind === 'solo' ? 1 : kind === 'couple' ? 2 : size })}>Save</Button>
-    </div>
-  )
-}
-
-function EditMeals({ p, onSave }) {
-  const [meals, setMeals] = useState(p.planned_meals || [])
-  const toggle = (v) => setMeals((m) => m.includes(v) ? m.filter((x) => x !== v) : [...m, v])
-  return (
-    <div style={{ paddingTop: 8 }}>
-      <div className="chip-row" style={{ marginBottom: 16 }}>
-        {MEAL_OPTIONS.map((m) => <Chip key={m.value} flame active={meals.includes(m.value)} onClick={() => toggle(m.value)}>{m.icon} {m.label}</Chip>)}
-      </div>
-      <Button block disabled={!meals.length} onClick={() => onSave({ planned_meals: meals })}>Save</Button>
     </div>
   )
 }

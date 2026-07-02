@@ -12,11 +12,7 @@ const HOUSEHOLDS = [
   { k: 'couple', icon: 'users', title: 'A couple', desc: 'Two of us, 2 portions' },
   { k: 'family', icon: 'users', title: 'A family', desc: 'Bigger batches' },
 ]
-const MEALS = [
-  { k: 'breakfast', emoji: '🍳', title: 'Breakfast', desc: 'Start the day right' },
-  { k: 'lunch', emoji: '🥗', title: 'Lunch', desc: 'Midday fuel' },
-  { k: 'dinner', emoji: '🍽️', title: 'Dinner', desc: 'The main event' },
-]
+const STEPS = 3
 
 export default function Onboarding() {
   const { refresh, profile } = useProfile()
@@ -26,13 +22,11 @@ export default function Onboarding() {
 
   const [household, setHousehold] = useState('couple')
   const [size, setSize] = useState(3)
-  const [meals, setMeals] = useState(['breakfast', 'lunch', 'dinner'])
   const [horizon, setHorizon] = useState(7)
   const [custom, setCustom] = useState(false)
   const [diet, setDiet] = useState([])
   const [customDiet, setCustomDiet] = useState('')
 
-  const toggleMeal = (v) => setMeals((m) => m.includes(v) ? m.filter((x) => x !== v) : [...m, v])
   const toggleDiet = (v) => setDiet((d) => d.includes(v) ? d.filter((x) => x !== v) : [...d, v])
 
   async function finish() {
@@ -43,7 +37,7 @@ export default function Onboarding() {
       await completeOnboarding({
         household_kind: household,
         household_size: household === 'solo' ? 1 : household === 'couple' ? 2 : Math.max(3, Number(size) || 3),
-        planned_meals: meals.length ? meals : ['dinner'],
+        planned_meals: ['dinner'],
         planning_horizon_days: horizon,
         dietary_prefs: dietary,
         display_name: profile?.display_name,
@@ -55,14 +49,14 @@ export default function Onboarding() {
     }
   }
 
-  const canNext = (step === 0 && !!household) || (step === 1 && meals.length > 0) || step >= 2
+  const canNext = (step === 0 && !!household) || step >= 1
 
   return (
     <div className="onb">
       <div className="onb-top">
         {step > 0 && <button className="onb-back" onClick={() => setStep((s) => s - 1)} aria-label="Back"><Icon name="arrowLeft" size={18} /></button>}
-        <div className="onb-bar"><span style={{ width: `${((step + 1) / 4) * 100}%` }} /></div>
-        <span className="onb-count">{step + 1} of 4</span>
+        <div className="onb-bar"><span style={{ width: `${((step + 1) / STEPS) * 100}%` }} /></div>
+        <span className="onb-count">{step + 1} of {STEPS}</span>
       </div>
 
       <AnimatePresence mode="wait">
@@ -97,28 +91,12 @@ export default function Onboarding() {
 
           {step === 1 && (
             <>
-              <h1>Which meals should we plan?</h1>
-              <p className="onb-sub">Pick any — you can change this any time.</p>
-              <div className="onb-rows">
-                {MEALS.map((m) => (
-                  <button key={m.k} className={`onb-row check ${meals.includes(m.k) ? 'sel' : ''}`} onClick={() => toggleMeal(m.k)}>
-                    <span className="onb-row-ic emoji">{m.emoji}</span>
-                    <div><b>{m.title}</b><span>{m.desc}</span></div>
-                    <span className="onb-check">{meals.includes(m.k) ? <Icon name="check" size={15} /> : null}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <h1>How far ahead do you plan?</h1>
-              <p className="onb-sub">We'll build your plan and shopping list for this window.</p>
+              <h1>How many dinners ahead?</h1>
+              <p className="onb-sub">We'll plan this many nights and build your shopping list.</p>
               <div className="onb-grid">
                 {[3, 5, 7].map((d) => (
                   <button key={d} className={`onb-card ${!custom && horizon === d ? 'sel' : ''}`} onClick={() => { setCustom(false); setHorizon(d) }}>
-                    <span className="big">{d}</span>{d === 7 ? 'a full week' : 'days'}
+                    <span className="big">{d}</span>{d === 7 ? 'a full week' : 'nights'}
                   </button>
                 ))}
                 <button className={`onb-card ${custom ? 'sel' : ''}`} onClick={() => setCustom(true)}>
@@ -127,7 +105,7 @@ export default function Onboarding() {
               </div>
               {custom && (
                 <div className="onb-stepper">
-                  <span>Days per plan</span>
+                  <span>Nights per plan</span>
                   <div className="stepper">
                     <button onClick={() => setHorizon((h) => Math.max(1, h - 1))}><Icon name="minus" size={16} /></button>
                     <b>{horizon}</b>
@@ -138,7 +116,7 @@ export default function Onboarding() {
             </>
           )}
 
-          {step === 3 && (
+          {step === 2 && (
             <>
               <h1>Any dietary preferences?</h1>
               <p className="onb-sub">We'll keep these in mind for every recipe we suggest.</p>
@@ -155,7 +133,7 @@ export default function Onboarding() {
       </AnimatePresence>
 
       <div className="onb-actions">
-        {step < 3 ? (
+        {step < STEPS - 1 ? (
           <Button block lg disabled={!canNext} onClick={() => setStep((s) => s + 1)}>Continue</Button>
         ) : (
           <Button block lg loading={busy} onClick={finish}>Start cooking</Button>

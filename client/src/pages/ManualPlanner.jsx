@@ -9,8 +9,6 @@ import { useGoBack } from '../lib/useGoBack'
 import { useRecipeFilters, FilterButton, ActiveFilterChips, FilterSheet } from '../lib/recipeFilters'
 import './manual-planner.css'
 
-const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' }
-const mealOrder = { breakfast: 0, lunch: 1, dinner: 2 }
 const dayLabel = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })
 
 export default function ManualPlanner() {
@@ -30,7 +28,7 @@ export default function ManualPlanner() {
   useEffect(() => {
     (async () => {
       let p = await getActivePlan()
-      if (!p) p = await createPlan({ startDate: new Date(), days: profile?.planning_horizon_days || 7, meals: profile?.planned_meals || ['breakfast', 'lunch', 'dinner'] })
+      if (!p) p = await createPlan({ startDate: new Date(), days: profile?.planning_horizon_days || 7, meals: profile?.planned_meals || ['dinner'] })
       setSlots(await getPlanSlots(p.id))
       setRecipes(await listRecipes())
       setLoading(false)
@@ -75,9 +73,8 @@ export default function ManualPlanner() {
       {dates.map((date) => (
         <div key={date} className="mp-day">
           <h3 className="mp-day-h">{dayLabel(date)}</h3>
-          {byDate[date].sort((a, b) => mealOrder[a.meal] - mealOrder[b.meal]).map((slot) => (
+          {byDate[date].map((slot) => (
             <div key={slot.id} className="mp-meal-block">
-              <div className="mp-meal-label">{MEAL_LABEL[slot.meal]}</div>
               <button className={`mp-slot ${slot.recipe_id ? 'filled' : 'empty'}`} onClick={() => setPicker(slot)}>
                 {slot.recipe ? (
                   <span className="mp-recipe">
@@ -95,7 +92,7 @@ export default function ManualPlanner() {
 
       <Button block lg className="mp-done" onClick={() => navigate('/shopping')}>Done — build shopping list</Button>
 
-      <Sheet open={!!picker} onClose={() => { setPicker(null); setQ('') }} title={picker ? `${MEAL_LABEL[picker.meal]} · ${dayLabel(picker.slot_date)}` : ''}>
+      <Sheet open={!!picker} onClose={() => { setPicker(null); setQ('') }} title={picker ? dayLabel(picker.slot_date) : ''}>
         <input className="input" placeholder="Search your recipes…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 14 }} />
         {picker?.recipe_id && <Button variant="soft" block onClick={() => pick(null)} style={{ marginBottom: 12 }}>Clear this slot</Button>}
         <div className="plan-picker">

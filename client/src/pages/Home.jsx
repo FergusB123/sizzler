@@ -12,8 +12,6 @@ function greeting() {
   if (h < 18) return 'Good afternoon'
   return 'Good evening'
 }
-const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' }
-const mealOrder = { breakfast: 0, lunch: 1, dinner: 2 }
 const weekday = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long' })
 const shortDay = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short' })
 
@@ -54,7 +52,7 @@ export default function Home() {
   const today = iso(new Date())
   const dates = [...new Set(filled.map((s) => s.slot_date))].sort()
   const heroDate = dates.find((d) => d >= today) || dates[dates.length - 1]
-  const heroSlots = filled.filter((s) => s.slot_date === heroDate).sort((a, b) => mealOrder[a.meal] - mealOrder[b.meal])
+  const heroSlots = filled.filter((s) => s.slot_date === heroDate)
   const heroLabel = heroDate === today ? `Tonight · ${weekday(heroDate)}` : weekday(heroDate)
 
   const Header = (
@@ -80,7 +78,6 @@ export default function Home() {
                 <div className="cook-meal" key={s.id}>
                   <Thumb recipe={s.recipe} size={46} />
                   <div className="cook-meal-txt">
-                    <span className="cook-meal-label">{MEAL_LABEL[s.meal]}</span>
                     <b>{s.recipe?.title}</b>
                   </div>
                   {(s.recipe?.prep_minutes || s.recipe?.cook_minutes) && (
@@ -105,7 +102,7 @@ export default function Home() {
           <div className="section-title">The week ahead</div>
           <div className="week-list">
             {dates.map((d) => {
-              const day = filled.filter((s) => s.slot_date === d).sort((a, b) => mealOrder[a.meal] - mealOrder[b.meal])
+              const day = filled.filter((s) => s.slot_date === d)
               return (
                 <Link to="/plan/manual" className="week-row" key={d}>
                   <span className="week-day">{shortDay(d)}</span>

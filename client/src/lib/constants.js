@@ -1,6 +1,5 @@
+// Dinner-only app — meals are not user-selectable.
 export const MEAL_OPTIONS = [
-  { value: 'breakfast', label: 'Breakfast', icon: '🌅' },
-  { value: 'lunch', label: 'Lunch', icon: '🥪' },
   { value: 'dinner', label: 'Dinner', icon: '🍽️' },
 ]
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button, Chip, Field, Badge } from './ui/primitives'
 import Icon from './Icon'
-import { MEAL_OPTIONS, DIFFICULTY_OPTIONS, INFERRED_LABELS } from '../lib/constants'
+import { DIFFICULTY_OPTIONS, INFERRED_LABELS } from '../lib/constants'
 import './recipe-form.css'
 
 const blank = {
@@ -31,7 +31,6 @@ export default function RecipeForm({ initial, onSubmit, submitting, imagePreview
   const addStep = () => set({ steps: [...r.steps, ''] })
   const delStep = (i) => set({ steps: r.steps.filter((_, j) => j !== i) })
 
-  const toggleMeal = (v) => set({ meal_types: r.meal_types.includes(v) ? r.meal_types.filter((x) => x !== v) : [...r.meal_types, v] })
   const addTag = () => { const t = tagInput.trim().toLowerCase(); if (t && !r.tags.includes(t)) set({ tags: [...r.tags, t] }); setTagInput('') }
 
   const AiTag = ({ field }) => inferred.has(field)
@@ -75,14 +74,6 @@ export default function RecipeForm({ initial, onSubmit, submitting, imagePreview
       </div>
 
       <Field label="Description"><textarea className="textarea" value={r.description || ''} onChange={(e) => set({ description: e.target.value })} placeholder="One appetising line…" style={{ minHeight: 64 }} /></Field>
-
-      {/* Meal types */}
-      <div className="field">
-        <span className="rf-label">Meal type <AiTag field="meal_types" /></span>
-        <div className="chip-row">
-          {MEAL_OPTIONS.map((m) => <Chip key={m.value} flame active={r.meal_types.includes(m.value)} onClick={() => { toggleMeal(m.value); clearInferred('meal_types') }}>{m.label}</Chip>)}
-        </div>
-      </div>
 
       {/* Times / difficulty / servings */}
       <div className="rf-3col">

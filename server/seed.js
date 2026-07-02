@@ -73,7 +73,7 @@ async function run() {
   const { rows } = await pool.query(
     `INSERT INTO users (email, name, password_hash, household_kind, household_size, planned_meals, planning_horizon_days, dietary_prefs, onboarded_at)
      VALUES ($1,'Demo Cook',$2,'couple',2,$3,7,$4,NOW()) RETURNING id`,
-    [email, hash, J(['breakfast', 'lunch', 'dinner']), J([])]
+    [email, hash, J(['dinner']), J([])]
   );
   const userId = rows[0].id;
 

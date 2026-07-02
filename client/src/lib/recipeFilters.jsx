@@ -28,13 +28,6 @@ export const GROUPS = [
     ],
   },
   {
-    key: 'meal', label: 'Meal type', options: [
-      { v: 'breakfast', label: 'Breakfast', emoji: '🍳', test: (r) => r.meal_types?.includes('breakfast') },
-      { v: 'lunch', label: 'Lunch', emoji: '🥗', test: (r) => r.meal_types?.includes('lunch') },
-      { v: 'dinner', label: 'Dinner', emoji: '🍽️', test: (r) => r.meal_types?.includes('dinner') },
-    ],
-  },
-  {
     key: 'ingredient', label: 'Lead ingredient', options: [
       { v: 'chicken', label: 'Chicken', emoji: '🐔', test: (r) => /chicken/.test(hay(r)) },
       { v: 'beef', label: 'Beef', emoji: '🥩', test: (r) => /\b(beef|steak|mince|cottage pie|bolognese|brisket)\b/.test(hay(r)) },

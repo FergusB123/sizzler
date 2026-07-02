@@ -11,7 +11,6 @@ export default function PlanChoose() {
   const goBack = useGoBack('/')
   const { profile } = useProfile()
   const days = profile?.planning_horizon_days || 7
-  const meals = (profile?.planned_meals || ['breakfast', 'lunch', 'dinner']).length
 
   return (
     <div className="screen no-nav">
@@ -20,7 +19,7 @@ export default function PlanChoose() {
       </div>
       <h1 className="choose-h">How do you want to plan?</h1>
       <p className="muted" style={{ margin: '8px 0 24px', lineHeight: 1.5 }}>
-        We'll fill {days} day{days === 1 ? '' : 's'} · {meals} meal{meals === 1 ? '' : 's'}/day and build your shopping list.
+        We'll plan {days} dinner{days === 1 ? '' : 's'} and build your shopping list.
       </p>
 
       <button className="choose-card swipe" onClick={() => navigate('/plan/swipe')}>

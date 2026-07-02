@@ -9,7 +9,7 @@ import { useGoBack } from '../lib/useGoBack'
 import { INFERRED_LABELS } from '../lib/constants'
 import './recipe-detail.css'
 
-const MEAL_LABEL = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner' }
+const MEAL_LABEL = { dinner: 'Dinner' }
 
 export default function RecipeDetail() {
   const { id } = useParams()
@@ -110,7 +110,6 @@ export default function RecipeDetail() {
         </div>
 
         <div className="chip-row" style={{ marginBottom: 18 }}>
-          {recipe.meal_types?.map((m) => <Badge key={m}>{MEAL_LABEL[m]}</Badge>)}
           {recipe.tags?.map((t) => <Badge key={t}>#{t}</Badge>)}
         </div>
 

@@ -195,7 +195,7 @@ async function run() {
       if (!ingredients.length || !steps.length) return;
       const total = e.prep_times?.for_4 ?? e.prep_times?.for_2 ?? null;
       const category = e.categories?.[0]?.title || null;
-      const meal_types = mealTypesFor(e.title, category, total, []);
+      const meal_types = ['dinner']; // dinner-only app
       const recipe = {
         title: e.title.trim(), cuisine, category,
         description: stripHtml(e.description).split('\n')[0] || null,
