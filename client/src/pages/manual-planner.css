@@ -14,3 +14,16 @@
 .mp-recipe-fb { width: 38px; height: 38px; border-radius: 9px; display: grid; place-content: center; background: var(--oat); font-family: var(--font-display); font-weight: 600; color: var(--text-faint); }
 .mp-recipe b { font-size: 15px; letter-spacing: -0.01em; }
 .mp-done { margin-top: 8px; }
+
+/* Toolbar: rearrange hint + reshuffle */
+.mp-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.mp-reshuffle { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; background: var(--cast-iron); color: #fff; border: none; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 0.12s var(--ease-out); }
+.mp-reshuffle:active { transform: scale(0.95); }
+
+/* Draggable night cards */
+.mp-nights { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.mp-night { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--shadow-sm); padding: 14px 16px; }
+.mp-night-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.mp-night-day { font-family: var(--font-display); font-size: 16px; letter-spacing: -0.02em; }
+.mp-drag { display: grid; place-content: center; width: 32px; height: 32px; margin: -6px -6px -6px 0; color: var(--text-faint); cursor: grab; touch-action: none; }
+.mp-drag:active { cursor: grabbing; }

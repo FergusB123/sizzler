@@ -40,6 +40,8 @@ const paths = {
   users: <><circle cx="9" cy="8.5" r="3.4" {...P} /><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 5.5a3.4 3.4 0 0 1 0 6.6M17 19a5.5 5.5 0 0 0-3-4.9" {...P} /></>,
   info: <><circle cx="12" cy="12" r="9" {...P} /><path d="M12 11v5M12 7.6v.1" {...P} /></>,
   filter: <path d="M4 5.5h16l-6.2 7.4v5.4l-3.6 1.8v-7.2L4 5.5Z" {...P} />,
+  shuffle: <><path d="M2 18h2.2c1.3 0 2.5-.6 3.3-1.7l5.8-8.2c.8-1.1 2-1.7 3.3-1.7H22" {...P} /><path d="m18 3.5 4 3.5-4 3.5" {...P} /><path d="M2 6h2.2c1.3 0 2.5.6 3.3 1.7l.6.8" {...P} /><path d="M22 18h-2.9c-1.3 0-2.5-.6-3.3-1.7l-.6-.8" {...P} /><path d="m18 20.5 4-3.5-4-3.5" {...P} /></>,
+  grip: <g fill="currentColor" stroke="none"><circle cx="9" cy="6.5" r="1.4" /><circle cx="9" cy="12" r="1.4" /><circle cx="9" cy="17.5" r="1.4" /><circle cx="15" cy="6.5" r="1.4" /><circle cx="15" cy="12" r="1.4" /><circle cx="15" cy="17.5" r="1.4" /></g>,
 }
 
 export default function Icon({ name, size = 24, className = '', style }) {
