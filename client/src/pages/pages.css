@@ -145,5 +145,5 @@
 .week-row { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 14px; box-shadow: var(--shadow-sm); }
 .week-day { font-family: var(--font-display); font-weight: 600; color: var(--orange-500); width: 38px; flex-shrink: 0; font-size: 14px; }
 .week-meals { display: flex; gap: 14px; overflow: hidden; flex: 1; }
-.week-meal { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.week-meal > span:last-child { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.week-meal { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1; }
+.week-meal > span:last-child { font-size: 13.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: none; flex: 1; }

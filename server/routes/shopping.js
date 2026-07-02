@@ -26,9 +26,9 @@ router.post('/:planId/generate', auth, async (req, res) => {
     let pos = 0;
     for (const it of items) {
       const { rows } = await client.query(
-        `INSERT INTO shopping_list_items (plan_id, user_id, name, quantity, category, from_recipes, position)
-         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-        [req.params.planId, req.user.id, it.name, it.quantity || null, it.category || 'other', J(it.from_recipes), pos++]);
+        `INSERT INTO shopping_list_items (plan_id, user_id, name, quantity, unit, category, from_recipes, position)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+        [req.params.planId, req.user.id, it.name, it.quantity || null, it.unit || null, it.category || 'other', J(it.from_recipes), pos++]);
       inserted.push(rows[0]);
     }
     await client.query('COMMIT');

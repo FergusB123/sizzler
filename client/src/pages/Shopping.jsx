@@ -62,6 +62,18 @@ export default function Shopping() {
     } catch (e) { toast.error(e.message) }
   }
 
+  function finishShopping() {
+    toast.success("Nice — you're all stocked up!")
+    navigate('/')
+  }
+
+  async function resetChecks() {
+    const field = mode === 'home' ? 'have_at_home' : 'in_cart'
+    const toReset = items.filter((i) => i[field])
+    setItems((arr) => arr.map((x) => ({ ...x, [field]: false })))
+    try { await Promise.all(toReset.map((i) => updateShoppingItem(i.id, { [field]: false }))) } catch { /* ignore */ }
+  }
+
   if (loading) return <div className="screen"><SizzleLoader message="Sorting your aisles…" /></div>
 
   if (plan === null) {
@@ -92,6 +104,7 @@ export default function Shopping() {
   const grouped = CATEGORIES.map((c) => ({ ...c, list: visible.filter((i) => i.category === c.key) })).filter((g) => g.list.length)
   const doneField = mode === 'home' ? 'have_at_home' : 'in_cart'
   const doneCount = visible.filter((i) => i[doneField]).length
+  const allDone = mode === 'instore' && visible.length > 0 && doneCount === visible.length
 
   return (
     <div className="screen">
@@ -118,17 +131,29 @@ export default function Shopping() {
         <div className="shop-progress-track"><span style={{ width: `${visible.length ? (doneCount / visible.length) * 100 : 0}%` }} /></div>
       </div>
 
+      {allDone && (
+        <div className="shop-done">
+          <div className="shop-done-ic"><Icon name="check" size={28} /></div>
+          <b>That's everything!</b>
+          <p>Your trolley's full for the week's dinners.</p>
+          <Button lg onClick={finishShopping}>Finish shopping</Button>
+          <button className="shop-reset" onClick={resetChecks}>Uncheck all</button>
+        </div>
+      )}
+
       {grouped.map((g) => (
         <div key={g.key} className="shop-group">
           <h3 className="shop-cat">{g.label}<small>{g.list.length}</small></h3>
           {g.list.map((item) => {
             const checked = item[doneField]
-            const mult = (item.from_recipes?.length || 0) > 1
             return (
               <button key={item.id} className={`shop-item ${checked ? 'checked' : ''}`} onClick={() => toggle(item)}>
                 <span className={`shop-check ${checked ? 'on' : ''}`}>{checked ? <Icon name="check" size={14} /> : null}</span>
                 <span className="shop-name">{item.name}</span>
-                {mult ? <span className="shop-mult">×{item.from_recipes.length}</span> : item.quantity ? <span className="shop-qty">{item.quantity}</span> : null}
+                <span className="shop-amount">
+                  {item.quantity ? <span className="shop-qty">{item.quantity}</span> : null}
+                  {item.unit ? <span className="shop-unit">{item.unit}</span> : null}
+                </span>
               </button>
             )
           })}

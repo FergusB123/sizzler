@@ -92,6 +92,7 @@ async function initDatabase() {
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
       quantity TEXT,
+      unit TEXT,
       category TEXT DEFAULT 'other',
       from_recipes JSONB DEFAULT '[]',
       have_at_home BOOLEAN DEFAULT FALSE,
@@ -101,6 +102,7 @@ async function initDatabase() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS shopping_items_plan_idx ON shopping_list_items(plan_id);
+    ALTER TABLE shopping_list_items ADD COLUMN IF NOT EXISTS unit TEXT;
 
     CREATE TABLE IF NOT EXISTS notifications (
       id SERIAL PRIMARY KEY,

@@ -43,21 +43,68 @@ function keyFor(name) {
     .replace(/s$/, '')
 }
 
-// Try to add two quantities of the same unit; otherwise list them.
-function combineQuantities(parts) {
+// Combine quantities into a { quantity, unit } pair for consistent columns.
+// Sums same-unit amounts; falls back to a combined amount string (in quantity,
+// with no separate unit) only when units genuinely differ.
+// Parse "1/2", "1 1/2", "0.5", "2" into a number.
+function toNum(q) {
+  const s = String(q ?? '').trim()
+  const mixed = s.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)$/)
+  if (mixed) return +mixed[1] + +mixed[2] / +mixed[3]
+  const frac = s.match(/^(\d+)\s*\/\s*(\d+)$/)
+  if (frac) return +frac[1] / +frac[2]
+  return parseFloat(s)
+}
+
+function combineAmounts(parts) {
   const byUnit = {}
   const freeform = []
   for (const p of parts) {
-    const qty = parseFloat(p.quantity)
+    const qty = toNum(p.quantity)
     const unit = (p.unit || '').toLowerCase().trim()
-    if (!isNaN(qty) && unit) {
-      byUnit[unit] = (byUnit[unit] || 0) + qty
+    if (!isNaN(qty)) {
+      byUnit[unit] = (byUnit[unit] || 0) + qty // unit may be '' (a plain count)
     } else if (p.quantity) {
       freeform.push([p.quantity, p.unit].filter(Boolean).join(' '))
     }
   }
-  const summed = Object.entries(byUnit).map(([u, q]) => `${+q.toFixed(2)} ${u}`)
-  return [...summed, ...freeform].join(' + ') || null
+  const units = Object.keys(byUnit)
+  if (units.length === 1 && !freeform.length) {
+    return { quantity: String(+byUnit[units[0]].toFixed(2)), unit: units[0] }
+  }
+  const summed = units.map((u) => `${+byUnit[u].toFixed(2)}${u ? ' ' + u : ''}`)
+  return { quantity: [...summed, ...freeform].join(' + '), unit: '' }
+}
+
+const UNIT_RE = /^(g|kg|ml|l|tbsp|tbsps|tsp|tsps|tin|tins|can|cans|clove|cloves|pack|packs|bunch|bunches|handful|handfuls|pinch|pinches|slice|slices|cup|cups|sprig|sprigs|stick|sticks|piece|pieces|pcs|ball|balls|sheet|sheets|jar|jars|bottle|bottles|knob|knobs|dash|drizzle|litre|litres|gram|grams)$/i
+const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
+
+// Pull a leading amount out of a free-text ingredient like "1 carrot",
+// "2 garlic cloves", "1/2 tsp cayenne pepper", "1 tin of chopped tomatoes".
+function splitAmount(str) {
+  const s = String(str || '').trim()
+  const m = s.match(/^(\d+(?:\s*[/-]\s*\d+)?(?:\.\d+)?|½|¼|¾)\s+(.*)$/)
+  if (!m) return { quantity: '', unit: '', name: s }
+  const quantity = m[1].replace(/\s+/g, '')
+  let rest = m[2]
+  let unit = ''
+  const first = rest.split(/\s+/)[0]
+  if (first && UNIT_RE.test(first.replace(/[^a-z]/gi, ''))) { unit = first.toLowerCase(); rest = rest.slice(first.length).trim() }
+  rest = rest.replace(/^of\s+/i, '')
+  return { quantity, unit, name: rest || s }
+}
+
+// Normalise one ingredient into a clean { name, quantity, unit }, using the
+// structured fields when present and otherwise parsing them out of the text.
+function normaliseIngredient(ing) {
+  const rawName = (ing.name || ing.raw || '').trim()
+  const hasQty = ing.quantity != null && String(ing.quantity).trim() !== ''
+  if (hasQty) {
+    const sp = splitAmount(rawName) // strip any accidental amount left in the name
+    return { name: cap((sp.quantity ? sp.name : rawName)), quantity: String(ing.quantity).trim(), unit: (ing.unit || '').trim() }
+  }
+  const sp = splitAmount(rawName)
+  return { name: cap(sp.name), quantity: sp.quantity, unit: sp.unit }
 }
 
 /**
@@ -70,22 +117,27 @@ export function buildShoppingList(slots) {
     const recipe = slot.recipe
     if (!recipe) continue
     for (const ing of recipe.ingredients || []) {
-      const k = keyFor(ing.name || ing.raw || '')
+      const norm = normaliseIngredient(ing)
+      const k = keyFor(norm.name)
       if (!k) continue
-      if (!groups[k]) groups[k] = { name: ing.name || ing.raw, parts: [], recipeIds: new Set(), category: categorise(ing.name || ing.raw) }
-      groups[k].parts.push({ quantity: ing.quantity, unit: ing.unit })
+      if (!groups[k]) groups[k] = { name: norm.name, parts: [], recipeIds: new Set(), category: categorise(norm.name) }
+      groups[k].parts.push({ quantity: norm.quantity, unit: norm.unit })
       groups[k].recipeIds.add(recipe.id)
     }
   }
   return Object.values(groups)
-    .map((g) => ({
-      name: g.name,
-      quantity: combineQuantities(g.parts),
-      category: g.category,
-      from_recipes: [...g.recipeIds],
-      have_at_home: false,
-      in_cart: false,
-      manual: false,
-    }))
+    .map((g) => {
+      const { quantity, unit } = combineAmounts(g.parts)
+      return {
+        name: g.name,
+        quantity,
+        unit,
+        category: g.category,
+        from_recipes: [...g.recipeIds],
+        have_at_home: false,
+        in_cart: false,
+        manual: false,
+      }
+    })
     .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name))
 }
