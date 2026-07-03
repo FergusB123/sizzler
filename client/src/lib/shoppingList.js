@@ -79,32 +79,56 @@ function combineAmounts(parts) {
 const UNIT_RE = /^(g|kg|ml|l|tbsp|tbsps|tsp|tsps|tin|tins|can|cans|clove|cloves|pack|packs|bunch|bunches|handful|handfuls|pinch|pinches|slice|slices|cup|cups|sprig|sprigs|stick|sticks|piece|pieces|pcs|ball|balls|sheet|sheets|jar|jars|bottle|bottles|knob|knobs|dash|drizzle|litre|litres|gram|grams)$/i
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s)
 
-// Pull a leading amount out of a free-text ingredient like "1 carrot",
-// "2 garlic cloves", "1/2 tsp cayenne pepper", "1 tin of chopped tomatoes".
-function splitAmount(str) {
+// Parse an amount token like "150g", "2pcs", "0.5 tbsp", "2", "1/2 tsp".
+function parseAmountToken(tok) {
+  const m = String(tok || '').trim().match(/^(\d+(?:\s*[/-]\s*\d+)?(?:\.\d+)?|½|¼|¾)\s*([a-z]+)?/i)
+  if (!m) return null
+  return { quantity: m[1].replace(/\s+/g, ''), unit: (m[2] || '').toLowerCase() }
+}
+
+// Pull a LEADING amount out of "1 carrot", "500g beef mince", "1 tin of tomatoes".
+function splitLeading(str) {
   const s = String(str || '').trim()
   const m = s.match(/^(\d+(?:\s*[/-]\s*\d+)?(?:\.\d+)?|½|¼|¾)\s+(.*)$/)
-  if (!m) return { quantity: '', unit: '', name: s }
-  const quantity = m[1].replace(/\s+/g, '')
+  if (!m) return { amount: null, name: s }
   let rest = m[2]
   let unit = ''
   const first = rest.split(/\s+/)[0]
   if (first && UNIT_RE.test(first.replace(/[^a-z]/gi, ''))) { unit = first.toLowerCase(); rest = rest.slice(first.length).trim() }
   rest = rest.replace(/^of\s+/i, '')
-  return { quantity, unit, name: rest || s }
+  return { amount: { quantity: m[1].replace(/\s+/g, ''), unit }, name: rest || s }
 }
 
-// Normalise one ingredient into a clean { name, quantity, unit }, using the
-// structured fields when present and otherwise parsing them out of the text.
+// Normalise one ingredient into a clean { name, quantity, unit }. Handles
+// structured fields, a trailing "(150g)"/"(2pcs)" amount, a Gousto "xN" portion
+// multiplier, and leading amounts like "1 carrot".
 function normaliseIngredient(ing) {
-  const rawName = (ing.name || ing.raw || '').trim()
-  const hasQty = ing.quantity != null && String(ing.quantity).trim() !== ''
-  if (hasQty) {
-    const sp = splitAmount(rawName) // strip any accidental amount left in the name
-    return { name: cap((sp.quantity ? sp.name : rawName)), quantity: String(ing.quantity).trim(), unit: (ing.unit || '').trim() }
+  let name = (ing.name || ing.raw || '').trim()
+  let mult = 1
+  const mx = name.match(/\s*[x×]\s*(\d+)\s*$/i)
+  if (mx) { mult = parseInt(mx[1], 10) || 1; name = name.slice(0, mx.index).trim() }
+
+  let amount = null
+  const par = name.match(/\(([^)]+)\)\s*$/)
+  if (par) { amount = parseAmountToken(par[1]); name = name.slice(0, par.index).trim() }
+
+  if (!amount && ing.quantity != null && String(ing.quantity).trim() !== '') {
+    amount = { quantity: String(ing.quantity).trim(), unit: (ing.unit || '').trim() }
   }
-  const sp = splitAmount(rawName)
-  return { name: cap(sp.name), quantity: sp.quantity, unit: sp.unit }
+  if (!amount) {
+    const lead = splitLeading(name)
+    if (lead.amount) { amount = lead.amount; name = lead.name }
+  }
+
+  let quantity = '', unit = ''
+  if (amount) {
+    const n = toNum(amount.quantity)
+    if (!isNaN(n)) { quantity = String(+(n * mult).toFixed(2)); unit = amount.unit }
+    else { quantity = amount.quantity; unit = amount.unit }
+  } else if (mult > 1) {
+    quantity = String(mult)
+  }
+  return { name: cap(name), quantity, unit }
 }
 
 /**

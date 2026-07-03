@@ -11,6 +11,16 @@ import { useGoBack } from '../lib/useGoBack'
 import { useRecipeFilters, FilterButton, ActiveFilterChips, FilterSheet } from '../lib/recipeFilters'
 import './swipe.css'
 
+// Fisher–Yates — fresh random deck order every time you enter the swipe view.
+function shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export default function SwipePlanner() {
   const navigate = useNavigate()
   const goBack = useGoBack('/plan')
@@ -37,7 +47,7 @@ export default function SwipePlanner() {
       }
       setPlan(p)
       setSlots(s)
-      setPool(await swipePool(profile?.planned_meals))
+      setPool(shuffle(await swipePool(profile?.planned_meals)))
       setLoading(false)
     })()
   }, [])

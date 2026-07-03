@@ -1,4 +1,4 @@
-.swipe-screen { min-height: 100dvh; display: flex; flex-direction: column; background: var(--charcoal); color: var(--charcoal-text); padding: calc(var(--safe-top) + 12px) 20px calc(var(--safe-bottom) + 20px); }
+.swipe-screen { height: 100dvh; overflow: hidden; overscroll-behavior: none; display: flex; flex-direction: column; background: var(--charcoal); color: var(--charcoal-text); padding: calc(var(--safe-top) + 12px) 20px calc(var(--safe-bottom) + 20px); }
 .swipe-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
 .swipe-progress { flex: 1; }
 .swipe-bar { height: 6px; background: rgba(255, 255, 255, 0.16); border-radius: 999px; overflow: hidden; }
@@ -12,7 +12,8 @@
 .swipe-filter.on { background: var(--orange-500); border-color: var(--orange-500); color: #fff; }
 .swipe-screen .active-filters { margin: 0 -20px 8px; padding: 0 20px 2px; }
 
-.swipe-stack { flex: 1; position: relative; display: grid; place-items: center; margin: 8px 0; }
+.swipe-stack { flex: 1; min-height: 0; position: relative; display: grid; place-items: center; margin: 8px 0; }
+.swipe-card { touch-action: none; }
 .swipe-card {
   position: absolute; width: 100%; max-width: 360px; aspect-ratio: 3 / 4.2;
   border-radius: var(--r-xl); overflow: hidden; background: var(--surface-2);
