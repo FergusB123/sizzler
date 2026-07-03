@@ -132,22 +132,8 @@ export default function SwipePlanner() {
   const visible = deck.slice(index, index + 3).reverse() // back-to-front for stacking
 
   return (
-    <div className="swipe-screen">
-      <div className="swipe-top">
-        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
-        <div className="swipe-progress">
-          <div className="swipe-bar"><span style={{ width: `${Math.min(100, (shortlist.length / target) * 100)}%` }} /></div>
-          <small>{shortlist.length} of ~{target} chosen</small>
-        </div>
-        <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} className="swipe-filter" />
-        <button className="swipe-undo" onClick={undo} disabled={!history.length || done} aria-label="Undo last swipe">
-          <Icon name="arrowLeft" size={16} /> Undo
-        </button>
-      </div>
-
-      <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
-
-      <div className="swipe-stack">
+    <div className="swipe-screen full">
+      <div className="swipe-deck">
         {done ? (
           <div className="swipe-done">
             <div className="swipe-done-ic"><Icon name="check" size={30} /></div>
@@ -166,14 +152,32 @@ export default function SwipePlanner() {
         )}
       </div>
 
-      {!done && (
-        <>
-          <div className="swipe-actions">
-            <button className="swipe-act skip" onClick={() => decide(deck[index], false)}><Icon name="x" size={26} /></button>
-            <button className="swipe-act like" onClick={() => decide(deck[index], true)}><Icon name="heart" size={26} /></button>
+      {/* Top controls overlaid on the image */}
+      <div className="swipe-scrim-top" />
+      <div className="swipe-topbar">
+        <div className="swipe-top">
+          <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
+          <div className="swipe-progress">
+            <div className="swipe-bar"><span style={{ width: `${Math.min(100, (shortlist.length / target) * 100)}%` }} /></div>
+            <small>{shortlist.length} of ~{target} chosen</small>
           </div>
-          <p className="swipe-cap">Swipe right to shortlist · left to skip</p>
-        </>
+          <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} className="swipe-filter" />
+          <button className="swipe-undo" onClick={undo} disabled={!history.length || done} aria-label="Undo last swipe">
+            <Icon name="arrowLeft" size={16} /> Undo
+          </button>
+        </div>
+        <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
+      </div>
+
+      {/* Action buttons overlaid at the bottom */}
+      {!done && (
+        <div className="swipe-bottom">
+          <p className="swipe-cap">Swipe · or tap below</p>
+          <div className="swipe-actions">
+            <button className="swipe-act skip" onClick={() => decide(deck[index], false)} aria-label="Skip"><Icon name="x" size={28} /></button>
+            <button className="swipe-act like" onClick={() => decide(deck[index], true)} aria-label="Shortlist"><Icon name="heart" size={28} /></button>
+          </div>
+        </div>
       )}
 
       <FilterSheet open={f.open} onClose={() => f.setOpen(false)} sel={f.sel} toggle={f.toggle}
@@ -192,26 +196,24 @@ function SwipeCard({ recipe, isTop, depth, onDecide }) {
   return (
     <motion.div
       className="swipe-card"
-      style={{ x, rotate, zIndex: 10 - depth, scale: 1 - depth * 0.04, y: depth * 12 }}
+      style={{ x, rotate, zIndex: 10 - depth, scale: 1 - depth * 0.03 }}
       drag={isTop ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={(_e, info) => {
         if (info.offset.x > 120) onDecide(recipe, true)
         else if (info.offset.x < -120) onDecide(recipe, false)
       }}
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ x: x.get() > 0 ? 320 : -320, opacity: 0, transition: { duration: 0.25 } }}
+      exit={{ x: x.get() > 0 ? 520 : -520, opacity: 0, transition: { duration: 0.28 } }}
     >
       <div className="sc-media">
         {recipe.image_url ? <img src={recipe.image_url} alt={recipe.title} /> : <div className="sc-fallback">{(recipe.title || '?').charAt(0).toUpperCase()}</div>}
         <div className="sc-grad" />
         <motion.div className="sc-stamp like" style={{ opacity: likeOp }}>YUM</motion.div>
         <motion.div className="sc-stamp nope" style={{ opacity: nopeOp }}>SKIP</motion.div>
-        <div className="sc-origin">
-          {recipe.origin === 'you' ? <Badge kind="you">Yours</Badge> : <Badge kind="community">Community</Badge>}
-        </div>
         <div className="sc-info">
+          <span className="sc-origin">{recipe.origin === 'you' ? <Badge kind="you">Yours</Badge> : <Badge kind="community">Community</Badge>}</span>
           <h2>{recipe.title}</h2>
           <div className="sc-meta">
             {recipe.cuisine && <span>{recipe.cuisine}</span>}

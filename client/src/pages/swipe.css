@@ -1,49 +1,53 @@
-.swipe-screen { height: 100dvh; overflow: hidden; overscroll-behavior: none; display: flex; flex-direction: column; background: var(--charcoal); color: var(--charcoal-text); padding: calc(var(--safe-top) + 12px) 20px calc(var(--safe-bottom) + 20px); }
-.swipe-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-.swipe-progress { flex: 1; }
-.swipe-bar { height: 6px; background: rgba(255, 255, 255, 0.16); border-radius: 999px; overflow: hidden; }
-.swipe-bar span { display: block; height: 100%; border-radius: 999px; transition: width 0.4s var(--ease-out); background: repeating-linear-gradient(45deg, #eb4606 0 8px, #f26a30 8px 16px); animation: scStripe 0.7s linear infinite; }
-.swipe-progress small { font-size: 12px; color: var(--charcoal-dim); font-weight: 600; margin-top: 6px; display: block; }
-.swipe-undo { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: var(--charcoal-dim); font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 6px; transition: opacity 0.2s; }
-.swipe-undo:disabled { opacity: 0.3; cursor: default; }
+/* Full-screen swipe deck */
+.swipe-screen.full { position: relative; height: 100dvh; overflow: hidden; overscroll-behavior: none; background: var(--charcoal); color: #fff; }
 
-/* Filter button + active chips styled for the dark swipe screen */
-.swipe-filter { width: 44px; background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.18); color: var(--charcoal-text); box-shadow: none; }
-.swipe-filter.on { background: var(--orange-500); border-color: var(--orange-500); color: #fff; }
-.swipe-screen .active-filters { margin: 0 -20px 8px; padding: 0 20px 2px; }
+.swipe-deck { position: absolute; inset: 0; display: grid; place-items: center; }
 
-.swipe-stack { flex: 1; min-height: 0; position: relative; display: grid; place-items: center; margin: 8px 0; }
-.swipe-card { touch-action: none; }
-.swipe-card {
-  position: absolute; width: 100%; max-width: 360px; aspect-ratio: 3 / 4.2;
-  border-radius: var(--r-xl); overflow: hidden; background: var(--surface-2);
-  border: 1px solid var(--border-strong); box-shadow: var(--shadow-lg);
-  cursor: grab; touch-action: pan-y;
-}
+.swipe-card { position: absolute; inset: 0; overflow: hidden; background: var(--charcoal); cursor: grab; touch-action: none; }
 .swipe-card:active { cursor: grabbing; }
-.sc-media { position: relative; width: 100%; height: 100%; }
+.sc-media { position: absolute; inset: 0; }
 .sc-media img { width: 100%; height: 100%; object-fit: cover; }
-.sc-fallback { width: 100%; height: 100%; display: grid; place-content: center; font-family: var(--font-display); font-size: 90px; font-weight: 600; color: rgba(30,30,30,0.16); background: linear-gradient(150deg, #fde7d8, #f3eada); }
-.sc-grad { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 42%, rgba(0,0,0,0.9)); }
-.sc-origin { position: absolute; top: 14px; left: 14px; }
-.sc-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 22px; color: #fff; }
-.sc-info h2 { color: #fff; font-size: 28px; line-height: 1.05; margin-bottom: 10px; letter-spacing: -0.03em; text-shadow: 0 2px 20px rgba(0,0,0,0.6); }
-.sc-meta { display: flex; flex-wrap: wrap; gap: 7px; font-size: 12.5px; font-weight: 600; }
-.sc-meta span { background: rgba(255,255,255,0.14); backdrop-filter: blur(8px); padding: 5px 11px; border-radius: 999px; }
-.sc-meta .cap, .sc-meal { text-transform: capitalize; }
+.sc-fallback { width: 100%; height: 100%; display: grid; place-content: center; font-family: var(--font-display); font-size: 120px; font-weight: 600; color: rgba(255, 255, 255, 0.12); background: linear-gradient(150deg, #2a2622, #1b1916); }
+.sc-grad { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, transparent 20%, transparent 42%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0.92) 100%); }
 
-.sc-stamp { position: absolute; top: 28px; font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: 0.02em; padding: 6px 16px; border-radius: 12px; border: 3px solid; }
-.sc-stamp.like { right: 22px; color: var(--success); border-color: var(--success); transform: rotate(10deg); }
-.sc-stamp.nope { left: 22px; color: var(--danger); border-color: var(--danger); transform: rotate(-10deg); }
+.sc-info { position: absolute; left: 22px; right: 22px; bottom: calc(var(--safe-bottom) + 128px); }
+.sc-origin { display: inline-block; margin-bottom: 12px; }
+.sc-info h2 { color: #fff; font-size: 32px; line-height: 1.04; margin-bottom: 12px; letter-spacing: -0.03em; text-shadow: 0 2px 24px rgba(0, 0, 0, 0.7); }
+.sc-meta { display: flex; flex-wrap: wrap; gap: 7px; font-size: 13px; font-weight: 600; }
+.sc-meta span { background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 999px; color: #fff; }
+.sc-meta .cap { text-transform: capitalize; }
 
-.swipe-cap { text-align: center; font-size: 13px; color: var(--charcoal-faint); margin-top: 14px; }
-.swipe-actions { display: flex; justify-content: center; align-items: center; gap: 26px; padding-top: 16px; }
-.swipe-act { width: 66px; height: 66px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-content: center; transition: transform 0.14s var(--ease-spring), background 0.2s; }
+.sc-stamp { position: absolute; top: 100px; font-family: var(--font-display); font-weight: 700; font-size: 34px; letter-spacing: 0.02em; padding: 6px 18px; border-radius: 12px; border: 3px solid; background: rgba(0, 0, 0, 0.2); }
+.sc-stamp.like { right: 24px; color: #6ee7a8; border-color: #6ee7a8; transform: rotate(10deg); }
+.sc-stamp.nope { left: 24px; color: #ff6b5e; border-color: #ff6b5e; transform: rotate(-10deg); }
+
+/* Top scrim + controls overlaid on the image */
+.swipe-scrim-top { position: absolute; top: 0; left: 0; right: 0; height: 190px; background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent); pointer-events: none; z-index: 20; }
+.swipe-topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 21; padding: calc(var(--safe-top) + 12px) 20px 0; }
+.swipe-top { display: flex; align-items: center; gap: 12px; }
+.swipe-topbar .icon-btn { background: rgba(0, 0, 0, 0.3); color: #fff; backdrop-filter: blur(6px); border: none; }
+.swipe-progress { flex: 1; }
+.swipe-bar { height: 6px; background: rgba(255, 255, 255, 0.28); border-radius: 999px; overflow: hidden; }
+.swipe-bar span { display: block; height: 100%; border-radius: 999px; transition: width 0.4s var(--ease-out); background: repeating-linear-gradient(45deg, #eb4606 0 8px, #f26a30 8px 16px); animation: scStripe 0.7s linear infinite; }
+.swipe-progress small { font-size: 12px; color: rgba(255, 255, 255, 0.9); font-weight: 600; margin-top: 6px; display: block; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
+.swipe-undo { display: inline-flex; align-items: center; gap: 4px; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(6px); border: none; border-radius: 999px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; padding: 8px 12px; transition: opacity 0.2s; }
+.swipe-undo:disabled { opacity: 0.35; cursor: default; }
+
+.swipe-filter { width: 42px; background: rgba(0, 0, 0, 0.3); border-color: transparent; color: #fff; box-shadow: none; backdrop-filter: blur(6px); }
+.swipe-filter.on { background: var(--orange-500); border-color: var(--orange-500); color: #fff; }
+.swipe-topbar .active-filters { margin: 12px 0 0; padding: 0 0 2px; }
+
+/* Bottom actions overlaid on the image */
+.swipe-bottom { position: absolute; left: 0; right: 0; bottom: 0; z-index: 21; padding: 0 20px calc(var(--safe-bottom) + 22px); display: grid; justify-items: center; gap: 12px; }
+.swipe-cap { text-align: center; font-size: 12px; color: rgba(255, 255, 255, 0.78); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5); }
+.swipe-actions { display: flex; justify-content: center; align-items: center; gap: 26px; }
+.swipe-act { width: 68px; height: 68px; border-radius: 50%; border: none; cursor: pointer; display: grid; place-content: center; transition: transform 0.14s var(--ease-spring), background 0.2s; box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.6); }
 .swipe-act:active { transform: scale(0.88); }
 .swipe-act.skip { background: #fff; color: var(--cast-iron); }
-.swipe-act.like { background: var(--orange-500); color: #fff; box-shadow: var(--shadow-flame); }
+.swipe-act.like { background: var(--orange-500); color: #fff; }
 .swipe-act.like:active { background: var(--orange-600); }
 
-.swipe-done { text-align: center; display: grid; gap: 16px; justify-items: center; color: var(--charcoal-text); }
-.swipe-done-ic { width: 64px; height: 64px; border-radius: 50%; display: grid; place-content: center; background: rgba(62, 124, 78, 0.25); color: #6ee7a8; }
+/* Done state (centered over the deck) */
+.swipe-done { text-align: center; display: grid; gap: 16px; justify-items: center; padding: 24px; z-index: 5; }
+.swipe-done-ic { width: 64px; height: 64px; border-radius: 50%; display: grid; place-content: center; background: rgba(62, 124, 78, 0.3); color: #6ee7a8; }
 .swipe-done h2 { font-size: 26px; letter-spacing: -0.02em; color: #fff; }
