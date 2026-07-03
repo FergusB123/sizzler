@@ -16,8 +16,9 @@ const dow = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { wee
 const dnum = (d) => new Date(d + 'T00:00:00').getDate()
 
 // One draggable night: a dark day badge, the recipe slot, and a grip handle.
-// The grip starts the drag so tapping the slot still opens the picker.
-function NightItem({ item, date, index, onOpen, onDragEnd }) {
+// The grip starts the drag. Tapping a filled slot opens the recipe; the swap
+// button changes it. An empty slot taps straight into the picker to add one.
+function NightItem({ item, date, index, onOpenRecipe, onChange, onDragEnd }) {
   const controls = useDragControls()
   const recipe = item.recipe
   return (
@@ -27,16 +28,21 @@ function NightItem({ item, date, index, onOpen, onDragEnd }) {
         <span className="mp-dow">{dow(date)}</span>
         <span className="mp-dnum">{dnum(date)}</span>
       </div>
-      <button className={`mp-slot ${recipe ? 'filled' : 'empty'}`} onClick={() => onOpen(index)}>
-        {recipe ? (
+      {recipe ? (
+        <button className="mp-slot filled" onClick={() => onOpenRecipe(recipe)}>
           <span className="mp-recipe">
             {recipe.image_url ? <img src={recipe.image_url} alt="" /> : <span className="mp-recipe-fb">{(recipe.title || '?').charAt(0).toUpperCase()}</span>}
             <b>{recipe.title}</b>
           </span>
-        ) : (
+        </button>
+      ) : (
+        <button className="mp-slot empty" onClick={() => onChange(index)}>
           <span className="mp-add"><Icon name="plus" size={17} /> Add a recipe</span>
-        )}
-      </button>
+        </button>
+      )}
+      {recipe && (
+        <button className="mp-swap" aria-label="Change recipe" onClick={() => onChange(index)}><Icon name="swap" size={17} /></button>
+      )}
       <span className="mp-drag" aria-label="Drag to reorder" onPointerDown={(e) => controls.start(e)}><Icon name="grip" size={18} /></span>
     </Reorder.Item>
   )
@@ -140,7 +146,8 @@ export default function ManualPlanner() {
       <Reorder.Group axis="y" values={order} onReorder={setOrder} className="mp-nights">
         {order.map((item, i) => (
           <NightItem key={item.key} item={item} date={dates[i]} index={i}
-            onOpen={openPicker} onDragEnd={() => saveArrangement(orderRef.current)} />
+            onOpenRecipe={(r) => navigate(`/recipes/${r.id}`)} onChange={openPicker}
+            onDragEnd={() => saveArrangement(orderRef.current)} />
         ))}
       </Reorder.Group>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
-import { getActivePlan, getPlanSlots, listRecipes, iso } from '../lib/api'
+import { getActivePlan, getPlanSlots, listRecipes, getShoppingList, iso } from '../lib/api'
 import Icon from '../components/Icon'
 import { SizzleLoader } from '../components/ui/primitives'
 import './pages.css'
@@ -27,6 +27,7 @@ export default function Home() {
   const [recipes, setRecipes] = useState(null)
   const [plan, setPlan] = useState(undefined)
   const [slots, setSlots] = useState([])
+  const [shopComplete, setShopComplete] = useState(false)
 
   useEffect(() => {
     (async () => {
@@ -34,6 +35,14 @@ export default function Home() {
       setRecipes(r)
       setPlan(p)
       setSlots(p ? await getPlanSlots(p.id) : [])
+      if (p) {
+        try {
+          const items = await getShoppingList(p.id)
+          // "Shop done" = every buyable item (not already at home) is in the cart.
+          const buyable = items.filter((i) => !i.have_at_home)
+          setShopComplete(buyable.length > 0 && buyable.every((i) => i.in_cart))
+        } catch { /* no list yet */ }
+      }
     })()
   }, [])
 
@@ -71,11 +80,11 @@ export default function Home() {
 
       {hasPlan ? (
         <>
-          <Link to="/plan/manual" className="cook-hero">
+          <div className="cook-hero">
             <div className="cook-hero-top"><span className="overline accent">{heroLabel}</span><span>{planDays}-day plan</span></div>
             <div className="cook-hero-meals">
               {heroSlots.slice(0, 3).map((s) => (
-                <div className="cook-meal" key={s.id}>
+                <Link className="cook-meal" key={s.id} to={`/recipes/${s.recipe?.id}`}>
                   <Thumb recipe={s.recipe} size={46} />
                   <div className="cook-meal-txt">
                     <b>{s.recipe?.title}</b>
@@ -83,18 +92,25 @@ export default function Home() {
                   {(s.recipe?.prep_minutes || s.recipe?.cook_minutes) && (
                     <span className="cook-meal-time">{(s.recipe.prep_minutes || 0) + (s.recipe.cook_minutes || 0)} min</span>
                   )}
-                </div>
+                </Link>
               ))}
             </div>
+          </div>
+
+          <Link to="/plan/manual" className="plan-banner">
+            <span className="pb-ic"><Icon name="calendar" size={20} /></span>
+            <div className="pb-txt"><b>Your plan</b><span>Reorder & reshuffle your week</span></div>
+            <Icon name="arrowRight" size={18} />
           </Link>
 
           <div className="home-cards">
-            <button className="home-card" onClick={() => navigate('/shopping')}>
-              <span className="hc-ic"><Icon name="cart" size={20} /></span>
-              <b>Shopping list</b><span>Ready to shop</span>
+            <button className={`home-card ${shopComplete ? 'done' : ''}`} onClick={() => navigate('/shopping')}>
+              <span className="hc-ic"><Icon name={shopComplete ? 'check' : 'cart'} size={20} /></span>
+              <b>{shopComplete ? 'Shop done' : 'Shopping list'}</b>
+              <span>{shopComplete ? 'Ingredients bought' : 'Ready to shop'}</span>
             </button>
             <button className="home-card" onClick={() => navigate('/plan')}>
-              <span className="hc-ic"><Icon name="calendar" size={20} /></span>
+              <span className="hc-ic"><Icon name="shuffle" size={20} /></span>
               <b>Replan</b><span>Start fresh</span>
             </button>
           </div>
@@ -103,14 +119,16 @@ export default function Home() {
           <div className="week-list">
             {dates.map((d) => {
               const day = filled.filter((s) => s.slot_date === d)
+              const r = day[0]?.recipe
               return (
-                <Link to="/plan/manual" className="week-row" key={d}>
+                <Link to={r ? `/recipes/${r.id}` : '/plan/manual'} className="week-row" key={d}>
                   <span className="week-day">{shortDay(d)}</span>
                   <div className="week-meals">
                     {day.slice(0, 3).map((s) => (
                       <span className="week-meal" key={s.id}><Thumb recipe={s.recipe} size={30} /><span>{s.recipe?.title}</span></span>
                     ))}
                   </div>
+                  <Icon name="arrowRight" size={16} />
                 </Link>
               )
             })}
