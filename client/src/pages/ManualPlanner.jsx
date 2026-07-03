@@ -12,17 +12,20 @@ import { useRecipeFilters, FilterButton, ActiveFilterChips, FilterSheet } from '
 import './manual-planner.css'
 
 const dayLabel = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })
+const dow = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short' })
+const dnum = (d) => new Date(d + 'T00:00:00').getDate()
 
-// One draggable night. A dedicated grip starts the drag so tapping the card
-// still opens the recipe picker and the page can scroll normally.
+// One draggable night: a dark day badge, the recipe slot, and a grip handle.
+// The grip starts the drag so tapping the slot still opens the picker.
 function NightItem({ item, date, index, onOpen, onDragEnd }) {
   const controls = useDragControls()
   const recipe = item.recipe
   return (
-    <Reorder.Item value={item} dragListener={false} dragControls={controls} onDragEnd={onDragEnd} className="mp-night">
-      <div className="mp-night-head">
-        <span className="mp-night-day">{dayLabel(date)}</span>
-        <span className="mp-drag" aria-label="Drag to reorder" onPointerDown={(e) => controls.start(e)}><Icon name="grip" size={18} /></span>
+    <Reorder.Item value={item} dragListener={false} dragControls={controls} onDragEnd={onDragEnd}
+      className={`mp-night ${recipe ? 'filled' : ''}`}>
+      <div className="mp-daybadge">
+        <span className="mp-dow">{dow(date)}</span>
+        <span className="mp-dnum">{dnum(date)}</span>
       </div>
       <button className={`mp-slot ${recipe ? 'filled' : 'empty'}`} onClick={() => onOpen(index)}>
         {recipe ? (
@@ -34,6 +37,7 @@ function NightItem({ item, date, index, onOpen, onDragEnd }) {
           <span className="mp-add"><Icon name="plus" size={17} /> Add a recipe</span>
         )}
       </button>
+      <span className="mp-drag" aria-label="Drag to reorder" onPointerDown={(e) => controls.start(e)}><Icon name="grip" size={18} /></span>
     </Reorder.Item>
   )
 }
@@ -116,20 +120,19 @@ export default function ManualPlanner() {
   const filledCount = order.filter((o) => o.recipe).length
 
   return (
-    <div className="screen no-nav">
-      <div className="topbar" style={{ padding: 0, marginBottom: 10 }}>
-        <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 24 }}>Your plan</h1>
+    <div className="screen no-nav mp-screen">
+      <div className="mp-hero">
+        <div className="mp-hero-top">
+          <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
+          <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} className="mp-hero-filter" />
         </div>
-        <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} />
-      </div>
-
-      <div className="mp-toolbar">
-        <span className="mp-sub">Drag to reorder · tap to change</span>
-        {filledCount >= 2 && (
-          <button className="mp-reshuffle" onClick={reshuffle}><Icon name="shuffle" size={15} /> Reshuffle</button>
-        )}
+        <h1 className="mp-hero-title">Your plan</h1>
+        <div className="mp-hero-meta">
+          <span>{order.length} night{order.length === 1 ? '' : 's'} · drag to reorder</span>
+          {filledCount >= 2 && (
+            <button className="mp-reshuffle" onClick={reshuffle}><Icon name="shuffle" size={15} /> Reshuffle</button>
+          )}
+        </div>
       </div>
 
       <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
