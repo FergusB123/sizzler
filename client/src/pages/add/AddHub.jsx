@@ -24,6 +24,17 @@ export default function AddHub() {
         <h1 style={{ fontSize: 30, marginTop: 4, letterSpacing: '-0.03em' }}>Add a recipe</h1>
       </div>
 
+      <button className="ai-card" onClick={() => navigate('/add/ai')}>
+        <span className="ai-card-ic"><Icon name="sparkle" size={22} /></span>
+        <div className="ai-card-txt">
+          <b>Sizzler AI</b>
+          <span>Describe a craving — get a full recipe, made for you</span>
+        </div>
+        <Icon name="arrowRight" size={18} />
+      </button>
+
+      <div className="add-divider"><span>or add your own</span></div>
+
       <div className="add-group">
         {AI_METHODS.map((m) => (
           <button key={m.to} className="add-row" onClick={() => navigate(m.to)}>

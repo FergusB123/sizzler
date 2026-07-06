@@ -76,12 +76,20 @@ Rules:
 - For any field NOT explicitly stated, infer a sensible value from context (estimate difficulty from technique/step count; guess cuisine from ingredients; pick meal_types from the dish). Add every inferred field's name to "inferred_fields".
 - If the content clearly is NOT a recipe, return save_recipe with title "NOT_A_RECIPE" and empty arrays.`;
 
+const GENERATE_PROMPT = `You are Sizzler's recipe creator. Invent ONE appealing, genuinely cookable dinner based on the user's request. Always return via the save_recipe tool — never prose.
+
+Rules:
+- Make it realistic and achievable at home, with sensible quantities and clear imperative method steps.
+- Fill in EVERY field: title, cuisine, category, a one-line appetising description, ingredients (name + quantity + unit, and the original line in "raw"), ordered steps, prep_minutes, cook_minutes, difficulty, servings (default 2), meal_types ["dinner"], and a few useful tags.
+- You are inventing this from scratch, so leave "inferred_fields" empty.
+- Honour any constraints in the request (dietary needs, key ingredients, time, cuisine, spice level).`;
+
 // blocks: array of { type:'text', text } | { type:'image', source:{...} }
-async function runExtraction(blocks) {
+async function runExtraction(blocks, system = SYSTEM_PROMPT) {
   const response = await getClient().messages.create({
     model: MODEL,
     max_tokens: 2048,
-    system: SYSTEM_PROMPT,
+    system,
     tools: [RECIPE_TOOL],
     tool_choice: { type: 'tool', name: 'save_recipe' },
     messages: [{ role: 'user', content: blocks }],
@@ -89,6 +97,11 @@ async function runExtraction(blocks) {
   const toolUse = response.content.find((b) => b.type === 'tool_use');
   if (!toolUse) throw new Error('Model did not return a structured recipe');
   return toolUse.input;
+}
+
+// Invent a brand-new recipe from a free-text request.
+async function generateRecipe(prompt) {
+  return runExtraction([{ type: 'text', text: `Create a dinner recipe for this request:\n\n${prompt}` }], GENERATE_PROMPT);
 }
 
 async function extractFromText(text) {
@@ -104,4 +117,4 @@ async function extractFromImages(images) {
   return runExtraction([...imageBlocks, { type: 'text', text: 'Extract the recipe from this image.' }]);
 }
 
-module.exports = { extractFromText, extractFromImages, aiConfigured, MODEL };
+module.exports = { extractFromText, extractFromImages, generateRecipe, aiConfigured, MODEL };

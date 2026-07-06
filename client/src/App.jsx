@@ -13,6 +13,7 @@ import RecipeDetail from './pages/RecipeDetail'
 import AddHub from './pages/add/AddHub'
 import AddManual from './pages/add/AddManual'
 import AddImport from './pages/add/AddImport'
+import AddAI from './pages/add/AddAI'
 import EditRecipe from './pages/add/EditRecipe'
 import PlanChoose from './pages/PlanChoose'
 import SwipePlanner from './pages/SwipePlanner'
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/recipes/:id/edit" element={<EditRecipe />} />
             <Route path="/add" element={<AddHub />} />
             <Route path="/add/manual" element={<AddManual />} />
+            <Route path="/add/ai" element={<AddAI />} />
             <Route path="/add/url" element={<AddImport mode="url" />} />
             <Route path="/add/photo" element={<AddImport mode="photo" />} />
             <Route path="/add/social" element={<AddImport mode="social" />} />

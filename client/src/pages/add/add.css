@@ -18,6 +18,37 @@
 .add-row.dark .ar-ic { background: rgba(235, 70, 6, 0.22); color: var(--orange-300); }
 .add-row.dark .ar-txt span { color: var(--charcoal-dim); }
 
+/* Sizzler AI — hero entry on the Add hub */
+.ai-card {
+  display: flex; align-items: center; gap: 13px; width: 100%; text-align: left; cursor: pointer;
+  border: none; border-radius: var(--r-xl); padding: 16px; margin-bottom: 16px; color: #fff;
+  background: radial-gradient(120% 120% at 85% 0%, rgba(235, 70, 6, 0.55), transparent 60%), var(--charcoal);
+  box-shadow: var(--shadow-md, 0 10px 30px -12px rgba(0,0,0,0.45)); position: relative; overflow: hidden;
+  transition: transform 0.14s var(--ease-out);
+}
+.ai-card::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(122deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 16px); pointer-events: none; }
+.ai-card:active { transform: scale(0.98); }
+.ai-card > * { position: relative; z-index: 1; }
+.ai-card-ic { display: grid; place-content: center; width: 44px; height: 44px; border-radius: 13px; background: rgba(255,255,255,0.14); color: #fff; flex-shrink: 0; }
+.ai-card-txt { flex: 1; min-width: 0; }
+.ai-card-txt b { display: block; font-size: 16.5px; letter-spacing: -0.01em; }
+.ai-card-txt span { font-size: 12.5px; color: rgba(255,255,255,0.72); }
+.ai-card > svg:last-child { color: rgba(255,255,255,0.72); flex-shrink: 0; }
+
+.add-divider { display: flex; align-items: center; gap: 12px; margin: 4px 0 16px; color: var(--text-faint); }
+.add-divider::before, .add-divider::after { content: ''; height: 1px; background: var(--border); flex: 1; }
+.add-divider span { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+
+/* Sizzler AI — prompt screen */
+.ai-hero { text-align: center; margin: 6px 0 20px; }
+.ai-hero-ic { display: inline-grid; place-content: center; width: 64px; height: 64px; border-radius: 20px; margin-bottom: 12px; color: #fff; background: radial-gradient(120% 120% at 80% 0%, rgba(235,70,6,0.6), transparent 60%), var(--charcoal); }
+.ai-hero h1 { font-size: 28px; letter-spacing: -0.03em; }
+.ai-hero p { color: var(--text-dim); font-size: 14.5px; line-height: 1.5; margin: 6px auto 0; max-width: 32ch; }
+.ai-prompt { min-height: 108px; margin-bottom: 12px; }
+.ai-ideas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.ai-chip { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 8px 13px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; transition: transform 0.12s var(--ease-out), background 0.15s; }
+.ai-chip:active { transform: scale(0.95); background: var(--orange-50); }
+
 .import-hero { display: grid; place-content: center; margin: 12px 0 24px; }
 .import-hero span { display: grid; place-content: center; width: 64px; height: 64px; border-radius: 18px; background: var(--accent-soft); color: var(--flame-300); }
 .import-drop {

@@ -6,7 +6,7 @@ import { getActivePlan, createPlan, getPlanSlots, assignSlot, assignSlots, listR
 import { autoAllocate } from '../lib/planner'
 import { Button, SizzleLoader, Sheet, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
-import { formatTime } from '../components/RecipeCard'
+import RecipeCard from '../components/RecipeCard'
 import { useGoBack } from '../lib/useGoBack'
 import { useRecipeFilters, FilterButton, ActiveFilterChips, FilterSheet } from '../lib/recipeFilters'
 import './manual-planner.css'
@@ -167,15 +167,15 @@ export default function ManualPlanner() {
         </div>
         <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
         {picker !== null && order[picker.index]?.recipe && <Button variant="soft" block onClick={() => pick(null)} style={{ marginBottom: 12 }}>Clear this night</Button>}
-        <div className="plan-picker">
+        <div className="recipe-grid swap-grid">
           {pickList.map((r) => (
-            <button key={r.id} className="plan-picker-item" onClick={() => pick(r.id)}>
-              <div className="ppi-img">{r.image_url ? <img src={r.image_url} alt="" /> : <span className="ppi-initial">{(r.title || '?').charAt(0).toUpperCase()}</span>}</div>
-              <div className="ppi-body"><b>{r.title}</b><span>{r.cuisine || '—'}{((r.prep_minutes || 0) + (r.cook_minutes || 0)) > 0 ? ` · ${formatTime((r.prep_minutes || 0) + (r.cook_minutes || 0))}` : ''}</span></div>
+            <button key={r.id} className="swap-tile" onClick={() => pick(r.id)}>
+              <RecipeCard recipe={r} origin="you" />
+              <span className="swap-add"><Icon name="plus" size={15} /> Add to plan</span>
             </button>
           ))}
-          {pickList.length === 0 && <p className="muted">No recipes match. Adjust your filters or search.</p>}
         </div>
+        {pickList.length === 0 && <p className="muted">No recipes match. Adjust your filters or search.</p>}
       </Sheet>
 
       <FilterSheet open={f.open} onClose={() => f.setOpen(false)} sel={f.sel} toggle={f.toggle}

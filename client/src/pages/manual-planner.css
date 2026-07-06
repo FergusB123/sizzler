@@ -38,3 +38,11 @@
 .mp-drag:active { cursor: grabbing; }
 
 .mp-done { margin-top: 8px; }
+
+/* Swap/change-recipe picker: full recipe cards + quick add-to-plan button */
+.swap-grid { margin-top: 4px; }
+.swap-tile { display: flex; flex-direction: column; background: none; border: none; padding: 0; cursor: pointer; text-align: left; }
+.swap-tile .recipe-card { width: 100%; }
+.swap-tile .rc-link, .swap-tile > .recipe-card { pointer-events: none; }
+.swap-add { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; width: 100%; background: var(--orange-50); color: var(--orange-600); border-radius: var(--r-md); padding: 9px; font-size: 13px; font-weight: 600; transition: background 0.15s, color 0.15s; }
+.swap-tile:active .swap-add { background: var(--orange-500); color: #fff; }

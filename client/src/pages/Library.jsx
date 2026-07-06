@@ -35,12 +35,6 @@ export default function Library() {
 
       <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
 
-      <button className="discover-banner" onClick={() => navigate('/community')}>
-        <span className="db-ic"><Icon name="globe" size={18} /></span>
-        <span className="db-txt"><b>Discover community recipes</b><span>Browse and save dishes shared by other cooks</span></span>
-        <Icon name="arrowRight" size={18} />
-      </button>
-
       {recipes === null ? (
         <div className="recipe-grid">{[0, 1, 2, 3].map((i) => <div key={i} className="skeleton" style={{ height: 210 }} />)}</div>
       ) : recipes.length === 0 ? (

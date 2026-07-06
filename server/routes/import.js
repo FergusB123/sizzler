@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const auth = require('../middleware/auth');
-const { extractFromText, extractFromImages } = require('../services/claude');
+const { extractFromText, extractFromImages, generateRecipe } = require('../services/claude');
 const { uploadFile } = require('../services/storage');
+const { generateRecipeImage } = require('../services/images');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024 } });
 
@@ -91,6 +92,19 @@ router.post('/photo', auth, upload.single('image'), async (req, res) => {
     const recipe = await extractFromImages([{ buffer, mimetype }]);
     if (recipeOrError(recipe, res)) res.json({ recipe });
   } catch (err) { res.status(500).json({ error: 'extract_failed', message: err.message }); }
+});
+
+// ---- Sizzler AI: generate a brand-new recipe from a prompt ----
+router.post('/ai', auth, async (req, res) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt?.trim()) return res.status(400).json({ error: 'Tell us what you fancy' });
+    const recipe = await generateRecipe(prompt.trim());
+    if (!recipeOrError(recipe, res)) return;
+    let image_url = null;
+    try { const img = await generateRecipeImage(recipe.title, recipe.description); image_url = img?.url || null; } catch { /* image is best-effort */ }
+    res.json({ recipe, image_url });
+  } catch (err) { res.status(500).json({ error: 'generate_failed', message: err.message }); }
 });
 
 // ---- URL / social (best-effort) ----
