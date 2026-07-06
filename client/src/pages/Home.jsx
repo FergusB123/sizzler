@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
 import { getActivePlan, getPlanSlots, listRecipes, getShoppingList, iso } from '../lib/api'
 import { shoppingListStale } from '../lib/shoppingList'
+import { thumbUrl } from '../components/RecipeCard'
 import Icon from '../components/Icon'
 import { SizzleLoader } from '../components/ui/primitives'
 import './pages.css'
@@ -17,7 +18,7 @@ const weekday = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, {
 const shortDay = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short' })
 
 function Thumb({ recipe, size = 44 }) {
-  if (recipe?.image_url) return <img className="thumb" src={recipe.image_url} alt="" style={{ width: size, height: size }} />
+  if (recipe?.image_url) return <img className="thumb" src={thumbUrl(recipe.image_url)} alt="" loading="lazy" decoding="async" style={{ width: size, height: size }} />
   const h = ((recipe?.title || '').length % 5)
   return <span className={`thumb thumb-fb h${h}`} style={{ width: size, height: size }}>{(recipe?.title || '?').charAt(0).toUpperCase()}</span>
 }

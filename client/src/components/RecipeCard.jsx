@@ -2,6 +2,14 @@ import { Link } from 'react-router-dom'
 import Icon from './Icon'
 import './recipe-card.css'
 
+// Gousto CMS images are stored at -x700 (700px). Cards render them ~180px, so
+// request the smaller -x350 variant to roughly halve the bytes and load faster.
+// Non-Gousto/data URLs pass through untouched.
+export function thumbUrl(url, size = 350) {
+  if (!url) return url
+  return url.replace(/-x700\.jpg(\?.*)?$/i, `-x${size}.jpg$1`)
+}
+
 export function formatTime(mins) {
   if (!mins) return null
   if (mins < 60) return `${mins} min`
@@ -25,7 +33,7 @@ export default function RecipeCard({ recipe, to, origin }) {
   const inner = (
     <div className="recipe-card">
       <div className="rc-media">
-        {recipe.image_url ? <img src={recipe.image_url} alt={recipe.title} loading="lazy" /> : <Fallback recipe={recipe} />}
+        {recipe.image_url ? <img src={thumbUrl(recipe.image_url)} alt={recipe.title} loading="lazy" decoding="async" /> : <Fallback recipe={recipe} />}
         {total > 0 && <span className="rc-time">{formatTime(total)}</span>}
         {origin === 'community' ? (
           <span className="rc-corner community"><Icon name="users" size={14} /></span>

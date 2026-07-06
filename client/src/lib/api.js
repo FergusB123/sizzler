@@ -78,9 +78,11 @@ export async function extractFromText(text) {
   const res = await data(api.post('/import/text', { text }))
   return normaliseExtracted(res.recipe)
 }
-export async function extractFromImage(file) {
-  const { image, mimetype } = await compressImage(file)
-  const res = await data(api.post('/import/photo', { image, mimetype }))
+export async function extractFromImage(files) {
+  // Accepts one file or several (e.g. a recipe spanning multiple book pages).
+  const list = Array.isArray(files) ? files : [files]
+  const images = await Promise.all(list.map((f) => compressImage(f)))
+  const res = await data(api.post('/import/photo', { images }))
   return normaliseExtracted(res.recipe)
 }
 export async function extractFromUrl(url) {

@@ -79,17 +79,23 @@ router.post('/text', auth, async (req, res) => {
 // Accepts either multipart (local dev) OR a base64 JSON body { image, mimetype }.
 // The JSON path is required on Vercel: the serverless runtime consumes the
 // request stream to populate req.body, so multer/busboy never see the file.
-router.post('/photo', auth, upload.single('image'), async (req, res) => {
+router.post('/photo', auth, upload.array('images', 8), async (req, res) => {
   try {
-    let buffer = null, mimetype = 'image/jpeg';
-    if (req.file) {
-      buffer = req.file.buffer; mimetype = req.file.mimetype;
+    let images = [];
+    if (req.files?.length) {
+      images = req.files.map((f) => ({ buffer: f.buffer, mimetype: f.mimetype }));
+    } else if (req.file) {
+      images = [{ buffer: req.file.buffer, mimetype: req.file.mimetype }];
+    } else if (Array.isArray(req.body?.images)) {
+      images = req.body.images
+        .filter((x) => x?.image)
+        .map((x) => ({ buffer: Buffer.from(x.image, 'base64'), mimetype: x.mimetype || 'image/jpeg' }));
     } else if (req.body?.image) {
-      mimetype = req.body.mimetype || 'image/jpeg';
-      buffer = Buffer.from(req.body.image, 'base64');
+      images = [{ buffer: Buffer.from(req.body.image, 'base64'), mimetype: req.body.mimetype || 'image/jpeg' }];
     }
-    if (!buffer || !buffer.length) return res.status(400).json({ error: 'Provide an image' });
-    const recipe = await extractFromImages([{ buffer, mimetype }]);
+    images = images.filter((i) => i.buffer && i.buffer.length);
+    if (!images.length) return res.status(400).json({ error: 'Provide an image' });
+    const recipe = await extractFromImages(images);
     if (recipeOrError(recipe, res)) res.json({ recipe });
   } catch (err) { res.status(500).json({ error: 'extract_failed', message: err.message }); }
 });

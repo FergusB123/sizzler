@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useDragControls } from 'framer-motion'
 import Icon from '../Icon'
 import './ui.css'
 
@@ -130,6 +130,7 @@ export function ExtractLoader({ title = 'Reading the recipe' }) {
 }
 
 export function Sheet({ open, onClose, title, children }) {
+  const controls = useDragControls()
   return (
     <AnimatePresence>
       {open && (
@@ -143,12 +144,17 @@ export function Sheet({ open, onClose, title, children }) {
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 32, stiffness: 360 }}
             onClick={(e) => e.stopPropagation()}
-            drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.4 }}
+            // Drag-to-dismiss is started only from the grip/title so the body can
+            // scroll freely on touch (previously the whole sheet grabbed swipes).
+            drag="y" dragListener={false} dragControls={controls}
+            dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.4 }}
             onDragEnd={(_e, info) => { if (info.offset.y > 120) onClose() }}
           >
-            <div className="sheet-grip" />
-            {title && <h2>{title}</h2>}
-            {children}
+            <div className="sheet-handle" onPointerDown={(e) => controls.start(e)}>
+              <div className="sheet-grip" />
+              {title && <h2>{title}</h2>}
+            </div>
+            <div className="sheet-body">{children}</div>
           </motion.div>
         </motion.div>
       )}

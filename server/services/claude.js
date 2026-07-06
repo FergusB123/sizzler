@@ -154,7 +154,10 @@ async function extractFromImages(images) {
     type: 'image',
     source: { type: 'base64', media_type: normalizeMediaType(mimetype), data: buffer.toString('base64') },
   }));
-  return runExtraction([...imageBlocks, { type: 'text', text: 'Extract the recipe from this image.' }]);
+  const note = images.length > 1
+    ? `These ${images.length} images are all of the SAME single recipe — they may span multiple pages (e.g. ingredients on one page, the method on another, or a list continuing over the page). Combine everything across all images into one complete recipe.`
+    : 'Extract the recipe from this image.';
+  return runExtraction([...imageBlocks, { type: 'text', text: note }]);
 }
 
 module.exports = { extractFromText, extractFromImages, generateRecipe, generateRecipeIdeas, aiConfigured, MODEL };

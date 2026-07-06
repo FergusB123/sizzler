@@ -153,11 +153,17 @@
 .sheet {
   width: 100%; max-width: var(--maxw);
   background: var(--bg); border-radius: var(--r-2xl) var(--r-2xl) 0 0;
-  padding: 10px 20px calc(var(--safe-bottom) + 24px);
-  max-height: 92dvh; overflow-y: auto; box-shadow: var(--shadow-lg);
+  max-height: 92dvh; overflow: hidden; box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column;
 }
+/* Grip + title: the drag-to-dismiss handle. touch-action:none lets the pointer
+   start a drag here rather than a scroll. */
+.sheet-handle { flex-shrink: 0; padding: 10px 20px 0; cursor: grab; touch-action: none; }
+.sheet-handle:active { cursor: grabbing; }
 .sheet-grip { width: 38px; height: 4px; border-radius: 3px; background: var(--border-strong); margin: 8px auto 16px; }
-.sheet h2 { font-size: 24px; margin-bottom: 4px; letter-spacing: -0.02em; }
+.sheet-handle h2 { font-size: 24px; margin-bottom: 4px; letter-spacing: -0.02em; }
+/* Scrollable content area — this is what moves on touch now. */
+.sheet-body { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 6px 20px calc(var(--safe-bottom) + 24px); }
 
 /* ---- Empty state ---- */
 .empty { position: relative; text-align: center; padding: 48px 24px; display: grid; gap: 16px; justify-items: center; }
