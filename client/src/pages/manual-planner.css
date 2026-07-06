@@ -24,6 +24,9 @@
 .mp-night { display: flex; align-items: center; gap: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--shadow-sm); padding: 12px; }
 .mp-daybadge { flex-shrink: 0; width: 50px; height: 56px; border-radius: 13px; background: var(--cast-iron); color: #fff; display: grid; place-content: center; text-align: center; gap: 2px; transition: background 0.2s; }
 .mp-night.filled .mp-daybadge { background: var(--orange-500); }
+/* Nights already gone — greyed out */
+.mp-night.past { opacity: 0.5; }
+.mp-night.past .mp-daybadge { background: var(--stone, #8a8377); }
 .mp-dow { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255, 255, 255, 0.72); }
 .mp-dnum { font-family: var(--font-display); font-size: 22px; font-weight: 600; line-height: 1; }
 .mp-slot { flex: 1; min-width: 0; display: flex; align-items: center; text-align: left; cursor: pointer; background: none; border: none; border-radius: var(--r-md); padding: 6px 2px; min-height: 44px; }

@@ -46,9 +46,14 @@ export const GROUPS = [
     ],
   },
   {
-    key: 'type', label: 'Recipe type', options: [
-      { v: 'saved', label: 'Saved', emoji: '❤️', test: (r) => r.favorite },
-      { v: 'shared', label: 'Shared', emoji: '🌍', test: (r) => r.is_shared },
+    key: 'fav', label: 'Favourites', options: [
+      { v: 'fav', label: 'Favourites', emoji: '❤️', test: (r) => !!r.favorite },
+    ],
+  },
+  {
+    key: 'type', label: 'Recipe source', options: [
+      { v: 'mine', label: 'My recipes', emoji: '👨‍🍳', test: (r) => (r.source || '') !== 'Gousto' },
+      { v: 'sizzler', label: 'Sizzler recipes', emoji: '🔥', test: (r) => (r.source || '') === 'Gousto' },
     ],
   },
 ]

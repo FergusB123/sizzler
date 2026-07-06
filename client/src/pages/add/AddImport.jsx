@@ -4,7 +4,7 @@ import RecipeForm from '../../components/RecipeForm'
 import { IconButton, Button, ExtractLoader, useToast } from '../../components/ui/primitives'
 import Icon from '../../components/Icon'
 import { useGoBack } from '../../lib/useGoBack'
-import { extractFromUrl, extractFromImage, createRecipe, uploadRecipeImage } from '../../lib/api'
+import { extractFromUrl, extractFromImage, createRecipe } from '../../lib/api'
 import './add.css'
 
 const COPY = {
@@ -39,9 +39,6 @@ export default function AddImport({ mode }) {
   function removePhoto(i) {
     setPhotos((p) => { try { URL.revokeObjectURL(p[i]?.url) } catch { /* ignore */ } return p.filter((_, j) => j !== i) })
   }
-  function setCoverPhoto(f) {
-    if (f) setPhotos((p) => [{ file: f, url: URL.createObjectURL(f) }, ...p.slice(1)])
-  }
 
   async function runExtract() {
     setError(null)
@@ -66,10 +63,8 @@ export default function AddImport({ mode }) {
   async function save(recipe) {
     setSaving(true)
     try {
-      let image_url = recipe.image_url
-      // For photo imports, keep the user's first photo as the recipe image.
-      if (mode === 'photo' && photos[0] && !image_url) image_url = await uploadRecipeImage(photos[0].file)
-      const created = await createRecipe({ ...recipe, image_url })
+      // Photo imports now carry an AI-generated dish image from extraction.
+      const created = await createRecipe({ ...recipe, image_url: recipe.image_url })
       toast.success('Recipe saved')
       navigate(`/recipes/${created.id}`, { replace: true })
     } catch (e) {
@@ -104,8 +99,6 @@ export default function AddImport({ mode }) {
           initial={extracted}
           onSubmit={save}
           submitting={saving}
-          imagePreview={mode === 'photo' ? photos[0]?.url : ''}
-          onPickImage={mode === 'photo' ? setCoverPhoto : undefined}
           sourceKind={extracted.source_kind || mode}
           sourceUrl={extracted.source_url || (mode !== 'photo' ? url : '')}
         />

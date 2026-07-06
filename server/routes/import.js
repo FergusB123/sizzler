@@ -96,7 +96,12 @@ router.post('/photo', auth, upload.array('images', 8), async (req, res) => {
     images = images.filter((i) => i.buffer && i.buffer.length);
     if (!images.length) return res.status(400).json({ error: 'Provide an image' });
     const recipe = await extractFromImages(images);
-    if (recipeOrError(recipe, res)) res.json({ recipe });
+    if (!recipeOrError(recipe, res)) return;
+    // Generate an appetising AI image of the dish rather than keeping the photo
+    // of the page (which is usually just text on paper).
+    let image_url = null;
+    try { const img = await generateRecipeImage(recipe.title, recipe.description); image_url = img?.url || null; } catch { /* best-effort */ }
+    res.json({ recipe, image_url });
   } catch (err) { res.status(500).json({ error: 'extract_failed', message: err.message }); }
 });
 

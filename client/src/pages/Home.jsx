@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
-import { getActivePlan, getPlanSlots, listRecipes, getShoppingList, iso } from '../lib/api'
+import { getActivePlan, getPlanSlots, listRecipes, getShoppingList, todayISO } from '../lib/api'
 import { shoppingListStale } from '../lib/shoppingList'
 import { thumbUrl } from '../components/RecipeCard'
 import Icon from '../components/Icon'
@@ -64,15 +64,14 @@ export default function Home() {
   const planDays = plan ? Math.round((new Date(plan.end_date) - new Date(plan.start_date)) / 86400000) + 1 : 0
 
   // Build the "hero day" — today if it has meals, else the next day with meals.
-  const today = iso(new Date())
+  const today = todayISO()
   const dates = [...new Set(filled.map((s) => s.slot_date))].sort()
   const heroDate = dates.find((d) => d >= today) || dates[dates.length - 1]
   const heroSlots = filled.filter((s) => s.slot_date === heroDate)
   const heroLabel = heroDate === today ? `Tonight · ${weekday(heroDate)}` : weekday(heroDate)
 
-  // "The week ahead" starts on today and runs to the end of the plan — never
-  // shows days that have already passed. Empty days nudge the user to fill them.
-  const upcoming = [...new Set(slots.map((s) => s.slot_date))].filter((d) => d >= today).sort()
+  // "The week ahead" shows the whole plan; days already gone are greyed out.
+  const weekDates = [...new Set(slots.map((s) => s.slot_date))].sort()
 
   const Header = (
     <header className="home-head">
@@ -127,10 +126,11 @@ export default function Home() {
 
           <div className="section-title">The week ahead</div>
           <div className="week-list">
-            {upcoming.map((d) => {
+            {weekDates.map((d) => {
               const r = slots.find((s) => s.slot_date === d && s.recipe)?.recipe
+              const past = d < today
               return r ? (
-                <Link to={`/recipes/${r.id}`} className="week-row" key={d}>
+                <Link to={`/recipes/${r.id}`} className={`week-row ${past ? 'past' : ''}`} key={d}>
                   <span className="week-day">{shortDay(d)}</span>
                   <div className="week-meals">
                     <span className="week-meal"><Thumb recipe={r} size={30} /><span>{r.title}</span></span>
@@ -138,10 +138,10 @@ export default function Home() {
                   <Icon name="arrowRight" size={16} />
                 </Link>
               ) : (
-                <Link to="/plan/manual" className="week-row empty" key={d}>
+                <Link to="/plan/manual" className={`week-row empty ${past ? 'past' : ''}`} key={d}>
                   <span className="week-day">{shortDay(d)}</span>
-                  <div className="week-meals"><span className="week-empty">Nothing planned — add a dinner</span></div>
-                  <Icon name="plus" size={16} />
+                  <div className="week-meals"><span className="week-empty">{past ? 'No dinner' : 'Nothing planned — add a dinner'}</span></div>
+                  {!past && <Icon name="plus" size={16} />}
                 </Link>
               )
             })}

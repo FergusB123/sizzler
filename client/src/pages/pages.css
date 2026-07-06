@@ -163,6 +163,9 @@
 .week-row.empty { border-style: dashed; box-shadow: none; background: transparent; }
 .week-row.empty .week-day { color: var(--text-faint); }
 .week-empty { font-size: 13.5px; color: var(--text-dim); }
+/* Days already gone — greyed out and de-emphasised */
+.week-row.past { opacity: 0.42; box-shadow: none; }
+.week-row.past .week-day { color: var(--text-faint); }
 .week-day { font-family: var(--font-display); font-weight: 600; color: var(--orange-500); width: 38px; flex-shrink: 0; font-size: 14px; }
 .week-meals { display: flex; gap: 14px; overflow: hidden; flex: 1; }
 .week-meal { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1; }

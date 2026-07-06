@@ -106,7 +106,9 @@ body {
   text-rendering: optimizeLegibility;
   overscroll-behavior-y: none;
 }
-button { font-family: inherit; }
+/* color: inherit is essential — iOS Safari otherwise paints button text with the
+   system tint (blue). This is what made "Shopping list"/"Replan" etc. show blue. */
+button { font-family: inherit; color: inherit; }
 input, textarea, select { font-family: inherit; font-size: 16px; }
 a { color: inherit; text-decoration: none; }
 /* iOS Safari turns links/text blue two ways: dark-mode link recolouring and

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Reorder, useDragControls } from 'framer-motion'
 import { useProfile } from '../context/ProfileContext'
-import { getActivePlan, createPlan, getPlanSlots, assignSlot, assignSlots, listRecipes, getShoppingList } from '../lib/api'
+import { getActivePlan, createPlan, getPlanSlots, assignSlot, assignSlots, listRecipes, getShoppingList, todayISO } from '../lib/api'
 import { shoppingListStale } from '../lib/shoppingList'
 import { autoAllocate } from '../lib/planner'
 import { Button, SizzleLoader, Sheet, IconButton, useToast } from '../components/ui/primitives'
@@ -22,9 +22,10 @@ const dnum = (d) => new Date(d + 'T00:00:00').getDate()
 function NightItem({ item, date, index, onOpenRecipe, onChange, onDragEnd }) {
   const controls = useDragControls()
   const recipe = item.recipe
+  const past = date < todayISO()
   return (
     <Reorder.Item value={item} dragListener={false} dragControls={controls} onDragEnd={onDragEnd}
-      className={`mp-night ${recipe ? 'filled' : ''}`}>
+      className={`mp-night ${recipe ? 'filled' : ''} ${past ? 'past' : ''}`}>
       <div className="mp-daybadge">
         <span className="mp-dow">{dow(date)}</span>
         <span className="mp-dnum">{dnum(date)}</span>

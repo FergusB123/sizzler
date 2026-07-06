@@ -83,7 +83,7 @@ export async function extractFromImage(files) {
   const list = Array.isArray(files) ? files : [files]
   const images = await Promise.all(list.map((f) => compressImage(f)))
   const res = await data(api.post('/import/photo', { images }))
-  return normaliseExtracted(res.recipe)
+  return { ...normaliseExtracted(res.recipe), image_url: res.image_url || '' }
 }
 export async function extractFromUrl(url) {
   const res = await data(api.post('/import/url', { url }))
@@ -135,3 +135,9 @@ export const addManualShoppingItem = (planId, name, category = 'other') =>
 
 // ---------- util ----------
 export const iso = (d) => new Date(d).toISOString().slice(0, 10)
+// Local calendar date (YYYY-MM-DD). Avoids the UTC off-by-one that toISOString
+// gives, so "today" matches the user's actual day for plan comparisons.
+export const todayISO = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}

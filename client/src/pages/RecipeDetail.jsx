@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getRecipe, setShared, setFavorite, deleteRecipe, acceptInferredField, getActivePlan, getPlanSlots, assignSlot } from '../lib/api'
+import { getRecipe, setFavorite, deleteRecipe, acceptInferredField, getActivePlan, getPlanSlots, assignSlot } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { Button, IconButton, Badge, SizzleLoader, useToast, Sheet } from '../components/ui/primitives'
 import Icon from '../components/Icon'
@@ -25,21 +25,35 @@ export default function RecipeDetail() {
   const [plan, setPlan] = useState(undefined)
   const [slots, setSlots] = useState([])
 
-  useEffect(() => { getRecipe(id).then(setRecipe).catch(() => toast.error('Recipe not found')) }, [id])
+  useEffect(() => {
+    getRecipe(id).then(setRecipe).catch(() => toast.error('Recipe not found'))
+    // Load the plan up front so we know whether this recipe is already in it.
+    ;(async () => {
+      const p = await getActivePlan()
+      setPlan(p)
+      if (p) setSlots(await getPlanSlots(p.id))
+    })()
+  }, [id])
 
-  async function openPlanSheet() {
-    setPlanSheet(true)
-    const p = await getActivePlan()
-    setPlan(p)
-    if (p) setSlots(await getPlanSlots(p.id))
-  }
+  function openPlanSheet() { setPlanSheet(true) }
 
   async function addToSlot(slot) {
     setPlanSheet(false)
     try {
       await assignSlot(slot.id, recipe.id)
+      setSlots((arr) => arr.map((s) => s.id === slot.id ? { ...s, recipe_id: recipe.id, recipe } : s))
       const d = new Date(slot.slot_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short' })
       toast.success(`Added to ${d} ${MEAL_LABEL[slot.meal].toLowerCase()}`)
+    } catch (e) { toast.error(e.message) }
+  }
+
+  async function removeFromPlan() {
+    const targets = slots.filter((s) => String(s.recipe_id) === String(recipe.id))
+    if (!targets.length) return
+    try {
+      await Promise.all(targets.map((s) => assignSlot(s.id, null)))
+      setSlots((arr) => arr.map((s) => targets.some((t) => t.id === s.id) ? { ...s, recipe_id: null, recipe: null } : s))
+      toast.success('Removed from plan')
     } catch (e) { toast.error(e.message) }
   }
 
@@ -48,13 +62,7 @@ export default function RecipeDetail() {
   const isOwner = recipe.user_id === user?.id
   const inferred = new Set(recipe.ai_inferred_fields || [])
   const totalTime = (recipe.prep_minutes || 0) + (recipe.cook_minutes || 0)
-
-  async function toggleShare() {
-    const next = !recipe.is_shared
-    setRecipe({ ...recipe, is_shared: next })
-    try { await setShared(recipe.id, next); toast.success(next ? 'Shared to the community' : 'Made private') }
-    catch (e) { toast.error(e.message); setRecipe({ ...recipe, is_shared: !next }) }
-  }
+  const isPlanned = slots.some((s) => String(s.recipe_id) === String(recipe.id))
 
   async function toggleFav() {
     const next = !recipe.favorite
@@ -115,20 +123,14 @@ export default function RecipeDetail() {
           {recipe.tags?.map((t) => <Badge key={t}>#{t}</Badge>)}
         </div>
 
-        <Button variant="ghost" block className="rd-addplan" onClick={openPlanSheet}>
-          <Icon name="calendar" size={18} /> Add to plan
-        </Button>
-
-        {/* Share toggle (owner only) */}
-        {isOwner && (
-          <button className={`rd-share ${recipe.is_shared ? 'on' : ''}`} onClick={toggleShare}>
-            <span className="rd-share-ic"><Icon name="globe" size={20} /></span>
-            <div>
-              <b>Share to community</b>
-              <span>{recipe.is_shared ? 'Other cooks can discover this' : 'Let other cooks discover it'}</span>
-            </div>
-            <span className={`switch ${recipe.is_shared ? 'on' : ''}`} />
-          </button>
+        {isPlanned ? (
+          <Button variant="soft" block className="rd-addplan" onClick={removeFromPlan}>
+            <Icon name="x" size={18} /> Remove from plan
+          </Button>
+        ) : (
+          <Button variant="ghost" block className="rd-addplan" onClick={openPlanSheet}>
+            <Icon name="calendar" size={18} /> Add to plan
+          </Button>
         )}
 
         {recipe.description && <p className="rd-desc">{recipe.description}</p>}
