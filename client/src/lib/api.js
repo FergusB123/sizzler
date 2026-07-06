@@ -87,6 +87,10 @@ export async function extractFromUrl(url) {
   const res = await data(api.post('/import/url', { url }))
   return { ...normaliseExtracted(res.recipe), image_url: res.image_url || '', source_url: res.source_url, source_kind: res.source_kind }
 }
+export async function generateRecipeIdeas(prompt) {
+  const res = await data(api.post('/import/ai/ideas', { prompt }))
+  return res.ideas || []
+}
 export async function generateRecipe(prompt) {
   const res = await data(api.post('/import/ai', { prompt }))
   return { ...normaliseExtracted(res.recipe), image_url: res.image_url || '' }

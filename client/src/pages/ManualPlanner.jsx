@@ -132,7 +132,6 @@ export default function ManualPlanner() {
       <div className="mp-hero">
         <div className="mp-hero-top">
           <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
-          <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} className="mp-hero-filter" />
         </div>
         <h1 className="mp-hero-title">Your plan</h1>
         <div className="mp-hero-meta">
@@ -142,8 +141,6 @@ export default function ManualPlanner() {
           )}
         </div>
       </div>
-
-      <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
 
       <Reorder.Group axis="y" values={order} onReorder={setOrder} className="mp-nights">
         {order.map((item, i) => (

@@ -4,10 +4,14 @@ import Icon from '../../components/Icon'
 import { useGoBack } from '../../lib/useGoBack'
 import './add.css'
 
-const AI_METHODS = [
-  { to: '/add/url', icon: 'link', title: 'Paste a link', desc: 'Import from any recipe website' },
-  { to: '/add/photo', icon: 'camera', title: 'Snap a photo', desc: 'From a cookbook or recipe card' },
-  { to: '/add/social', icon: 'film', title: 'Social link', desc: 'TikTok, Instagram or YouTube' },
+// One consistent list. Sizzler AI leads with an accent; the rest share the
+// same row treatment so nothing feels bolted on.
+const METHODS = [
+  { to: '/add/ai', icon: 'sparkle', title: 'Sizzler AI', desc: 'Describe a craving, get a full recipe', tag: 'NEW', accent: true },
+  { to: '/add/url', icon: 'link', title: 'Paste a link', desc: 'Import from any recipe website', tag: 'AI' },
+  { to: '/add/photo', icon: 'camera', title: 'Snap a photo', desc: 'From a cookbook or recipe card', tag: 'AI' },
+  { to: '/add/social', icon: 'film', title: 'Social link', desc: 'TikTok, Instagram or YouTube', tag: 'AI' },
+  { to: '/add/manual', icon: 'pencil', title: 'Write it out', desc: 'Enter the recipe by hand' },
 ]
 
 export default function AddHub() {
@@ -24,31 +28,16 @@ export default function AddHub() {
         <h1 style={{ fontSize: 30, marginTop: 4, letterSpacing: '-0.03em' }}>Add a recipe</h1>
       </div>
 
-      <button className="ai-card" onClick={() => navigate('/add/ai')}>
-        <span className="ai-card-ic"><Icon name="sparkle" size={22} /></span>
-        <div className="ai-card-txt">
-          <b>Sizzler AI</b>
-          <span>Describe a craving — get a full recipe, made for you</span>
-        </div>
-        <Icon name="arrowRight" size={18} />
-      </button>
-
-      <div className="add-divider"><span>or add your own</span></div>
-
       <div className="add-group">
-        {AI_METHODS.map((m) => (
-          <button key={m.to} className="add-row" onClick={() => navigate(m.to)}>
+        {METHODS.map((m) => (
+          <button key={m.to} className={`add-row ${m.accent ? 'accent' : ''}`} onClick={() => navigate(m.to)}>
             <span className="ar-ic"><Icon name={m.icon} size={20} /></span>
             <div className="ar-txt"><b>{m.title}</b><span>{m.desc}</span></div>
-            <span className="ar-ai">AI</span>
+            {m.tag && <span className={`ar-tag ${m.accent ? 'new' : ''}`}>{m.tag}</span>}
+            <Icon name="chevron" size={17} className="ar-chev" />
           </button>
         ))}
       </div>
-
-      <button className="add-row dark" onClick={() => navigate('/add/manual')}>
-        <span className="ar-ic"><Icon name="pencil" size={20} /></span>
-        <div className="ar-txt"><b>Write it out</b><span>Enter the recipe by hand</span></div>
-      </button>
     </div>
   )
 }

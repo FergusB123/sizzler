@@ -104,6 +104,46 @@ async function generateRecipe(prompt) {
   return runExtraction([{ type: 'text', text: `Create a dinner recipe for this request:\n\n${prompt}` }], GENERATE_PROMPT);
 }
 
+const IDEAS_TOOL = {
+  name: 'suggest_recipes',
+  description: 'Return a short list of distinct dinner ideas for the user to choose from.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      ideas: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            title: { type: 'string', description: 'A specific, appetising dish name.' },
+            blurb: { type: 'string', description: 'One enticing sentence describing the dish.' },
+            cuisine: { type: 'string' },
+            time_minutes: { type: 'integer', description: 'Rough total time in minutes.' },
+          },
+          required: ['title', 'blurb'],
+        },
+      },
+    },
+    required: ['ideas'],
+  },
+};
+
+const IDEAS_PROMPT = `You are Sizzler's dinner idea generator. Given a request, propose 4 DISTINCT, appealing dinner ideas that fit it — vary the cuisine, main ingredient and style so the choices feel different. Each idea needs a specific appetising title (not generic), a one-sentence blurb, a cuisine, and a rough total time in minutes. Honour any constraints (diet, key ingredients, time, spice). Always return via the suggest_recipes tool.`;
+
+// Propose a few recipe ideas (title + blurb) for the user to pick from.
+async function generateRecipeIdeas(prompt) {
+  const response = await getClient().messages.create({
+    model: MODEL,
+    max_tokens: 1024,
+    system: IDEAS_PROMPT,
+    tools: [IDEAS_TOOL],
+    tool_choice: { type: 'tool', name: 'suggest_recipes' },
+    messages: [{ role: 'user', content: [{ type: 'text', text: `Suggest 4 dinner ideas for: ${prompt}` }] }],
+  });
+  const toolUse = response.content.find((b) => b.type === 'tool_use');
+  return toolUse?.input?.ideas || [];
+}
+
 async function extractFromText(text) {
   return runExtraction([{ type: 'text', text: `Extract the recipe from this content:\n\n${text}` }]);
 }
@@ -117,4 +157,4 @@ async function extractFromImages(images) {
   return runExtraction([...imageBlocks, { type: 'text', text: 'Extract the recipe from this image.' }]);
 }
 
-module.exports = { extractFromText, extractFromImages, generateRecipe, aiConfigured, MODEL };
+module.exports = { extractFromText, extractFromImages, generateRecipe, generateRecipeIdeas, aiConfigured, MODEL };
