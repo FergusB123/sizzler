@@ -112,6 +112,9 @@
 .home-card.done { background: var(--orange-50); border-color: #f6c8b3; }
 .home-card.done .hc-ic { background: var(--orange-500); color: #fff; }
 .home-card.done b { color: var(--orange-600); }
+.home-card.stale { background: #fff4e0; border-color: #f0cf8c; }
+.home-card.stale .hc-ic { background: #e08a1e; color: #fff; }
+.home-card.stale b { color: #b3630c; }
 
 /* "Your plan" banner — opens the full plan for reordering/reshuffling */
 .plan-banner { display: flex; align-items: center; gap: 13px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 16px; box-shadow: var(--shadow-sm); margin-bottom: 14px; color: var(--text); text-decoration: none; transition: transform 0.14s var(--ease-out); }
@@ -157,6 +160,9 @@
 .week-list { display: flex; flex-direction: column; gap: 8px; }
 .week-row { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 14px; box-shadow: var(--shadow-sm); text-decoration: none; color: inherit; }
 .week-row > svg:last-child { color: var(--text-faint); flex-shrink: 0; }
+.week-row.empty { border-style: dashed; box-shadow: none; background: transparent; }
+.week-row.empty .week-day { color: var(--text-faint); }
+.week-empty { font-size: 13.5px; color: var(--text-dim); }
 .week-day { font-family: var(--font-display); font-weight: 600; color: var(--orange-500); width: 38px; flex-shrink: 0; font-size: 14px; }
 .week-meals { display: flex; gap: 14px; overflow: hidden; flex: 1; }
 .week-meal { display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1; }

@@ -10,6 +10,8 @@ import { INFERRED_LABELS } from '../lib/constants'
 import './recipe-detail.css'
 
 const MEAL_LABEL = { dinner: 'Dinner' }
+const dow = (d) => new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short' })
+const dnum = (d) => new Date(d + 'T00:00:00').getDate()
 
 export default function RecipeDetail() {
   const { id } = useParams()
@@ -173,7 +175,7 @@ export default function RecipeDetail() {
         </div>
       </Sheet>
 
-      <Sheet open={planSheet} onClose={() => setPlanSheet(false)} title="Add to plan">
+      <Sheet open={planSheet} onClose={() => setPlanSheet(false)} title="Add to your plan">
         {plan === undefined ? (
           <p className="muted">Loading your plan…</p>
         ) : !plan ? (
@@ -181,23 +183,38 @@ export default function RecipeDetail() {
             <p className="muted" style={{ marginBottom: 16 }}>You don't have an active plan yet.</p>
             <Button block onClick={() => navigate('/plan')}>Create a plan</Button>
           </div>
-        ) : (
-          <>
-            <p className="muted" style={{ margin: '0 0 14px', fontSize: 13.5 }}>Pick a slot for <b style={{ color: 'var(--text)' }}>{recipe.title}</b>.</p>
-            <div className="rd-slotpick">
-              {slots.filter((s) => recipe.meal_types?.includes(s.meal)).map((s) => (
-                <button key={s.id} className={`rd-slotpick-item ${s.recipe_id ? 'taken' : ''}`} onClick={() => addToSlot(s)}>
-                  <span className="rsp-day">{new Date(s.slot_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })}</span>
-                  <span className="rsp-meal">{MEAL_LABEL[s.meal]}</span>
-                  <span className="rsp-state">{s.recipe ? `Replace ${s.recipe.title}` : 'Empty'}</span>
-                </button>
-              ))}
-              {slots.filter((s) => recipe.meal_types?.includes(s.meal)).length === 0 && (
-                <p className="muted">No matching meal slots in this plan.</p>
-              )}
-            </div>
-          </>
-        )}
+        ) : (() => {
+          const daySlots = slots.filter((s) => recipe.meal_types?.includes(s.meal))
+          const allFull = daySlots.length > 0 && daySlots.every((s) => s.recipe_id)
+          return (
+            <>
+              <p className="rd-plan-note">
+                {allFull
+                  ? <>Your week's fully planned — pick a night to <b>swap in</b> {recipe.title}.</>
+                  : <>Pick a night for <b>{recipe.title}</b>.</>}
+              </p>
+              <div className="rd-plan-nights">
+                {daySlots.map((s) => (
+                  <button key={s.id} className={`rd-plan-night ${s.recipe ? 'filled' : ''}`} onClick={() => addToSlot(s)}>
+                    <span className="rd-pn-badge"><span className="rd-pn-dow">{dow(s.slot_date)}</span><span className="rd-pn-dnum">{dnum(s.slot_date)}</span></span>
+                    <span className="rd-pn-body">
+                      {s.recipe ? (
+                        <>
+                          <span className="rd-pn-cur">{s.recipe.image_url ? <img src={s.recipe.image_url} alt="" /> : null}<b>{s.recipe.title}</b></span>
+                          <span className="rd-pn-act">Tap to swap</span>
+                        </>
+                      ) : (
+                        <span className="rd-pn-empty">Free night · tap to add</span>
+                      )}
+                    </span>
+                    <Icon name={s.recipe ? 'swap' : 'plus'} size={17} />
+                  </button>
+                ))}
+                {daySlots.length === 0 && <p className="muted">No dinner slots in this plan.</p>}
+              </div>
+            </>
+          )
+        })()}
       </Sheet>
     </div>
   )

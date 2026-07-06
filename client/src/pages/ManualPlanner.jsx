@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Reorder, useDragControls } from 'framer-motion'
 import { useProfile } from '../context/ProfileContext'
 import { getActivePlan, createPlan, getPlanSlots, assignSlot, assignSlots, listRecipes, getShoppingList } from '../lib/api'
+import { shoppingListStale } from '../lib/shoppingList'
 import { autoAllocate } from '../lib/planner'
 import { Button, SizzleLoader, Sheet, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
@@ -59,7 +60,7 @@ export default function ManualPlanner() {
   const [order, setOrder] = useState([]) // [{ key, recipe }] in night order
   const [picker, setPicker] = useState(null) // { index }
   const [q, setQ] = useState('')
-  const [listBuilt, setListBuilt] = useState(false)
+  const [listItems, setListItems] = useState([])
   const keyRef = useRef(0)
   const orderRef = useRef(order)
   orderRef.current = order
@@ -74,7 +75,7 @@ export default function ManualPlanner() {
       setSlots(s)
       setOrder(s.map((x) => ({ key: `n${keyRef.current++}`, recipe: x.recipe })))
       setRecipes(await listRecipes())
-      try { const items = await getShoppingList(p.id); setListBuilt((items?.length || 0) > 0) } catch { /* no list yet */ }
+      try { setListItems(await getShoppingList(p.id)) } catch { /* no list yet */ }
       setLoading(false)
     })()
   }, [])
@@ -126,6 +127,10 @@ export default function ManualPlanner() {
   if (loading) return <div className="screen no-nav"><SizzleLoader message="Loading planner…" /></div>
 
   const filledCount = order.filter((o) => o.recipe).length
+  const listBuilt = listItems.some((i) => !i.manual)
+  // Compare the current arrangement against the list the shopping list was built
+  // from — if they've diverged, prompt to refresh it.
+  const listStale = listBuilt && shoppingListStale(order.map((o) => ({ recipe_id: o.recipe?.id })), listItems)
 
   return (
     <div className="screen no-nav mp-screen">
@@ -150,9 +155,11 @@ export default function ManualPlanner() {
         ))}
       </Reorder.Group>
 
-      {!listBuilt && (
+      {!listBuilt ? (
         <Button block lg className="mp-done" onClick={() => navigate('/shopping')}>Done — build shopping list</Button>
-      )}
+      ) : listStale ? (
+        <Button block lg className="mp-done" onClick={() => navigate('/shopping')}><Icon name="shuffle" size={17} /> Update shopping list</Button>
+      ) : null}
 
       <Sheet open={picker !== null} onClose={() => { setPicker(null); setQ('') }} title={picker !== null ? dayLabel(dates[picker.index]) : ''}>
         <div className="lib-controls">
@@ -166,10 +173,12 @@ export default function ManualPlanner() {
         {picker !== null && order[picker.index]?.recipe && <Button variant="soft" block onClick={() => pick(null)} style={{ marginBottom: 12 }}>Clear this night</Button>}
         <div className="recipe-grid swap-grid">
           {pickList.map((r) => (
-            <button key={r.id} className="swap-tile" onClick={() => pick(r.id)}>
-              <RecipeCard recipe={r} origin="you" />
-              <span className="swap-add"><Icon name="plus" size={15} /> Add to plan</span>
-            </button>
+            <div key={r.id} className="swap-tile">
+              <Link to={`/recipes/${r.id}`} className="swap-card-link" onClick={() => setPicker(null)}>
+                <RecipeCard recipe={r} origin="you" />
+              </Link>
+              <button className="swap-add" onClick={() => pick(r.id)}><Icon name="plus" size={15} /> Add to plan</button>
+            </div>
           ))}
         </div>
         {pickList.length === 0 && <p className="muted">No recipes match. Adjust your filters or search.</p>}

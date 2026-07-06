@@ -4,7 +4,7 @@ import {
   getActivePlan, getPlanSlots, getShoppingList, saveShoppingList,
   updateShoppingItem, addManualShoppingItem,
 } from '../lib/api'
-import { buildShoppingList, CATEGORIES } from '../lib/shoppingList'
+import { buildShoppingList, shoppingListStale, CATEGORIES } from '../lib/shoppingList'
 import { Button, EmptyState, SizzleLoader, Segmented, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import './shopping.css'
@@ -17,6 +17,7 @@ export default function Shopping() {
   const toast = useToast()
   const [plan, setPlan] = useState(undefined)
   const [items, setItems] = useState([])
+  const [slots, setSlots] = useState([])
   const [loading, setLoading] = useState(true)
   const [mode, setMode] = useState('home')
   const [newItem, setNewItem] = useState('')
@@ -27,8 +28,9 @@ export default function Shopping() {
     const p = await getActivePlan()
     setPlan(p)
     if (!p) { setLoading(false); return }
-    const existing = await getShoppingList(p.id)
+    const [existing, s] = await Promise.all([getShoppingList(p.id), getPlanSlots(p.id)])
     setItems(existing)
+    setSlots(s)
     setLoading(false)
   }
 
@@ -105,6 +107,7 @@ export default function Shopping() {
   const doneField = mode === 'home' ? 'have_at_home' : 'in_cart'
   const doneCount = visible.filter((i) => i[doneField]).length
   const allDone = mode === 'instore' && visible.length > 0 && doneCount === visible.length
+  const stale = shoppingListStale(slots, items)
 
   return (
     <div className="screen">
@@ -125,6 +128,13 @@ export default function Shopping() {
       <p className="shop-hint">
         {mode === 'home' ? <>Tick off what you <b>already have</b> before you shop.</> : 'Tick items into your trolley as you shop.'}
       </p>
+
+      {stale && (
+        <div className="shop-stale">
+          <div className="shop-stale-txt"><b>Your plan changed</b><span>Rebuild to match your latest dinners.</span></div>
+          <Button sm onClick={regenerate}>Rebuild</Button>
+        </div>
+      )}
 
       <div className="shop-progress">
         <div className="shop-progress-head"><span>{doneCount} of {visible.length} done</span><b>{Math.max(0, visible.length - doneCount)}</b></div>

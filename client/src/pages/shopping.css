@@ -6,6 +6,11 @@
 .shop-hint { font-size: 13px; color: var(--text-dim); margin: 12px 2px 16px; line-height: 1.45; }
 .shop-hint b { color: var(--text); font-weight: 600; }
 
+.shop-stale { display: flex; align-items: center; gap: 12px; background: #fff4e0; border: 1px solid #f0cf8c; border-radius: var(--r-lg); padding: 12px 14px; margin-bottom: 16px; }
+.shop-stale-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.shop-stale-txt b { font-size: 14px; color: #b3630c; }
+.shop-stale-txt span { font-size: 12.5px; color: var(--text-dim); }
+
 .shop-progress { background: var(--charcoal); border-radius: var(--r-lg); padding: 14px 16px 16px; margin-bottom: 24px; }
 .shop-progress-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 11px; }
 .shop-progress-head span { color: var(--charcoal-dim); font-size: 13px; font-weight: 600; }

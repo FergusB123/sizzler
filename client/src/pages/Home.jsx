@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
 import { getActivePlan, getPlanSlots, listRecipes, getShoppingList, iso } from '../lib/api'
+import { shoppingListStale } from '../lib/shoppingList'
 import Icon from '../components/Icon'
 import { SizzleLoader } from '../components/ui/primitives'
 import './pages.css'
@@ -28,19 +29,23 @@ export default function Home() {
   const [plan, setPlan] = useState(undefined)
   const [slots, setSlots] = useState([])
   const [shopComplete, setShopComplete] = useState(false)
+  const [shopStale, setShopStale] = useState(false)
 
   useEffect(() => {
     (async () => {
       const [r, p] = await Promise.all([listRecipes(), getActivePlan()])
       setRecipes(r)
       setPlan(p)
-      setSlots(p ? await getPlanSlots(p.id) : [])
+      const s = p ? await getPlanSlots(p.id) : []
+      setSlots(s)
       if (p) {
         try {
           const items = await getShoppingList(p.id)
           // "Shop done" = every buyable item (not already at home) is in the cart.
           const buyable = items.filter((i) => !i.have_at_home)
           setShopComplete(buyable.length > 0 && buyable.every((i) => i.in_cart))
+          // The plan changed after the list was built → it needs refreshing.
+          setShopStale(shoppingListStale(s, items))
         } catch { /* no list yet */ }
       }
     })()
@@ -63,6 +68,10 @@ export default function Home() {
   const heroDate = dates.find((d) => d >= today) || dates[dates.length - 1]
   const heroSlots = filled.filter((s) => s.slot_date === heroDate)
   const heroLabel = heroDate === today ? `Tonight · ${weekday(heroDate)}` : weekday(heroDate)
+
+  // "The week ahead" starts on today and runs to the end of the plan — never
+  // shows days that have already passed. Empty days nudge the user to fill them.
+  const upcoming = [...new Set(slots.map((s) => s.slot_date))].filter((d) => d >= today).sort()
 
   const Header = (
     <header className="home-head">
@@ -104,10 +113,10 @@ export default function Home() {
           </Link>
 
           <div className="home-cards">
-            <button className={`home-card ${shopComplete ? 'done' : ''}`} onClick={() => navigate('/shopping')}>
-              <span className="hc-ic"><Icon name={shopComplete ? 'check' : 'cart'} size={20} /></span>
-              <b>{shopComplete ? 'Shop done' : 'Shopping list'}</b>
-              <span>{shopComplete ? 'Ingredients bought' : 'Ready to shop'}</span>
+            <button className={`home-card ${shopStale ? 'stale' : shopComplete ? 'done' : ''}`} onClick={() => navigate('/shopping')}>
+              <span className="hc-ic"><Icon name={shopStale ? 'shuffle' : shopComplete ? 'check' : 'cart'} size={20} /></span>
+              <b>{shopStale ? 'Update list' : shopComplete ? 'Shop done' : 'Shopping list'}</b>
+              <span>{shopStale ? 'Plan changed — refresh it' : shopComplete ? 'Ingredients bought' : 'Ready to shop'}</span>
             </button>
             <button className="home-card" onClick={() => navigate('/plan')}>
               <span className="hc-ic"><Icon name="shuffle" size={20} /></span>
@@ -117,18 +126,21 @@ export default function Home() {
 
           <div className="section-title">The week ahead</div>
           <div className="week-list">
-            {dates.map((d) => {
-              const day = filled.filter((s) => s.slot_date === d)
-              const r = day[0]?.recipe
-              return (
-                <Link to={r ? `/recipes/${r.id}` : '/plan/manual'} className="week-row" key={d}>
+            {upcoming.map((d) => {
+              const r = slots.find((s) => s.slot_date === d && s.recipe)?.recipe
+              return r ? (
+                <Link to={`/recipes/${r.id}`} className="week-row" key={d}>
                   <span className="week-day">{shortDay(d)}</span>
                   <div className="week-meals">
-                    {day.slice(0, 3).map((s) => (
-                      <span className="week-meal" key={s.id}><Thumb recipe={s.recipe} size={30} /><span>{s.recipe?.title}</span></span>
-                    ))}
+                    <span className="week-meal"><Thumb recipe={r} size={30} /><span>{r.title}</span></span>
                   </div>
                   <Icon name="arrowRight" size={16} />
+                </Link>
+              ) : (
+                <Link to="/plan/manual" className="week-row empty" key={d}>
+                  <span className="week-day">{shortDay(d)}</span>
+                  <div className="week-meals"><span className="week-empty">Nothing planned — add a dinner</span></div>
+                  <Icon name="plus" size={16} />
                 </Link>
               )
             })}

@@ -109,6 +109,15 @@ body {
 button { font-family: inherit; }
 input, textarea, select { font-family: inherit; font-size: 16px; }
 a { color: inherit; text-decoration: none; }
+/* iOS Safari auto-detects dates/times/etc and wraps them in blue system links.
+   Force them to inherit the real text colour so recipe titles/times stay on-brand. */
+a[x-apple-data-detectors],
+a[x-apple-data-detectors] * {
+  color: inherit !important;
+  text-decoration: none !important;
+  -webkit-text-fill-color: inherit !important;
+  pointer-events: none;
+}
 img { display: block; max-width: 100%; }
 
 h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; margin: 0; line-height: 1.04; }

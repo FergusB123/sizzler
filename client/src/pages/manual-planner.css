@@ -39,10 +39,10 @@
 
 .mp-done { margin-top: 8px; }
 
-/* Swap/change-recipe picker: full recipe cards + quick add-to-plan button */
+/* Swap/change-recipe picker: tap the card to view the recipe, the button to add */
 .swap-grid { margin-top: 4px; }
-.swap-tile { display: flex; flex-direction: column; background: none; border: none; padding: 0; cursor: pointer; text-align: left; }
-.swap-tile .recipe-card { width: 100%; }
-.swap-tile .rc-link, .swap-tile > .recipe-card { pointer-events: none; }
-.swap-add { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; width: 100%; background: var(--orange-50); color: var(--orange-600); border-radius: var(--r-md); padding: 9px; font-size: 13px; font-weight: 600; transition: background 0.15s, color 0.15s; }
-.swap-tile:active .swap-add { background: var(--orange-500); color: #fff; }
+.swap-tile { display: flex; flex-direction: column; }
+.swap-card-link { display: block; text-decoration: none; color: inherit; }
+.swap-card-link .recipe-card { width: 100%; }
+.swap-add { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; width: 100%; background: var(--orange-50); color: var(--orange-600); border: none; border-radius: var(--r-md); padding: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s, transform 0.12s var(--ease-out); }
+.swap-add:active { transform: scale(0.96); background: var(--orange-500); color: #fff; }

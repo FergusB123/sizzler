@@ -131,6 +131,21 @@ function normaliseIngredient(ing) {
   return { name: cap(name), quantity, unit }
 }
 
+// Has the plan changed since this shopping list was built? Compares the set of
+// recipes currently on the plan with the set the list was generated from (via
+// each item's `from_recipes`). Manual items are ignored. Returns false when
+// there's no real list yet, so callers can treat it as "nothing to update".
+export function shoppingListStale(slots, items) {
+  const generated = (items || []).filter((i) => !i.manual)
+  if (generated.length === 0) return false
+  const covered = new Set(generated.flatMap((i) => (i.from_recipes || []).map(Number)))
+  const current = new Set((slots || []).filter((s) => s.recipe_id).map((s) => Number(s.recipe_id)))
+  if (current.size === 0) return false
+  for (const id of current) if (!covered.has(id)) return true
+  for (const id of covered) if (!current.has(id)) return true
+  return false
+}
+
 /**
  * @param {Array} slots  plan_slots joined with `recipe`
  * @returns {Array} shopping_list_items rows (without ids — caller persists)
