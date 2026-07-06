@@ -44,8 +44,17 @@ const INSERT_PLACE = Array.from({ length: 21 }, (_, i) => `$${i + 1}`).join(', '
 // ---- image upload (memory → Cloudinary/local) ----
 router.post('/upload', auth, upload.single('image'), async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: 'No image' });
-    const url = await uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype);
+    // Multipart in dev; base64 JSON on Vercel (serverless consumes the stream).
+    let buffer = null, mimetype = 'image/jpeg', name = 'upload.jpg';
+    if (req.file) {
+      buffer = req.file.buffer; mimetype = req.file.mimetype; name = req.file.originalname;
+    } else if (req.body?.image) {
+      mimetype = req.body.mimetype || 'image/jpeg';
+      name = req.body.filename || 'upload.jpg';
+      buffer = Buffer.from(req.body.image, 'base64');
+    }
+    if (!buffer || !buffer.length) return res.status(400).json({ error: 'No image' });
+    const url = await uploadFile(buffer, name, mimetype);
     res.json({ url });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });

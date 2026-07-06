@@ -14,10 +14,35 @@ export const completeOnboarding = (prefs) =>
   updateProfile({ ...prefs, onboarded_at: new Date().toISOString() })
 
 // ---------- recipe images ----------
+// Downscale + re-encode to JPEG so the base64 payload stays well under Vercel's
+// request-size limit and the vision call is fast. Falls back to the raw file's
+// base64 if canvas encoding isn't available.
+export function compressImage(file, maxDim = 1600, quality = 0.82) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    const fallback = () => fileToBase64(file).then((image) => resolve({ image, mimetype: file.type || 'image/jpeg' }))
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      try {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
+        const w = Math.max(1, Math.round(img.width * scale))
+        const h = Math.max(1, Math.round(img.height * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = w; canvas.height = h
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+        const dataUrl = canvas.toDataURL('image/jpeg', quality)
+        resolve({ image: dataUrl.split(',')[1], mimetype: 'image/jpeg' })
+      } catch { fallback() }
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); fallback() }
+    img.src = url
+  })
+}
+
 export async function uploadRecipeImage(file) {
-  const form = new FormData()
-  form.append('image', file)
-  const res = await data(api.post('/recipes/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } }))
+  const { image, mimetype } = await compressImage(file)
+  const res = await data(api.post('/recipes/upload', { image, mimetype, filename: file.name || 'upload.jpg' }))
   return res.url
 }
 
@@ -54,9 +79,8 @@ export async function extractFromText(text) {
   return normaliseExtracted(res.recipe)
 }
 export async function extractFromImage(file) {
-  const form = new FormData()
-  form.append('image', file)
-  const res = await data(api.post('/import/photo', form, { headers: { 'Content-Type': 'multipart/form-data' } }))
+  const { image, mimetype } = await compressImage(file)
+  const res = await data(api.post('/import/photo', { image, mimetype }))
   return normaliseExtracted(res.recipe)
 }
 export async function extractFromUrl(url) {

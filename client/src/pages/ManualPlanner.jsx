@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Reorder, useDragControls } from 'framer-motion'
 import { useProfile } from '../context/ProfileContext'
-import { getActivePlan, createPlan, getPlanSlots, assignSlot, assignSlots, listRecipes } from '../lib/api'
+import { getActivePlan, createPlan, getPlanSlots, assignSlot, assignSlots, listRecipes, getShoppingList } from '../lib/api'
 import { autoAllocate } from '../lib/planner'
 import { Button, SizzleLoader, Sheet, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
@@ -59,6 +59,7 @@ export default function ManualPlanner() {
   const [order, setOrder] = useState([]) // [{ key, recipe }] in night order
   const [picker, setPicker] = useState(null) // { index }
   const [q, setQ] = useState('')
+  const [listBuilt, setListBuilt] = useState(false)
   const keyRef = useRef(0)
   const orderRef = useRef(order)
   orderRef.current = order
@@ -73,6 +74,7 @@ export default function ManualPlanner() {
       setSlots(s)
       setOrder(s.map((x) => ({ key: `n${keyRef.current++}`, recipe: x.recipe })))
       setRecipes(await listRecipes())
+      try { const items = await getShoppingList(p.id); setListBuilt((items?.length || 0) > 0) } catch { /* no list yet */ }
       setLoading(false)
     })()
   }, [])
@@ -151,10 +153,19 @@ export default function ManualPlanner() {
         ))}
       </Reorder.Group>
 
-      <Button block lg className="mp-done" onClick={() => navigate('/shopping')}>Done — build shopping list</Button>
+      {!listBuilt && (
+        <Button block lg className="mp-done" onClick={() => navigate('/shopping')}>Done — build shopping list</Button>
+      )}
 
       <Sheet open={picker !== null} onClose={() => { setPicker(null); setQ('') }} title={picker !== null ? dayLabel(dates[picker.index]) : ''}>
-        <input className="input" placeholder="Search your recipes…" value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: 14 }} />
+        <div className="lib-controls">
+          <div className="lib-search">
+            <span className="lib-search-ic"><Icon name="search" size={17} /></span>
+            <input className="input" placeholder="Search your recipes…" value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
+          <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} />
+        </div>
+        <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
         {picker !== null && order[picker.index]?.recipe && <Button variant="soft" block onClick={() => pick(null)} style={{ marginBottom: 12 }}>Clear this night</Button>}
         <div className="plan-picker">
           {pickList.map((r) => (
