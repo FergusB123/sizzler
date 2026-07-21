@@ -78,6 +78,76 @@ const BRIEFS = [
   { cuisine: 'American', brief: 'Buttermilk fried chicken with charred corn' },
   { cuisine: 'American', brief: 'New England clam chowder' },
   { cuisine: 'American', brief: 'Cajun jambalaya with prawns and sausage' },
+
+  // ── Batch 2 ──────────────────────────────────────────────────────────
+  // New dishes only (no overlap with the above), four new cuisines, and a
+  // deliberate tilt towards quick weeknight cooking to balance batch 1.
+  // Italian
+  { cuisine: 'Italian', brief: 'Spaghetti alla puttanesca, quick weeknight, ready in about 25 minutes' },
+  { cuisine: 'Italian', brief: 'Lemon and garlic prawn linguine, quick weeknight, ready in about 25 minutes' },
+  { cuisine: 'Italian', brief: 'Sausage and fennel rigatoni, quick weeknight, ready in about 30 minutes' },
+  { cuisine: 'Italian', brief: 'Osso buco with gremolata' },
+  { cuisine: 'Italian', brief: 'Ribollita — Tuscan white bean, kale and bread soup' },
+  // French
+  { cuisine: 'French', brief: 'Steak frites with peppercorn sauce, ready in about 30 minutes' },
+  { cuisine: 'French', brief: 'Chicken chasseur with tarragon' },
+  { cuisine: 'French', brief: 'Croque monsieur with a green salad, ready in about 25 minutes' },
+  { cuisine: 'French', brief: 'Moules marinière with skinny fries' },
+  // Greek
+  { cuisine: 'Greek', brief: 'Classic moussaka with béchamel' },
+  { cuisine: 'Greek', brief: 'Greek chicken traybake with olives, lemon and feta' },
+  { cuisine: 'Greek', brief: 'Gigantes plaki — baked butter beans in tomato' },
+  // British / comfort
+  { cuisine: 'British', brief: 'Bangers and mash with red onion gravy' },
+  { cuisine: 'British', brief: 'Shepherd\'s pie with rosemary' },
+  { cuisine: 'British', brief: 'Beef stew with herb dumplings' },
+  { cuisine: 'British', brief: 'Corned beef hash with a fried egg, ready in about 25 minutes' },
+  { cuisine: 'British', brief: 'Roast chicken with all the trimmings' },
+  // Spanish
+  { cuisine: 'Spanish', brief: 'One-pan Spanish chicken with chorizo and potatoes' },
+  { cuisine: 'Spanish', brief: 'Gambas al ajillo with crusty bread, ready in about 20 minutes' },
+  { cuisine: 'Spanish', brief: 'Fabada — Asturian bean and chorizo stew' },
+  // Moroccan
+  { cuisine: 'Moroccan', brief: 'Chicken tagine with apricots and toasted almonds' },
+  { cuisine: 'Moroccan', brief: 'Harira — spiced lentil, chickpea and tomato soup' },
+  { cuisine: 'Moroccan', brief: 'Lamb and chickpea tagine with preserved lemon' },
+  // Middle Eastern
+  { cuisine: 'Middle Eastern', brief: 'Falafel wraps with tahini sauce, ready in about 25 minutes' },
+  { cuisine: 'Middle Eastern', brief: 'Musakhan — sumac roast chicken with flatbread and onions' },
+  { cuisine: 'Middle Eastern', brief: 'Fattoush salad with grilled halloumi, ready in about 20 minutes' },
+  // Turkish
+  { cuisine: 'Turkish', brief: 'Turkish lamb pide flatbreads' },
+  { cuisine: 'Turkish', brief: 'Menemen with sucuk, ready in about 20 minutes' },
+  // Indian
+  { cuisine: 'Indian', brief: 'Chicken tikka masala' },
+  { cuisine: 'Indian', brief: 'Saag paneer with spinach' },
+  { cuisine: 'Indian', brief: 'Keralan prawn curry with coconut and curry leaves' },
+  { cuisine: 'Indian', brief: 'Tarka dal with rice, quick and cheap, ready in about 30 minutes' },
+  // Thai
+  { cuisine: 'Thai', brief: 'Massaman beef curry with potatoes' },
+  { cuisine: 'Thai', brief: 'Tom yum soup with prawns, ready in about 25 minutes' },
+  // Vietnamese
+  { cuisine: 'Vietnamese', brief: 'Beef pho with rice noodles and herbs' },
+  { cuisine: 'Vietnamese', brief: 'Bun cha — grilled lemongrass pork with noodles and herbs' },
+  // Korean
+  { cuisine: 'Korean', brief: 'Bibimbap with vegetables and a fried egg' },
+  { cuisine: 'Korean', brief: 'Korean fried chicken with gochujang glaze' },
+  { cuisine: 'Korean', brief: 'Kimchi jjigae — kimchi and pork stew' },
+  // Chinese
+  { cuisine: 'Chinese', brief: 'Sweet and sour pork with peppers and pineapple' },
+  { cuisine: 'Chinese', brief: 'Beef chow mein, ready in about 25 minutes' },
+  { cuisine: 'Chinese', brief: 'Salt and pepper squid with chilli and spring onion' },
+  // Japanese
+  { cuisine: 'Japanese', brief: 'Chicken yakitori donburi rice bowl, ready in about 25 minutes' },
+  { cuisine: 'Japanese', brief: 'Rich pork ramen with soft-boiled egg' },
+  // Mexican
+  { cuisine: 'Mexican', brief: 'Slow-cooked pork carnitas tacos with pickled onion' },
+  { cuisine: 'Mexican', brief: 'Chicken quesadillas with pico de gallo, ready in about 25 minutes' },
+  { cuisine: 'Mexican', brief: 'Huevos rancheros with black beans, ready in about 25 minutes' },
+  // American
+  { cuisine: 'American', brief: 'Philly cheesesteak with peppers and onions, ready in about 30 minutes' },
+  { cuisine: 'American', brief: 'Baked mac and cheese with a bacon crumb' },
+  { cuisine: 'American', brief: 'Louisiana prawn po\'boy with remoulade, ready in about 30 minutes' },
 ];
 
 async function main() {

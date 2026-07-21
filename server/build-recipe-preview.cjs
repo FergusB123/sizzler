@@ -35,7 +35,7 @@ const longest = Math.max(...totalMin);
 
 const DATA = JSON.stringify(recipes).replace(/</g, '\\u003c');
 
-const html = `<title>50 new recipes for Sizzler</title>
+const html = `<title>${recipes.length} new recipes for Sizzler</title>
 <style>
   :root {
     --ground: #FBF5EC;
@@ -205,11 +205,11 @@ const html = `<title>50 new recipes for Sizzler</title>
 
 <div class="wrap">
   <div class="eyebrow">Sizzler · library expansion</div>
-  <h1>50 new recipes, ready for review</h1>
+  <h1>${recipes.length} new recipes, now in the app</h1>
   <p class="lede">
-    Original recipes written for Sizzler across twelve cuisines — weighted towards the
-    Italian, French, Greek and comfort cooking you asked for. Tap any card for the full
-    ingredients and method. Mark anything you don't want and I'll leave it out of the import.
+    Original recipes written for Sizzler across ${cuisines.length} cuisines — weighted towards the
+    Italian, French, Greek and comfort cooking you asked for. All of these are imported and live,
+    each with its own generated photo. Tap any card for the full ingredients and method.
   </p>
 
   <div class="stats">
@@ -217,7 +217,7 @@ const html = `<title>50 new recipes for Sizzler</title>
     <div class="stat"><b>${cuisines.length}</b><span>Cuisines</span></div>
     <div class="stat"><b>${avgTime}m</b><span>Avg time</span></div>
     <div class="stat"><b>${quickest}–${longest}m</b><span>Range</span></div>
-    <div class="stat"><b id="keepCount">${recipes.length}</b><span>To import</span></div>
+    <div class="stat"><b>${recipes.filter((r) => r.prep + r.cook <= 40).length}</b><span>Under 40 min</span></div>
   </div>
 
   <div class="controls">
@@ -232,9 +232,9 @@ const html = `<title>50 new recipes for Sizzler</title>
   <div class="grid" id="grid"></div>
 
   <div class="note">
-    <b>What happens next.</b> On your go-ahead these get imported into Sizzler as dinners, and
-    each one has a photo generated for it — the same pipeline that made the risotto shot. Nothing
-    is added until you say so, and anything you've marked "skip" is left out.
+    <b>All imported.</b> Every recipe here is live in Sizzler as a dinner, each with its own
+    AI-generated photo served as a static asset. The recipes and images are original — nothing
+    is copied from a recipe site — so they're yours to keep and publish.
   </div>
 </div>
 
@@ -242,12 +242,10 @@ const html = `<title>50 new recipes for Sizzler</title>
 
 <script>
   const RECIPES = ${DATA};
-  const skipped = new Set();
   let cuisine = 'all', query = '';
 
   const grid = document.getElementById('grid');
   const countEl = document.getElementById('count');
-  const keepEl = document.getElementById('keepCount');
   const dlg = document.getElementById('dlg');
   const sheet = document.getElementById('sheet');
 
@@ -269,7 +267,6 @@ const html = `<title>50 new recipes for Sizzler</title>
     const list = visible();
     countEl.textContent = list.length + (list.length === 1 ? ' recipe' : ' recipes') +
       (cuisine === 'all' ? '' : ' · ' + cuisine);
-    keepEl.textContent = RECIPES.length - skipped.size;
     grid.innerHTML = '';
     if (!list.length) {
       grid.innerHTML = '<p class="empty">Nothing matches that search.</p>';
@@ -277,7 +274,7 @@ const html = `<title>50 new recipes for Sizzler</title>
     }
     for (const r of list) {
       const card = document.createElement('div');
-      card.className = 'card' + (skipped.has(r.id) ? ' out' : '');
+      card.className = 'card';
       card.innerHTML =
         '<div class="card-top"><span class="cuisine">' + esc(r.cuisine) + '</span></div>' +
         '<h3>' + esc(r.title) + '</h3>' +
@@ -285,24 +282,10 @@ const html = `<title>50 new recipes for Sizzler</title>
         '<div class="meta"><span>' + time(r) + '</span><span>serves ' + (r.serves || '—') + '</span>' +
         '<span>' + r.ingredients.length + ' ingredients</span></div>';
 
-      const open = document.createElement('button');
-      open.className = 'card';
-      open.style.cssText = 'all:unset';
       card.tabIndex = 0;
       card.setAttribute('role', 'button');
-      card.addEventListener('click', (e) => { if (!e.target.classList.contains('skip')) show(r); });
+      card.addEventListener('click', () => show(r));
       card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(r); } });
-
-      const skip = document.createElement('button');
-      skip.className = 'skip';
-      skip.type = 'button';
-      skip.textContent = skipped.has(r.id) ? 'Skipped — undo' : 'Skip this one';
-      skip.addEventListener('click', (e) => {
-        e.stopPropagation();
-        skipped.has(r.id) ? skipped.delete(r.id) : skipped.add(r.id);
-        render();
-      });
-      card.appendChild(skip);
       grid.appendChild(card);
     }
   }
