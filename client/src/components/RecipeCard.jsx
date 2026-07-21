@@ -7,6 +7,10 @@ import './recipe-card.css'
 // Non-Gousto/data URLs pass through untouched.
 export function thumbUrl(url, size = 350) {
   if (!url) return url
+  // Our own generated images ship a -350 variant alongside the full-size file.
+  if (/^\/recipe-images\/.+\.jpg$/i.test(url) && !/-350\.jpg$/i.test(url)) {
+    return url.replace(/\.jpg$/i, '-350.jpg')
+  }
   return url.replace(/-x700\.jpg(\?.*)?$/i, `-x${size}.jpg$1`)
 }
 
