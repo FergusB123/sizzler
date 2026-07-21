@@ -4,7 +4,7 @@ const pool = require('../database');
 const auth = require('../middleware/auth');
 
 const SAFE_COLS =
-  'id, email, name, household_kind, household_size, planned_meals, planning_horizon_days, dietary_prefs, onboarded_at, push_enabled, created_at';
+  'id, email, name, household_kind, household_size, planned_meals, planning_horizon_days, week_start_day, dietary_prefs, onboarded_at, push_enabled, created_at';
 
 // Columns the client may update, with how to coerce the value for pg.
 // JSONB columns must be JSON.stringify'd (node-pg would otherwise send a JS
@@ -15,6 +15,7 @@ const FIELDS = {
   household_size: (v) => parseInt(v, 10) || 1,
   planned_meals: (v) => JSON.stringify(v || []),
   planning_horizon_days: (v) => Math.min(30, Math.max(1, parseInt(v, 10) || 7)),
+  week_start_day: (v) => Math.min(6, Math.max(0, parseInt(v, 10) || 0)),
   dietary_prefs: (v) => JSON.stringify(v || []),
   onboarded_at: (v) => v, // ISO string or null
 };

@@ -1,28 +1,68 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
-import { IconButton } from '../components/ui/primitives'
+import { getActivePlan, todayISO } from '../lib/api'
+import { IconButton, Segmented } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import { useGoBack } from '../lib/useGoBack'
+import { weekStartFor, addDays, formatRange, suggestedNextStart, getPlanPhase } from '../lib/planPhase'
 import './plan.css'
 
-// "How do you want to plan?" — pick Swipe (fun, auto-build) or Build by hand.
+// "Which week, and how do you want to build it?" Plans are anchored to the
+// user's week-start day so "this week" / "next week" mean something concrete.
 export default function PlanChoose() {
   const navigate = useNavigate()
   const goBack = useGoBack('/')
   const { profile } = useProfile()
-  const days = profile?.planning_horizon_days || 7
+
+  const anchor = profile?.week_start_day ?? 1
+  const today = todayISO()
+  const thisWeek = weekStartFor(today, anchor)
+  const nextWeek = addDays(thisWeek, 7)
+
+  const [start, setStart] = useState(thisWeek)
+  const [current, setCurrent] = useState(undefined)
+
+  // Default to whichever week actually needs planning next, clamped to the two
+  // weeks we offer so the toggle always has a selection.
+  useEffect(() => {
+    (async () => {
+      const p = await getActivePlan()
+      setCurrent(p)
+      const suggested = suggestedNextStart(p, today, anchor)
+      setStart(suggested >= nextWeek ? nextWeek : thisWeek)
+    })()
+  }, [anchor])
+
+  const phase = current ? getPlanPhase(current, today).phase : 'none'
+  const replacingLive = current && start === current.start_date && phase !== 'ended'
+  const go = (path) => navigate(path, { state: { startDate: start } })
 
   return (
     <div className="screen no-nav">
       <div className="topbar" style={{ padding: 0, marginBottom: 8 }}>
         <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
       </div>
-      <h1 className="choose-h">How do you want to plan?</h1>
-      <p className="muted" style={{ margin: '8px 0 24px', lineHeight: 1.5 }}>
-        We'll plan {days} dinner{days === 1 ? '' : 's'} and build your shopping list.
-      </p>
+      <h1 className="choose-h">Plan your week</h1>
 
-      <button className="choose-card swipe" onClick={() => navigate('/plan/swipe')}>
+      <div className="week-pick">
+        <Segmented
+          value={start}
+          onChange={setStart}
+          options={[
+            { value: thisWeek, label: 'This week' },
+            { value: nextWeek, label: 'Next week' },
+          ]}
+        />
+        <p className="week-pick-range">{formatRange(start, addDays(start, 6))}</p>
+        {replacingLive && (
+          <p className="week-pick-warn">
+            <Icon name="info" size={15} /> You already have a plan for this week — building a new one replaces it.
+          </p>
+        )}
+      </div>
+
+      <button className="choose-card swipe" onClick={() => go('/plan/swipe')}>
         <div className="choose-top">
           <span className="choose-ic"><Icon name="flame" size={22} /></span>
           <span className="choose-badge">FUN</span>
@@ -31,7 +71,7 @@ export default function PlanChoose() {
         <p>Swipe through your recipes and the community. We auto-build a balanced week from your picks.</p>
       </button>
 
-      <button className="choose-card build" onClick={() => navigate('/plan/manual')}>
+      <button className="choose-card build" onClick={() => go('/plan/manual')}>
         <span className="choose-ic"><Icon name="calendar" size={22} /></span>
         <b>Build it yourself</b>
         <p>Drop recipes straight into a day-by-day grid. Full control, your way.</p>

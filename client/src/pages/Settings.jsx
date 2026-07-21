@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { Button, Chip, Sheet, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import { DIETARY_OPTIONS, dietLabel } from '../lib/constants'
+import { DAY_NAMES } from '../lib/planPhase'
 import { enablePush, disablePush, permissionState } from '../lib/push'
 import './pages.css'
 
@@ -45,6 +46,9 @@ export default function Settings() {
         <button className="settings-row" onClick={() => setEditing('household')} style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', textAlign: 'left', cursor: 'pointer' }}>
           <span className="lbl">Household</span><span className="spacer" /><span className="val">{householdLabel}</span><Icon name="chevron" size={16} className="row-chevron" />
         </button>
+        <button className="settings-row" onClick={() => setEditing('weekstart')} style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', textAlign: 'left', cursor: 'pointer' }}>
+          <span className="lbl">Week starts on</span><span className="spacer" /><span className="val">{DAY_NAMES[p.week_start_day ?? 1]}</span><Icon name="chevron" size={16} className="row-chevron" />
+        </button>
         <button className="settings-row" onClick={() => setEditing('horizon')} style={{ width: '100%', background: 'none', border: 'none', borderBottom: '1px solid var(--border)', textAlign: 'left', cursor: 'pointer' }}>
           <span className="lbl">Planning horizon</span><span className="spacer" /><span className="val">{p.planning_horizon_days} days</span><Icon name="chevron" size={16} className="row-chevron" />
         </button>
@@ -79,6 +83,9 @@ export default function Settings() {
       <Sheet open={editing === 'household'} onClose={() => setEditing(null)} title="Household">
         <EditHousehold p={p} onSave={save} />
       </Sheet>
+      <Sheet open={editing === 'weekstart'} onClose={() => setEditing(null)} title="Week starts on">
+        <EditWeekStart p={p} onSave={save} />
+      </Sheet>
       <Sheet open={editing === 'horizon'} onClose={() => setEditing(null)} title="Planning horizon">
         <EditHorizon p={p} onSave={save} />
       </Sheet>
@@ -109,6 +116,24 @@ function EditHousehold({ p, onSave }) {
         </div>
       )}
       <Button block onClick={() => onSave({ household_kind: kind, household_size: kind === 'solo' ? 1 : kind === 'couple' ? 2 : size })}>Save</Button>
+    </div>
+  )
+}
+
+function EditWeekStart({ p, onSave }) {
+  const [day, setDay] = useState(p.week_start_day ?? 1)
+  return (
+    <div style={{ paddingTop: 4 }}>
+      <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.5, margin: '0 0 14px' }}>
+        Your plans run a week from this day — pick the day you usually shop, and "this week" and
+        "next week" will line up with how you actually cook.
+      </p>
+      <div className="chip-row" style={{ flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
+        {DAY_NAMES.map((name, i) => (
+          <Chip key={i} flame active={day === i} onClick={() => setDay(i)}>{name.slice(0, 3)}</Chip>
+        ))}
+      </div>
+      <Button block onClick={() => onSave({ week_start_day: day })}>Save</Button>
     </div>
   )
 }

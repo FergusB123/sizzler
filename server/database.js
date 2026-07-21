@@ -57,6 +57,9 @@ async function initDatabase() {
     CREATE INDEX IF NOT EXISTS recipes_user_idx ON recipes(user_id);
     CREATE INDEX IF NOT EXISTS recipes_shared_idx ON recipes(is_shared) WHERE is_shared = TRUE;
     ALTER TABLE recipes ADD COLUMN IF NOT EXISTS favorite BOOLEAN DEFAULT FALSE;
+    -- Which weekday a planning week starts on (0=Sun … 6=Sat). Anchors plans to
+    -- a repeating rhythm so "this week" / "next week" are concrete.
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS week_start_day INTEGER DEFAULT 1;
 
     CREATE TABLE IF NOT EXISTS meal_plans (
       id SERIAL PRIMARY KEY,

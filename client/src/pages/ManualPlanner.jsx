@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Reorder, useDragControls } from 'framer-motion'
 import { useProfile } from '../context/ProfileContext'
 import { getActivePlan, createPlan, getPlanSlots, assignSlot, assignSlots, listRecipes, getShoppingList, todayISO } from '../lib/api'
 import { shoppingListStale } from '../lib/shoppingList'
+import { getPlanPhase, suggestedNextStart, formatRange } from '../lib/planPhase'
 import { autoAllocate } from '../lib/planner'
 import { Button, SizzleLoader, Sheet, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
@@ -52,10 +53,12 @@ function NightItem({ item, date, index, onOpenRecipe, onChange, onDragEnd }) {
 
 export default function ManualPlanner() {
   const navigate = useNavigate()
+  const location = useLocation()
   const goBack = useGoBack('/')
   const toast = useToast()
   const { profile } = useProfile()
   const [loading, setLoading] = useState(true)
+  const [plan, setPlan] = useState(null)
   const [slots, setSlots] = useState([])
   const [recipes, setRecipes] = useState([])
   const [order, setOrder] = useState([]) // [{ key, recipe }] in night order
@@ -70,8 +73,21 @@ export default function ManualPlanner() {
 
   useEffect(() => {
     (async () => {
+      const today = todayISO()
+      const anchor = profile?.week_start_day ?? 1
+      const requested = location.state?.startDate
       let p = await getActivePlan()
-      if (!p) p = await createPlan({ startDate: new Date(), days: profile?.planning_horizon_days || 7, meals: profile?.planned_meals || ['dinner'] })
+      // Never silently adopt a finished plan — that's how you end up editing
+      // last month's week without realising. Start the right one instead.
+      const ended = p && getPlanPhase(p, today).phase === 'ended'
+      if (!p || ended || (requested && requested !== p.start_date)) {
+        p = await createPlan({
+          startDate: requested || suggestedNextStart(p, today, anchor),
+          days: profile?.planning_horizon_days || 7,
+          meals: profile?.planned_meals || ['dinner'],
+        })
+      }
+      setPlan(p)
       const s = (await getPlanSlots(p.id)).sort((a, b) => a.slot_date.localeCompare(b.slot_date))
       setSlots(s)
       setOrder(s.map((x) => ({ key: `n${keyRef.current++}`, recipe: x.recipe })))
@@ -128,6 +144,11 @@ export default function ManualPlanner() {
   if (loading) return <div className="screen no-nav"><SizzleLoader message="Loading planner…" /></div>
 
   const filledCount = order.filter((o) => o.recipe).length
+  const ph = plan ? getPlanPhase(plan, todayISO()) : null
+  const phaseLabel = !ph ? '' :
+    ph.phase === 'upcoming' ? `starts in ${ph.startsIn} day${ph.startsIn === 1 ? '' : 's'}` :
+    ph.phase === 'ended' ? 'finished' :
+    `day ${ph.dayNumber} of ${ph.totalDays}`
   const listBuilt = listItems.some((i) => !i.manual)
   // Compare the current arrangement against the list the shopping list was built
   // from — if they've diverged, prompt to refresh it.
@@ -140,6 +161,7 @@ export default function ManualPlanner() {
           <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
         </div>
         <h1 className="mp-hero-title">Your plan</h1>
+        {plan && <div className="mp-hero-range">{formatRange(plan.start_date, plan.end_date)}{phaseLabel ? ` · ${phaseLabel}` : ''}</div>}
         <div className="mp-hero-meta">
           <span>{order.length} night{order.length === 1 ? '' : 's'} · drag to reorder</span>
           {filledCount >= 2 && (

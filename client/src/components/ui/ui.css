@@ -133,6 +133,11 @@
   border-radius: 9px; background: var(--orange-500); color: #fff; font-size: 10px; font-weight: 700;
   display: grid; place-content: center; box-shadow: 0 0 0 2px #fff;
 }
+/* Small dot on the Plan tab when the week has ended or has gaps to fill */
+.nav-dot {
+  position: absolute; top: -2px; right: -6px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--orange-500); box-shadow: 0 0 0 2px #fff;
+}
 .nav-item.active { color: var(--orange-500); }
 .nav-item.active .ic { transform: translateY(-1px); }
 .nav-fab {

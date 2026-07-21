@@ -14,6 +14,7 @@
 .mp-hero-filter { background: rgba(255, 255, 255, 0.12); border-color: transparent; color: #fff; box-shadow: none; }
 .mp-hero-filter.on { background: var(--orange-500); border-color: var(--orange-500); color: #fff; }
 .mp-hero-title { font-size: 30px; letter-spacing: -0.03em; }
+.mp-hero-range { margin-top: 5px; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, 0.82); font-variant-numeric: tabular-nums; }
 .mp-hero-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
 .mp-hero-meta > span { color: rgba(255, 255, 255, 0.68); font-size: 13px; font-weight: 500; }
 .mp-reshuffle { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; background: #fff; color: var(--cast-iron); border: none; border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform 0.12s var(--ease-out); }

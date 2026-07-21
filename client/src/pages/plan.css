@@ -1,6 +1,18 @@
 .plan-progress-pill { background: var(--surface-3); color: var(--text); font-weight: 600; padding: 6px 13px; border-radius: var(--r-pill); font-size: 13px; border: 1px solid var(--border); }
 
 /* Plan chooser */
+/* Which week am I planning? */
+.week-pick { margin: 4px 0 24px; }
+.week-pick-range {
+  margin: 12px 2px 0; font-size: 14px; font-weight: 600; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.week-pick-warn {
+  display: flex; align-items: center; gap: 7px; margin: 10px 0 0;
+  font-size: 12.5px; line-height: 1.45; color: #b3630c;
+}
+.week-pick-warn svg { flex-shrink: 0; }
+
 .choose-h { font-size: 32px; letter-spacing: -0.03em; line-height: 1.04; }
 .choose-card { display: block; width: 100%; text-align: left; cursor: pointer; border-radius: var(--r-2xl); padding: 22px; margin-bottom: 16px; border: 1px solid var(--border); transition: transform 0.14s var(--ease-out); }
 .choose-card:active { transform: scale(0.98); }

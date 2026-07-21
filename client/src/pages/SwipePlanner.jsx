@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useProfile } from '../context/ProfileContext'
-import { getActivePlan, createPlan, getPlanSlots, swipePool, assignSlots } from '../lib/api'
+import { getActivePlan, createPlan, getPlanSlots, swipePool, assignSlots, todayISO } from '../lib/api'
+import { getPlanPhase, suggestedNextStart } from '../lib/planPhase'
 import { autoAllocate, targetShortlistSize } from '../lib/planner'
 import { Button, SizzleLoader, EmptyState, Badge, IconButton, useToast } from '../components/ui/primitives'
 import Icon from '../components/Icon'
@@ -23,6 +24,7 @@ function shuffle(arr) {
 
 export default function SwipePlanner() {
   const navigate = useNavigate()
+  const location = useLocation()
   const goBack = useGoBack('/plan')
   const toast = useToast()
   const { profile } = useProfile()
@@ -37,12 +39,21 @@ export default function SwipePlanner() {
 
   useEffect(() => {
     (async () => {
+      const today = todayISO()
+      const anchor = profile?.week_start_day ?? 1
+      const requested = location.state?.startDate
       let p = await getActivePlan()
       let s = p ? await getPlanSlots(p.id) : []
-      // Don't silently overwrite a finished plan — start a fresh week instead.
+      // Start a fresh week if there's no plan, the last one has finished, it's
+      // already full, or the user picked a different week on the chooser.
       const fullyFilled = p && s.length > 0 && s.every((x) => x.recipe_id)
-      if (!p || fullyFilled) {
-        p = await createPlan({ startDate: new Date(), days: profile?.planning_horizon_days || 7, meals: profile?.planned_meals || ['dinner'] })
+      const ended = p && getPlanPhase(p, today).phase === 'ended'
+      if (!p || ended || fullyFilled || (requested && requested !== p.start_date)) {
+        p = await createPlan({
+          startDate: requested || suggestedNextStart(p, today, anchor),
+          days: profile?.planning_horizon_days || 7,
+          meals: profile?.planned_meals || ['dinner'],
+        })
         s = await getPlanSlots(p.id)
       }
       setPlan(p)
