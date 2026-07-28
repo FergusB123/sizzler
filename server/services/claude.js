@@ -55,6 +55,7 @@ const RECIPE_TOOL = {
       cook_minutes: { type: 'integer' },
       difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] },
       servings: { type: 'integer' },
+      calories: { type: 'integer', description: 'Approximate energy per portion, in kcal.' },
       meal_types: { type: 'array', items: { type: 'string', enum: ['breakfast', 'lunch', 'dinner'] } },
       tags: { type: 'array', items: { type: 'string' } },
       inferred_fields: {
@@ -73,14 +74,14 @@ Rules:
 - Always return via the save_recipe tool. Never reply with prose.
 - Normalise ingredient quantities into number + unit where possible, but keep the original line in "raw".
 - Write method steps as clear individual imperative instructions.
-- For any field NOT explicitly stated, infer a sensible value from context (estimate difficulty from technique/step count; guess cuisine from ingredients; pick meal_types from the dish). Add every inferred field's name to "inferred_fields".
+- For any field NOT explicitly stated, infer a sensible value from context (estimate difficulty from technique/step count; guess cuisine from ingredients; pick meal_types from the dish; estimate calories per portion from the ingredients and servings). Add every inferred field's name to "inferred_fields".
 - If the content clearly is NOT a recipe, return save_recipe with title "NOT_A_RECIPE" and empty arrays.`;
 
 const GENERATE_PROMPT = `You are Sizzler's recipe creator. Invent ONE appealing, genuinely cookable dinner based on the user's request. Always return via the save_recipe tool — never prose.
 
 Rules:
 - Make it realistic and achievable at home, with sensible quantities and clear imperative method steps.
-- Fill in EVERY field: title, cuisine, category, a one-line appetising description, ingredients (name + quantity + unit, and the original line in "raw"), ordered steps, prep_minutes, cook_minutes, difficulty, servings (default 2), meal_types ["dinner"], and a few useful tags.
+- Fill in EVERY field: title, cuisine, category, a one-line appetising description, ingredients (name + quantity + unit, and the original line in "raw"), ordered steps, prep_minutes, cook_minutes, difficulty, servings (default 2), calories (approximate kcal per portion), meal_types ["dinner"], and a few useful tags.
 - You are inventing this from scratch, so leave "inferred_fields" empty.
 - Honour any constraints in the request (dietary needs, key ingredients, time, cuisine, spice level).`;
 

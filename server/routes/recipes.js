@@ -34,12 +34,13 @@ function recipeInsertValues(body, userId) {
     body.source_url || null,
     J(body.ai_inferred_fields),
     !!body.is_shared,
+    body.calories ?? null,
   ];
 }
 const INSERT_COLS = `user_id, title, cuisine, category, description, ingredients, steps, image_url,
   image_is_generated, prep_minutes, cook_minutes, difficulty, servings, meal_types, tags, notes,
-  source, source_kind, source_url, ai_inferred_fields, is_shared`;
-const INSERT_PLACE = Array.from({ length: 21 }, (_, i) => `$${i + 1}`).join(', ');
+  source, source_kind, source_url, ai_inferred_fields, is_shared, calories`;
+const INSERT_PLACE = Array.from({ length: 22 }, (_, i) => `$${i + 1}`).join(', ');
 
 // ---- image upload (memory → Cloudinary/local) ----
 router.post('/upload', auth, upload.single('image'), async (req, res) => {
@@ -134,7 +135,7 @@ const UPDATABLE = {
   title: String, cuisine: String, category: String, description: String,
   ingredients: J, steps: J, image_url: String, image_is_generated: Boolean,
   prep_minutes: Number, cook_minutes: Number, difficulty: String, servings: Number,
-  meal_types: J, tags: J, notes: String, source: String, ai_inferred_fields: J,
+  calories: Number, meal_types: J, tags: J, notes: String, source: String, ai_inferred_fields: J,
 };
 router.put('/:id', auth, async (req, res) => {
   const sets = [], vals = []; let i = 1;

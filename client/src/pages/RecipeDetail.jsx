@@ -117,6 +117,7 @@ export default function RecipeDetail() {
           <div className="rd-fact"><b>{formatTime(totalTime) || '—'}</b><span>Total <AiTag field="cook_minutes" /></span></div>
           <div className="rd-fact"><b className="cap">{recipe.difficulty || '—'}</b><span>Difficulty <AiTag field="difficulty" /></span></div>
           <div className="rd-fact"><b>{recipe.servings || '—'}</b><span>Serves <AiTag field="servings" /></span></div>
+          {recipe.calories ? <div className="rd-fact"><b>{recipe.calories}</b><span>kcal / portion <AiTag field="calories" /></span></div> : null}
         </div>
 
         <div className="chip-row" style={{ marginBottom: 18 }}>

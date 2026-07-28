@@ -68,6 +68,7 @@ function normaliseExtracted(r) {
     cook_minutes: r.cook_minutes ?? null,
     difficulty: r.difficulty || null,
     servings: r.servings ?? null,
+    calories: r.calories ?? null,
     meal_types: r.meal_types?.length ? r.meal_types : ['dinner'],
     tags: r.tags || [],
     ai_inferred_fields: r.inferred_fields || [],

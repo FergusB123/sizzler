@@ -51,6 +51,7 @@ export default function RecipeCard({ recipe, to, origin }) {
         <h3 className="rc-title">{recipe.title}</h3>
         <div className="rc-meta">
           {meta.map((m, i) => <span key={i} className="cap">{m}</span>)}
+          {recipe.calories ? <span className="rc-kcal">{recipe.calories} kcal</span> : null}
         </div>
       </div>
     </div>

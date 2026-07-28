@@ -31,16 +31,42 @@ export function categorise(name) {
   return 'other'
 }
 
-// Normalise an ingredient name for dedupe (drop quantities, plurals, descriptors).
+// Words that describe HOW an ingredient is prepared/sold but don't change WHAT
+// it is — stripped so "fresh root ginger", "ginger, grated" and "15g ginger"
+// all collapse to the same "ginger" line. Genuinely different products (e.g.
+// "ginger paste", "pickled ginger", "spring onion") keep their distinguishing
+// word and stay separate.
+const NOISE_WORDS = new Set([
+  // prep / quality
+  'fresh', 'dried', 'chopped', 'sliced', 'diced', 'minced', 'ground', 'grated',
+  'crushed', 'peeled', 'whole', 'large', 'small', 'medium', 'ripe', 'raw', 'cooked',
+  'baby', 'root', 'free', 'range', 'organic', 'finely', 'roughly', 'thinly', 'flat',
+  'leaf', 'lean', 'boneless', 'skinless', 'of', 'a', 'the', 'good', 'quality',
+  // units / measure words that can leak into a name
+  'g', 'kg', 'mg', 'ml', 'l', 'tbsp', 'tbsps', 'tsp', 'tsps', 'oz', 'lb', 'cup', 'cups',
+  'clove', 'cloves', 'tin', 'tins', 'can', 'cans', 'pack', 'packs', 'packet', 'sachet',
+  'sachets', 'bunch', 'bunches', 'handful', 'handfuls', 'pinch', 'pinches', 'knob',
+  'knobs', 'slice', 'slices', 'sprig', 'sprigs', 'stick', 'sticks', 'piece', 'pieces',
+  'ball', 'balls', 'sheet', 'sheets', 'jar', 'jars', 'bottle', 'bottles', 'dash',
+  'drizzle', 'gram', 'grams', 'litre', 'litres', 'pcs',
+])
+
+// Normalise an ingredient name to a dedupe key (drop quantities, prep words,
+// units, plurals, trailing descriptors).
 function keyFor(name) {
-  return name
-    .toLowerCase()
-    .replace(/\(.*?\)/g, '')
-    .replace(/\b(fresh|dried|chopped|sliced|diced|minced|ground|large|small|medium|ripe|free-range|finely|roughly)\b/g, '')
-    .replace(/[^a-z\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/s$/, '')
+  let n = String(name || '').toLowerCase()
+  n = n.split(',')[0]              // "ginger, grated" -> "ginger"
+  n = n.replace(/\(.*?\)/g, ' ')   // drop parentheticals like "(15g)"
+  const words = n
+    .replace(/[^a-z\s]/g, ' ')     // drop digits & punctuation
+    .split(/\s+/)
+    .filter((w) => w && !NOISE_WORDS.has(w))
+  // Fall back to the bare cleaned string if every word was noise (e.g. "1 egg"
+  // shouldn't vanish just because a descriptor matched).
+  let key = words.length
+    ? words.join(' ')
+    : n.replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim()
+  return key.trim().replace(/s$/, '') // light singularise
 }
 
 // Combine quantities into a { quantity, unit } pair for consistent columns.
@@ -160,6 +186,13 @@ export function buildShoppingList(slots) {
       const k = keyFor(norm.name)
       if (!k) continue
       if (!groups[k]) groups[k] = { name: norm.name, parts: [], recipeIds: new Set(), category: categorise(norm.name) }
+      // Display the tidiest variant seen (fewest words, then shortest) so a
+      // merged line reads "Ginger" rather than "Fresh root ginger".
+      const better = (a, b) => {
+        const wa = a.trim().split(/\s+/).length, wb = b.trim().split(/\s+/).length
+        return wa !== wb ? wa < wb : a.length <= b.length
+      }
+      if (better(norm.name, groups[k].name)) groups[k].name = norm.name
       groups[k].parts.push({ quantity: norm.quantity, unit: norm.unit })
       groups[k].recipeIds.add(recipe.id)
     }

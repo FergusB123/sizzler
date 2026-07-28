@@ -36,6 +36,8 @@
 .rc-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12.5px; color: var(--text-dim); font-weight: 500; }
 .rc-meta span.cap { text-transform: capitalize; }
 .rc-meta span + span.cap::before { content: '·'; margin-right: 6px; color: var(--ash); }
+.rc-meta .rc-kcal { font-variant-numeric: tabular-nums; }
+.rc-meta span + .rc-kcal::before { content: '·'; margin-right: 6px; color: var(--ash); }
 
 /* Library grid */
 .recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; }
