@@ -192,8 +192,13 @@ function curate(meals, have) {
   // Simple weeknight mode: rank by a simplicity proxy (ingredient count + method
   // length), take the simplest, with only light caps so there's some variety.
   if (SIMPLE) {
+    // Simplicity ranking tends to surface sides/tapas/salads (few ingredients);
+    // exclude those so we get simple MAINS, not snacks. (Doesn't hit burgers,
+    // bowls, stir-fries, curries, etc.)
+    const SIMPLE_SKIP_RE = /\b(salads?|slaw|padr[oó]n|tapas|bruschetta|canap|dip|hummus|olives|corn with|tomato bread|jam[oó]n serrano|herrings?|p[aâ]t[eé])\b/i;
+    const mains = fresh.filter((m) => !SIMPLE_SKIP_RE.test(m.strMeal));
     const score = (m) => ingredientLines(m).length + (m.strInstructions || '').length / 130;
-    const sorted = fresh.slice().sort((a, b) => score(a) - score(b) || a.strMeal.localeCompare(b.strMeal));
+    const sorted = mains.slice().sort((a, b) => score(a) - score(b) || a.strMeal.localeCompare(b.strMeal));
     const AREA_CAP = 8, CAT_CAP = Math.max(6, Math.ceil(TARGET / 4));
     const perArea = {}, perCat = {}, picked = [];
     for (const pass of [true, false]) { // pass 1 honours caps; pass 2 tops up

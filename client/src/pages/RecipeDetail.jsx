@@ -155,9 +155,14 @@ export default function RecipeDetail() {
           ))}
         </ol>
 
-        {(recipe.notes || recipe.source) && (
+        {(recipe.notes || recipe.source || recipe.source_url) && (
           <div className="rd-notes">
             {recipe.source && <p><b>Source:</b> {recipe.source}</p>}
+            {recipe.source_url && (
+              <p className="rd-source-link">
+                <a href={recipe.source_url} target="_blank" rel="noopener noreferrer">{recipe.source_url}</a>
+              </p>
+            )}
             {recipe.notes && <p>{recipe.notes}</p>}
           </div>
         )}

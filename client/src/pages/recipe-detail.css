@@ -70,3 +70,5 @@
 .rd-notes { background: var(--surface-2); border-radius: var(--r-lg); padding: 14px 16px; margin-top: 20px; }
 .rd-notes p { margin: 0 0 8px; line-height: 1.5; color: var(--text-dim); }
 .rd-notes p:last-child { margin-bottom: 0; }
+.rd-source-link a { color: var(--orange-500); text-decoration: none; word-break: break-all; font-size: 13.5px; }
+.rd-source-link a:hover { text-decoration: underline; }

@@ -6,8 +6,11 @@
 }
 .rc-link:active .recipe-card { transform: scale(0.985); }
 
-.rc-media { position: relative; aspect-ratio: 16 / 11; background: var(--oat); }
-.rc-media img { width: 100%; height: 100%; object-fit: cover; }
+.rc-media { position: relative; aspect-ratio: 16 / 11; background: var(--oat); overflow: hidden; }
+/* Absolutely positioned so the container's 16/11 aspect-ratio always wins —
+   otherwise an in-flow img with height:100% makes the box take the image's own
+   shape (e.g. square thumbnails), so cards looked stretched/inconsistent. */
+.rc-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* Warm typographic fallback */
 .rc-fallback { width: 100%; height: 100%; display: grid; place-content: center; }
