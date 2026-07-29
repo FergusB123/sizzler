@@ -44,13 +44,22 @@ export default function SwipePlanner() {
       const requested = location.state?.startDate
       let p = await getActivePlan()
       let s = p ? await getPlanSlots(p.id) : []
-      // Start a fresh week if there's no plan, the last one has finished, it's
-      // already full, or the user picked a different week on the chooser.
-      const fullyFilled = p && s.length > 0 && s.every((x) => x.recipe_id)
+      const filled = s.filter((x) => x.recipe_id).length
       const ended = p && getPlanPhase(p, today).phase === 'ended'
-      if (!p || ended || fullyFilled || (requested && requested !== p.start_date)) {
+      const fullyFilled = p && s.length > 0 && filled === s.length
+      const blank = p && filled === 0
+      // Which week to plan: an explicit chooser pick wins; otherwise a fresh
+      // start (no plan / finished / blank) begins TODAY, a finished-full week
+      // rolls to the next anchored week, and a part-filled week is continued.
+      const startDate = requested
+        || (!p || ended || blank ? today
+          : fullyFilled ? suggestedNextStart(p, today, anchor)
+          : p.start_date)
+      // (Re)create only when we don't already have a plan on that start date;
+      // creating archives the old one, so a stale blank plan is cleaned up.
+      if (!p || p.start_date !== startDate) {
         p = await createPlan({
-          startDate: requested || suggestedNextStart(p, today, anchor),
+          startDate,
           days: profile?.planning_horizon_days || 7,
           meals: profile?.planned_meals || ['dinner'],
         })

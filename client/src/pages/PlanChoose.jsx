@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useProfile } from '../context/ProfileContext'
-import { getActivePlan, todayISO } from '../lib/api'
+import { getActivePlan, getPlanSlots, todayISO } from '../lib/api'
 import { IconButton, Segmented } from '../components/ui/primitives'
 import Icon from '../components/Icon'
 import { useGoBack } from '../lib/useGoBack'
@@ -28,9 +28,12 @@ export default function PlanChoose() {
   useEffect(() => {
     (async () => {
       const p = await getActivePlan()
-      setCurrent(p)
-      const live = !!p && getPlanPhase(p, today).phase !== 'ended'
-      const suggested = suggestedNextStart(p, today, anchor)
+      const s = p ? await getPlanSlots(p.id) : []
+      // A blank plan (nothing chosen) doesn't count as a current plan.
+      const real = p && s.some((x) => x.recipe_id) ? p : null
+      setCurrent(real)
+      const live = !!real && getPlanPhase(real, today).phase !== 'ended'
+      const suggested = suggestedNextStart(real, today, anchor)
       setStart(suggested >= nextWeek ? nextWeek : (live ? thisWeekMon : today))
     })()
   }, [anchor])

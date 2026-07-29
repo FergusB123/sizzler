@@ -70,7 +70,9 @@ export default function Home() {
   // Where this plan sits in its life — drives which version of Home you see.
   const { phase, dayNumber, totalDays, daysLeft } = getPlanPhase(plan, today)
   const prog = planProgress(slots, today)
-  const nextStart = suggestedNextStart(plan, today, anchor)
+  // A blank plan (nothing chosen yet) isn't a real commitment — treat it as "no
+  // plan" so we suggest planning THIS week, not the week after a phantom plan.
+  const nextStart = suggestedNextStart(filled.length ? plan : null, today, anchor)
   const thisWeekStart = weekStartFor(today, anchor)
   const nextLabel =
     (nextStart === thisWeekStart || nextStart === today) ? 'this week'

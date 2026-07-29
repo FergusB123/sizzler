@@ -77,18 +77,22 @@ export default function ManualPlanner() {
       const anchor = profile?.week_start_day ?? 1
       const requested = location.state?.startDate
       let p = await getActivePlan()
-      // Never silently adopt a finished plan — that's how you end up editing
-      // last month's week without realising. Start the right one instead.
+      let s = p ? (await getPlanSlots(p.id)).sort((a, b) => a.slot_date.localeCompare(b.slot_date)) : []
+      // Never silently adopt a finished OR blank plan — a blank plan (nothing
+      // chosen) isn't a real commitment, so start fresh (today) rather than
+      // editing a phantom future week. A part-filled current week is continued.
       const ended = p && getPlanPhase(p, today).phase === 'ended'
-      if (!p || ended || (requested && requested !== p.start_date)) {
+      const blank = p && !s.some((x) => x.recipe_id)
+      const startDate = requested || (!p || ended || blank ? today : p.start_date)
+      if (!p || p.start_date !== startDate) {
         p = await createPlan({
-          startDate: requested || suggestedNextStart(p, today, anchor),
+          startDate,
           days: profile?.planning_horizon_days || 7,
           meals: profile?.planned_meals || ['dinner'],
         })
+        s = (await getPlanSlots(p.id)).sort((a, b) => a.slot_date.localeCompare(b.slot_date))
       }
       setPlan(p)
-      const s = (await getPlanSlots(p.id)).sort((a, b) => a.slot_date.localeCompare(b.slot_date))
       setSlots(s)
       setOrder(s.map((x) => ({ key: `n${keyRef.current++}`, recipe: x.recipe })))
       setRecipes(await listRecipes())
