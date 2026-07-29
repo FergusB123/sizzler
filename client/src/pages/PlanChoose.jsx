@@ -17,25 +17,30 @@ export default function PlanChoose() {
 
   const anchor = profile?.week_start_day ?? 1
   const today = todayISO()
-  const thisWeek = weekStartFor(today, anchor)
-  const nextWeek = addDays(thisWeek, 7)
+  const thisWeekMon = weekStartFor(today, anchor)
+  const nextWeek = addDays(thisWeekMon, 7)
 
-  const [start, setStart] = useState(thisWeek)
+  const [start, setStart] = useState(today)
   const [current, setCurrent] = useState(undefined)
 
   // Default to whichever week actually needs planning next, clamped to the two
-  // weeks we offer so the toggle always has a selection.
+  // options so the toggle always has a selection.
   useEffect(() => {
     (async () => {
       const p = await getActivePlan()
       setCurrent(p)
+      const live = !!p && getPlanPhase(p, today).phase !== 'ended'
       const suggested = suggestedNextStart(p, today, anchor)
-      setStart(suggested >= nextWeek ? nextWeek : thisWeek)
+      setStart(suggested >= nextWeek ? nextWeek : (live ? thisWeekMon : today))
     })()
   }, [anchor])
 
   const phase = current ? getPlanPhase(current, today).phase : 'none'
-  const replacingLive = current && start === current.start_date && phase !== 'ended'
+  const livePlan = !!current && phase !== 'ended'
+  // A brand-new plan starts today; only when a live current-week plan already
+  // exists does "this week" align to the anchored Monday (so it replaces it).
+  const thisWeekStart = livePlan ? thisWeekMon : today
+  const replacingLive = livePlan && start === current.start_date
   const go = (path) => navigate(path, { state: { startDate: start } })
 
   return (
@@ -50,7 +55,7 @@ export default function PlanChoose() {
           value={start}
           onChange={setStart}
           options={[
-            { value: thisWeek, label: 'This week' },
+            { value: thisWeekStart, label: 'This week' },
             { value: nextWeek, label: 'Next week' },
           ]}
         />

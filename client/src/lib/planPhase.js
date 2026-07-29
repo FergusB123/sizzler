@@ -76,11 +76,13 @@ export function planProgress(slots, todayISO) {
  * this week if there's nothing (or the current week hasn't been used yet).
  */
 export function suggestedNextStart(plan, todayISO, anchorDow = 1) {
+  // Fresh start — no plan, or the previous one has already finished — begins
+  // TODAY, so a mid-week "new plan" isn't rewound to a Monday that's already
+  // partly gone. (The Monday anchor is only the baseline for continuing on.)
+  if (!plan?.start_date || todayISO > plan.end_date) return todayISO
+  // Continuing from a live plan → the anchored week after its START week.
+  // (Using the end date breaks legacy plans that straddle two anchored weeks.)
   const thisWeek = weekStartFor(todayISO, anchorDow)
-  if (!plan?.start_date) return thisWeek
-  // Anchor off the plan's START week. Using the end date breaks for legacy
-  // plans that straddle two anchored weeks (e.g. a Tue–Mon plan would suggest
-  // skipping a week). Never suggest a week that's already gone.
   const afterPlan = addDays(weekStartFor(plan.start_date, anchorDow), 7)
   return afterPlan > thisWeek ? afterPlan : thisWeek
 }

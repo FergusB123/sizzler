@@ -73,7 +73,7 @@ export default function Home() {
   const nextStart = suggestedNextStart(plan, today, anchor)
   const thisWeekStart = weekStartFor(today, anchor)
   const nextLabel =
-    nextStart === thisWeekStart ? 'this week'
+    (nextStart === thisWeekStart || nextStart === today) ? 'this week'
     : nextStart === addDays(thisWeekStart, 7) ? 'next week'
     : `w/c ${fromISO(nextStart).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`
 
