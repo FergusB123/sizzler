@@ -143,7 +143,22 @@ export default function SwipePlanner() {
   const visible = deck.slice(index, index + 3).reverse() // back-to-front for stacking
 
   return (
-    <div className="swipe-screen full">
+    <div className="swipe-screen">
+      <div className="swipe-topbar">
+        <div className="swipe-top">
+          <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
+          <div className="swipe-progress">
+            <div className="swipe-bar"><span style={{ width: `${Math.min(100, (shortlist.length / target) * 100)}%` }} /></div>
+            <small>{shortlist.length} of ~{target} chosen</small>
+          </div>
+          <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} />
+          <button className="swipe-undo" onClick={undo} disabled={!history.length || done} aria-label="Undo last swipe">
+            <Icon name="arrowLeft" size={16} /> Undo
+          </button>
+        </div>
+        <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
+      </div>
+
       <div className="swipe-deck">
         {done ? (
           <div className="swipe-done">
@@ -152,42 +167,22 @@ export default function SwipePlanner() {
             <Button lg onClick={() => allocate(shortlist)}>Fill my plan</Button>
           </div>
         ) : (
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {visible.map((recipe, i) => {
               const isTop = i === visible.length - 1
               return (
-                <SwipeCard key={recipe.id + index} recipe={recipe} isTop={isTop} depth={visible.length - 1 - i} onDecide={decide} />
+                <SwipeCard key={recipe.id} recipe={recipe} isTop={isTop} depth={visible.length - 1 - i} onDecide={decide} />
               )
             })}
           </AnimatePresence>
         )}
       </div>
 
-      {/* Top controls overlaid on the image */}
-      <div className="swipe-scrim-top" />
-      <div className="swipe-topbar">
-        <div className="swipe-top">
-          <IconButton onClick={goBack}><Icon name="arrowLeft" size={20} /></IconButton>
-          <div className="swipe-progress">
-            <div className="swipe-bar"><span style={{ width: `${Math.min(100, (shortlist.length / target) * 100)}%` }} /></div>
-            <small>{shortlist.length} of ~{target} chosen</small>
-          </div>
-          <FilterButton activeCount={f.activeCount} onClick={() => f.setOpen(true)} className="swipe-filter" />
-          <button className="swipe-undo" onClick={undo} disabled={!history.length || done} aria-label="Undo last swipe">
-            <Icon name="arrowLeft" size={16} /> Undo
-          </button>
-        </div>
-        <ActiveFilterChips sel={f.sel} toggle={f.toggle} clearAll={f.clearAll} />
-      </div>
-
-      {/* Action buttons overlaid at the bottom */}
       {!done && (
         <div className="swipe-bottom">
-          <p className="swipe-cap">Swipe · or tap below</p>
-          <div className="swipe-actions">
-            <button className="swipe-act skip" onClick={() => decide(deck[index], false)} aria-label="Skip"><Icon name="x" size={28} /></button>
-            <button className="swipe-act like" onClick={() => decide(deck[index], true)} aria-label="Shortlist"><Icon name="heart" size={28} /></button>
-          </div>
+          <button className="swipe-act skip" onClick={() => decide(deck[index], false)} aria-label="Skip"><Icon name="x" size={26} /></button>
+          <span className="swipe-hint">Swipe or tap</span>
+          <button className="swipe-act like" onClick={() => decide(deck[index], true)} aria-label="Shortlist"><Icon name="heart" size={26} /></button>
         </div>
       )}
 
@@ -199,38 +194,44 @@ export default function SwipePlanner() {
 
 function SwipeCard({ recipe, isTop, depth, onDecide }) {
   const x = useMotionValue(0)
-  const rotate = useTransform(x, [-200, 200], [-14, 14])
-  const likeOp = useTransform(x, [40, 140], [0, 1])
-  const nopeOp = useTransform(x, [-140, -40], [1, 0])
+  const rotate = useTransform(x, [-200, 200], [-12, 12])
+  const likeOp = useTransform(x, [40, 130], [0, 1])
+  const nopeOp = useTransform(x, [-130, -40], [1, 0])
   const total = (recipe.prep_minutes || 0) + (recipe.cook_minutes || 0)
 
   return (
     <motion.div
       className="swipe-card"
-      style={{ x, rotate, zIndex: 10 - depth, scale: 1 - depth * 0.03 }}
+      style={{ x, rotate, zIndex: 10 - depth }}
       drag={isTop ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.6}
       onDragEnd={(_e, info) => {
-        if (info.offset.x > 120) onDecide(recipe, true)
-        else if (info.offset.x < -120) onDecide(recipe, false)
+        if (info.offset.x > 110) onDecide(recipe, true)
+        else if (info.offset.x < -110) onDecide(recipe, false)
       }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ x: x.get() > 0 ? 520 : -520, opacity: 0, transition: { duration: 0.28 } }}
+      initial={{ opacity: 0, scale: 0.92, y: 24 }}
+      animate={{ opacity: 1, scale: 1 - depth * 0.05, y: depth * 16 }}
+      exit={{ x: x.get() >= 0 ? 560 : -560, opacity: 0, transition: { duration: 0.26 } }}
+      transition={{ type: 'spring', stiffness: 320, damping: 32 }}
     >
       <div className="sc-media">
-        {recipe.image_url ? <img src={recipe.image_url} alt={recipe.title} /> : <div className="sc-fallback">{(recipe.title || '?').charAt(0).toUpperCase()}</div>}
-        <div className="sc-grad" />
+        {recipe.image_url
+          ? <img src={recipe.image_url} alt={recipe.title} draggable="false" />
+          : <div className="sc-fallback">{(recipe.title || '?').charAt(0).toUpperCase()}</div>}
+        <span className="sc-badge">{recipe.origin === 'you' ? 'Yours' : 'Community'}</span>
         <motion.div className="sc-stamp like" style={{ opacity: likeOp }}>YUM</motion.div>
         <motion.div className="sc-stamp nope" style={{ opacity: nopeOp }}>SKIP</motion.div>
-        <div className="sc-info">
-          <span className="sc-origin">{recipe.origin === 'you' ? <Badge kind="you">Yours</Badge> : <Badge kind="community">Community</Badge>}</span>
-          <h2>{recipe.title}</h2>
-          <div className="sc-meta">
-            {recipe.cuisine && <span>{recipe.cuisine}</span>}
-            {total > 0 && <span>{formatTime(total)}</span>}
-          </div>
+      </div>
+      <div className="sc-body">
+        <h2 className="sc-title">{recipe.title}</h2>
+        <div className="sc-meta">
+          {recipe.cuisine && <span className="cap">{recipe.cuisine}</span>}
+          {total > 0 && <span>{formatTime(total)}</span>}
+          {recipe.calories ? <span>{recipe.calories} kcal</span> : null}
+          {recipe.difficulty && <span className="cap">{recipe.difficulty}</span>}
         </div>
+        {recipe.description && <p className="sc-desc">{recipe.description}</p>}
       </div>
     </motion.div>
   )
