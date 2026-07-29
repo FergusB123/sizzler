@@ -5,6 +5,7 @@ const pool = require('../database');
 const auth = require('../middleware/auth');
 const { uploadFile } = require('../services/storage');
 const { generateRecipeImage, imageGenEnabled } = require('../services/images');
+const { recordDeletions } = require('../blocklist');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024 } });
 
@@ -187,6 +188,10 @@ router.post('/bulk-delete', auth, async (req, res) => {
   const ids = (Array.isArray(req.body.ids) ? req.body.ids : []).map(Number).filter(Number.isInteger);
   if (!ids.length) return res.status(400).json({ error: 'No recipe ids supplied' });
   try {
+    // Tombstone first so these can never be re-added by an importer.
+    const { rows: doomed } = await pool.query(
+      'SELECT title, source, source_url FROM recipes WHERE id = ANY($1) AND user_id = $2', [ids, req.user.id]);
+    await recordDeletions(pool, req.user.id, doomed);
     const { rowCount } = await pool.query('DELETE FROM recipes WHERE id = ANY($1) AND user_id = $2', [ids, req.user.id]);
     res.json({ ok: true, deleted: rowCount });
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -195,6 +200,9 @@ router.post('/bulk-delete', auth, async (req, res) => {
 // ---- delete own ----
 router.delete('/:id', auth, async (req, res) => {
   try {
+    const { rows: doomed } = await pool.query(
+      'SELECT title, source, source_url FROM recipes WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+    await recordDeletions(pool, req.user.id, doomed);
     await pool.query('DELETE FROM recipes WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }

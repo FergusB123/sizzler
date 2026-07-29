@@ -270,6 +270,9 @@ async function main() {
   const { rows: ex } = await pool.query('SELECT title FROM recipes WHERE user_id = $1', [userId]);
   const have = new Set();
   for (const r of ex) { have.add(norm(r.title)); have.add(loose(r.title)); }
+  // Never re-add anything the user has deleted.
+  const blocked = await require('./blocklist').loadBlocklist(pool, userId);
+  for (const t of blocked.titles) { have.add(norm(t)); have.add(loose(t)); }
 
   const picks = curate(meals, have);
   const areaSummary = {};

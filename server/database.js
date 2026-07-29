@@ -60,6 +60,19 @@ async function initDatabase() {
     ALTER TABLE recipes ADD COLUMN IF NOT EXISTS favorite BOOLEAN DEFAULT FALSE;
     -- Estimated (or source-reported) energy per portion, in kcal.
     ALTER TABLE recipes ADD COLUMN IF NOT EXISTS calories INTEGER;
+
+    -- Tombstones so a deleted recipe is never re-added by an importer. A recipe
+    -- the user deletes is recorded here (by title + source_url); every importer
+    -- checks this list and skips matches, so deletions are permanent.
+    CREATE TABLE IF NOT EXISTS deleted_recipes (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      source TEXT,
+      source_url TEXT,
+      deleted_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS deleted_recipes_user_idx ON deleted_recipes(user_id);
     -- Which weekday a planning week starts on (0=Sun … 6=Sat). Anchors plans to
     -- a repeating rhythm so "this week" / "next week" are concrete.
     ALTER TABLE users ADD COLUMN IF NOT EXISTS week_start_day INTEGER DEFAULT 1;

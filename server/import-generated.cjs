@@ -84,6 +84,9 @@ async function main() {
 
   const { rows: existing } = await pool.query('SELECT title FROM recipes WHERE user_id = $1', [userId]);
   const have = new Set(existing.map((r) => norm(r.title)));
+  // Never re-add anything the user has deleted.
+  const blocked = await require('./blocklist').loadBlocklist(pool, userId);
+  for (const t of blocked.titles) have.add(norm(t));
 
   const todo = all.filter((r) => !have.has(norm(r.title)) && !skipSet.has(norm(r.title)));
   console.log(`user ${userId} · ${existing.length} existing · ${todo.length} to import (${all.length - todo.length} skipped)\n`);

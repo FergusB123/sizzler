@@ -141,6 +141,10 @@ async function run() {
     'SELECT title, cuisine, source_url FROM recipes WHERE user_id = $1', [userId]);
   const existingSlugs = new Set(existing.map((r) => (r.source_url || '').split('/').filter(Boolean).pop()).filter(Boolean));
   const seenNorm = new Set(existing.map((r) => normTitle(r.title)));
+  // Never re-add anything the user has deleted.
+  const blocked = await require('./blocklist').loadBlocklist(pool, userId);
+  for (const t of blocked.titles) seenNorm.add(normTitle(t));
+  for (const u of blocked.urls) { const s = u.split('/').filter(Boolean).pop(); if (s) existingSlugs.add(s); }
   const cuisineCount = {};
   for (const r of existing) if (r.cuisine) cuisineCount[r.cuisine] = (cuisineCount[r.cuisine] || 0) + 1;
 
