@@ -182,6 +182,16 @@ router.post('/:id/favorite', auth, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ---- bulk delete own ----
+router.post('/bulk-delete', auth, async (req, res) => {
+  const ids = (Array.isArray(req.body.ids) ? req.body.ids : []).map(Number).filter(Number.isInteger);
+  if (!ids.length) return res.status(400).json({ error: 'No recipe ids supplied' });
+  try {
+    const { rowCount } = await pool.query('DELETE FROM recipes WHERE id = ANY($1) AND user_id = $2', [ids, req.user.id]);
+    res.json({ ok: true, deleted: rowCount });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // ---- delete own ----
 router.delete('/:id', auth, async (req, res) => {
   try {

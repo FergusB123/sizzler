@@ -105,6 +105,7 @@ export const getRecipe = (id) => data(api.get(`/recipes/${id}`))
 export const createRecipe = (recipe) => data(api.post('/recipes', recipe))
 export const updateRecipe = (id, patch) => data(api.put(`/recipes/${id}`, patch))
 export const deleteRecipe = (id) => data(api.delete(`/recipes/${id}`))
+export const bulkDeleteRecipes = (ids) => data(api.post('/recipes/bulk-delete', { ids }))
 export const setShared = (id, isShared) => data(api.post(`/recipes/${id}/share`, { is_shared: isShared }))
 export const setFavorite = (id, favorite) => data(api.post(`/recipes/${id}/favorite`, { favorite }))
 

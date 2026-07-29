@@ -31,13 +31,18 @@ function Fallback({ recipe }) {
   )
 }
 
-export default function RecipeCard({ recipe, to, origin }) {
+export default function RecipeCard({ recipe, to, origin, selectable, selected, onToggle }) {
   const total = (recipe.prep_minutes || 0) + (recipe.cook_minutes || 0)
   const meta = [recipe.cuisine].filter(Boolean)
   const inner = (
-    <div className="recipe-card">
+    <div className={`recipe-card${selectable ? ' selectable' : ''}${selected ? ' selected' : ''}`}>
       <div className="rc-media">
         {recipe.image_url ? <img src={thumbUrl(recipe.image_url)} alt={recipe.title} loading="lazy" decoding="async" /> : <Fallback recipe={recipe} />}
+        {selectable && (
+          <span className={`rc-check${selected ? ' on' : ''}`} aria-hidden="true">
+            {selected && <Icon name="check" size={15} />}
+          </span>
+        )}
         {total > 0 && <span className="rc-time">{formatTime(total)}</span>}
         {origin === 'community' ? (
           <span className="rc-corner community"><Icon name="users" size={14} /></span>
@@ -56,5 +61,12 @@ export default function RecipeCard({ recipe, to, origin }) {
       </div>
     </div>
   )
+  if (selectable) {
+    return (
+      <button type="button" className="rc-link rc-selectbtn" aria-pressed={!!selected} onClick={() => onToggle?.(recipe.id)}>
+        {inner}
+      </button>
+    )
+  }
   return to ? <Link to={to} className="rc-link">{inner}</Link> : inner
 }

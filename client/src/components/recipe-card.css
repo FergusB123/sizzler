@@ -42,5 +42,19 @@
 .rc-meta .rc-kcal { font-variant-numeric: tabular-nums; }
 .rc-meta span + .rc-kcal::before { content: '·'; margin-right: 6px; color: var(--ash); }
 
+/* Bulk-select mode */
+.rc-selectbtn { display: block; width: 100%; padding: 0; border: none; background: none; font: inherit; text-align: left; cursor: pointer; }
+.recipe-card.selectable { transition: transform 0.12s var(--ease-out); }
+.rc-selectbtn:active .recipe-card { transform: scale(0.985); }
+.recipe-card.selected { outline: 2.5px solid var(--orange-500); outline-offset: -2px; }
+.rc-check {
+  position: absolute; top: 10px; left: 10px; z-index: 3; width: 26px; height: 26px;
+  border-radius: 50%; border: 2px solid #fff; background: rgba(0, 0, 0, 0.35);
+  display: grid; place-content: center; color: #fff; box-shadow: var(--shadow-sm);
+}
+.rc-check.on { background: var(--orange-500); border-color: var(--orange-500); }
+/* When selecting, the time badge would clash with the checkbox top-left → hide it */
+.recipe-card.selectable .rc-time { display: none; }
+
 /* Library grid */
 .recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; }

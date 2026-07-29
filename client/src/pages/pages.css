@@ -161,6 +161,16 @@
 .lib-search-ic { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); pointer-events: none; }
 .filter-btn { position: relative; flex-shrink: 0; width: 50px; display: grid; place-content: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text); cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.12s var(--ease-out); }
 .filter-btn:active { transform: scale(0.94); }
+
+/* Bulk-select action bar */
+.lib-selbar {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  padding: 10px 12px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); box-shadow: var(--shadow-sm); position: sticky; top: 8px; z-index: 5;
+}
+.lib-selall { background: none; border: none; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--orange-700); cursor: pointer; padding: 4px 0; }
+.lib-selall:hover { text-decoration: underline; }
+.lib-selcount { margin-left: auto; font-size: 13.5px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .filter-btn.on { background: var(--cast-iron); color: #fff; border-color: var(--cast-iron); }
 .filter-badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--orange-500); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-content: center; box-shadow: 0 0 0 2px var(--cream); }
 
