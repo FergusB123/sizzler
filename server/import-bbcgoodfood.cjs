@@ -25,16 +25,42 @@ const POPULAR = process.argv.includes('--popular');
 // Popular everyday dishes, most-mainstream first. Slugs are matched as substrings
 // against the sitemap URL pool; only a couple of each are taken for variety.
 const POPULAR_SLUGS = [
+  // pies, bakes & comfort classics
   'spaghetti-bolognese', 'beef-lasagne', 'lasagne', 'cottage-pie', 'shepherds-pie', 'chilli-con-carne',
-  'macaroni-cheese', 'mac-and-cheese', 'spaghetti-carbonara', 'carbonara', 'fish-pie', 'beef-stew',
-  'sausage-casserole', 'toad-in-the-hole', 'fish-and-chips', 'fishcakes', 'chicken-and-mushroom-pie',
-  'chicken-pie', 'steak-and-ale-pie', 'roast-chicken', 'chicken-curry', 'chicken-tikka-masala', 'korma',
-  'chicken-jalfrezi', 'katsu-curry', 'chicken-fajitas', 'beef-stir-fry', 'chicken-stir-fry', 'meatballs',
-  'beef-burger', 'homemade-pizza', 'margherita', 'mushroom-risotto', 'risotto', 'paella',
-  'sweet-and-sour', 'chow-mein', 'egg-fried-rice', 'beef-tacos', 'enchiladas', 'pad-thai',
-  'chicken-biryani', 'tuna-pasta-bake', 'pasta-bake', 'creamy-chicken', 'pesto', 'chicken-noodle-soup',
-  'tomato-soup', 'leek-and-potato', 'minestrone', 'moussaka', 'chicken-tagine', 'gammon', 'pork-chops',
-  'salmon', 'quiche', 'frittata', 'chicken-casserole', 'beef-casserole', 'hotpot', 'jacket-potato',
+  'macaroni-cheese', 'mac-and-cheese', 'spaghetti-carbonara', 'carbonara', 'fish-pie', 'fishermans-pie',
+  'beef-stew', 'sausage-casserole', 'toad-in-the-hole', 'fish-and-chips', 'fishcakes',
+  'chicken-and-mushroom-pie', 'chicken-pie', 'steak-and-ale-pie', 'steak-pie', 'cauliflower-cheese',
+  'sausage-and-mash', 'bangers-and-mash', 'corned-beef-hash', 'bubble-and-squeak', 'cheese-and-onion-pie',
+  'pasta-bake', 'tuna-pasta-bake', 'potato-bake', 'meatloaf', 'stuffed-peppers',
+  // roasts / Sunday
+  'roast-chicken', 'roast-beef', 'roast-pork', 'roast-lamb', 'roast-dinner', 'pork-belly', 'gammon',
+  'pork-chops', 'lamb-chops', 'beef-wellington', 'yorkshire-pudding',
+  // curries (mainstream)
+  'chicken-curry', 'chicken-tikka-masala', 'tikka', 'butter-chicken', 'korma', 'chicken-jalfrezi',
+  'rogan-josh', 'madras', 'saag', 'dhal', 'dal', 'katsu-curry', 'thai-green-curry', 'thai-red-curry',
+  'massaman', 'chicken-biryani', 'prawn-curry', 'chickpea-curry',
+  // pasta & Italian
+  'spaghetti', 'penne', 'tagliatelle', 'ragu', 'arrabiata', 'puttanesca', 'pesto-pasta', 'creamy-pasta',
+  'sausage-pasta', 'gnocchi', 'cannelloni', 'ravioli', 'mushroom-risotto', 'risotto', 'parmigiana',
+  'homemade-pizza', 'margherita', 'calzone',
+  // stir-fries / noodles / rice (mainstream asian)
+  'beef-stir-fry', 'chicken-stir-fry', 'sweet-and-sour', 'chow-mein', 'egg-fried-rice', 'singapore-noodles',
+  'black-bean', 'satay', 'teriyaki', 'pad-thai', 'nasi-goreng',
+  // mexican / tex-mex
+  'chicken-fajitas', 'beef-tacos', 'chicken-tacos', 'enchiladas', 'burrito', 'quesadilla', 'nachos', 'jambalaya',
+  // burgers, grills, meatballs
+  'beef-burger', 'chicken-burger', 'meatballs', 'kofta', 'kebab', 'jerk-chicken', 'peri-peri', 'chicken-kiev',
+  'schnitzel', 'coq-au-vin', 'beef-bourguignon', 'steak',
+  // fish
+  'salmon', 'baked-salmon', 'cod', 'sea-bass', 'fish-finger', 'kedgeree', 'scampi',
+  // soups & stews
+  'chicken-noodle-soup', 'tomato-soup', 'leek-and-potato', 'minestrone', 'butternut-squash-soup',
+  'french-onion-soup', 'lentil-soup', 'goulash', 'ramen', 'chicken-casserole', 'beef-casserole', 'hotpot',
+  // eggs / lighter mains
+  'quiche', 'frittata', 'shakshuka', 'omelette', 'paella', 'moussaka', 'chicken-tagine', 'jacket-potato',
+  'stuffed-mushroom', 'ratatouille',
+  // broad fallbacks (only reached after the specifics above)
+  'traybake', 'curry', 'casserole', 'stew', 'risotto', 'stir-fry',
 ];
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 const CONCURRENCY = 2;
