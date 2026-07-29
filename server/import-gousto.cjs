@@ -145,6 +145,7 @@ async function run() {
   const blocked = await require('./blocklist').loadBlocklist(pool, userId);
   for (const t of blocked.titles) seenNorm.add(normTitle(t));
   for (const u of blocked.urls) { const s = u.split('/').filter(Boolean).pop(); if (s) existingSlugs.add(s); }
+  const dishes = new (require('./similar').DishSet)([...existing.map((r) => r.title), ...blocked.titles]);
   const cuisineCount = {};
   for (const r of existing) if (r.cuisine) cuisineCount[r.cuisine] = (cuisineCount[r.cuisine] || 0) + 1;
 
@@ -169,8 +170,8 @@ async function run() {
       const slug = e.url.split('/').filter(Boolean).pop();
       if (!slug || seenSlug.has(slug) || existingSlugs.has(slug)) continue;
       const norm = normTitle(e.title);
-      if (seenNorm.has(norm)) continue; // near-duplicate of something we have / already queued
-      seenSlug.add(slug); seenNorm.add(norm);
+      if (seenNorm.has(norm) || dishes.has(e.title)) continue; // dupe / near-dupe of something we have / already queued
+      seenSlug.add(slug); seenNorm.add(norm); dishes.add(e.title);
       candidates.push({ slug, title: e.title, media: e.media, primary: primaryMeal(e.title) });
     }
     const bf = candidates.filter((c) => c.primary === 'breakfast').length;

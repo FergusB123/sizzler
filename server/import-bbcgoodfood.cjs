@@ -15,6 +15,7 @@ const path = require('path');
 const Anthropic = require('@anthropic-ai/sdk');
 const pool = require('./database');
 const { loadBlocklist } = require('./blocklist');
+const { DishSet } = require('./similar');
 
 const TARGET = Number(process.argv.find((a) => /^\d+$/.test(a))) || 50;
 const DRY = process.argv.includes('--dry');
@@ -205,6 +206,9 @@ async function main() {
   const blocked = await loadBlocklist(pool, userId);
   for (const t of blocked.titles) { have.add(norm(t)); have.add(loose(t)); }
   for (const u of blocked.urls) haveUrl.add(u);
+  // Near-duplicate guard: skip dishes we effectively already have (whole library
+  // + blocklist), e.g. don't add "Next-Level Moussaka" when a moussaka exists.
+  const dishes = new DishSet([...ex.map((r) => r.title), ...blocked.titles]);
 
   let urls = await collectUrls(POPULAR ? 2000 : TARGET * 6);
   if (POPULAR) urls = orderByPopular(urls);
@@ -224,13 +228,13 @@ async function main() {
         const ld = recipeLd(pg.body);
         if (!ld || !ld.recipeIngredient?.length || !ld.recipeInstructions?.length) { skip++; continue; }
         if (!isMain(ld)) { skip++; continue; }
-        if (have.has(norm(ld.name)) || have.has(loose(ld.name))) { skip++; continue; }
+        if (have.has(norm(ld.name)) || have.has(loose(ld.name)) || dishes.has(ld.name)) { skip++; continue; }
         if (ok >= TARGET) return;
 
         const r = await rewrite(ld);
         if (!r.title || !r.steps?.length) { failed++; continue; }
-        if (have.has(norm(r.title)) || have.has(loose(r.title))) { skip++; continue; }
-        have.add(norm(r.title)); have.add(loose(r.title));
+        if (have.has(norm(r.title)) || have.has(loose(r.title)) || dishes.has(r.title)) { skip++; continue; }
+        have.add(norm(r.title)); have.add(loose(r.title)); dishes.add(r.title);
         const ldCal = caloriesFromLd(ld);
         const cal = ldCal || r.calories || null;
         const servings = servingsFromLd(ld) || r.servings || 4;

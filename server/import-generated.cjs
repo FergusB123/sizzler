@@ -88,7 +88,14 @@ async function main() {
   const blocked = await require('./blocklist').loadBlocklist(pool, userId);
   for (const t of blocked.titles) have.add(norm(t));
 
-  const todo = all.filter((r) => !have.has(norm(r.title)) && !skipSet.has(norm(r.title)));
+  // Skip near-duplicates of what's already in the library / blocklist / batch.
+  const dishes = new (require('./similar').DishSet)([...existing.map((r) => r.title), ...blocked.titles]);
+  const todo = [];
+  for (const r of all) {
+    if (have.has(norm(r.title)) || skipSet.has(norm(r.title)) || dishes.has(r.title)) continue;
+    dishes.add(r.title);
+    todo.push(r);
+  }
   console.log(`user ${userId} · ${existing.length} existing · ${todo.length} to import (${all.length - todo.length} skipped)\n`);
 
   let next = 0, ok = 0, failed = 0;

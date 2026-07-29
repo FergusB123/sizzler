@@ -180,9 +180,9 @@ async function makeImage(recipe, srcThumb) {
 }
 
 // ── Selection: diverse spread across countries + proteins ──────────────
-function curate(meals, have) {
+function curate(meals, have, dishes) {
   const fresh = meals.filter((m) => {
-    if (have.has(norm(m.strMeal)) || have.has(loose(m.strMeal))) return false;
+    if (have.has(norm(m.strMeal)) || have.has(loose(m.strMeal)) || (dishes && dishes.has(m.strMeal))) return false;
     if (!MAIN_CATS.has(m.strCategory)) return false;
     const vegLike = m.strCategory === 'Vegetarian' || m.strCategory === 'Vegan';
     if (vegLike && NON_MAIN_RE.test(m.strMeal)) return false;
@@ -273,8 +273,9 @@ async function main() {
   // Never re-add anything the user has deleted.
   const blocked = await require('./blocklist').loadBlocklist(pool, userId);
   for (const t of blocked.titles) { have.add(norm(t)); have.add(loose(t)); }
+  const dishes = new (require('./similar').DishSet)([...ex.map((r) => r.title), ...blocked.titles]);
 
-  const picks = curate(meals, have);
+  const picks = curate(meals, have, dishes);
   const areaSummary = {};
   for (const m of picks) areaSummary[m.strArea || 'International'] = (areaSummary[m.strArea || 'International'] || 0) + 1;
   console.log(`Catalogue ${meals.length} · library ${ex.length} · selected ${picks.length} dinners`);
@@ -294,7 +295,8 @@ async function main() {
         const r = await rewrite(m);
         if (!r.title || r.title === 'NOT_A_RECIPE' || !r.steps?.length) throw new Error('bad rewrite');
         // guard: re-check dedupe after Claude may have tidied the title
-        if (have.has(norm(r.title)) || have.has(loose(r.title))) { console.log(`· skip dup after rewrite: ${r.title}`); continue; }
+        if (have.has(norm(r.title)) || have.has(loose(r.title)) || dishes.has(r.title)) { console.log(`· skip dup after rewrite: ${r.title}`); continue; }
+        dishes.add(r.title);
         have.add(norm(r.title)); have.add(loose(r.title));
 
         if (DRY) {
