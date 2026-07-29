@@ -79,10 +79,22 @@ let anthropic;
 const ai = () => (anthropic ||= new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }));
 
 async function get(url, accept = 'text/html', ms = 20000) {
-  const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
-  try { const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: accept }, redirect: 'follow', signal: c.signal });
-    return { status: r.status, ct: r.headers.get('content-type') || '', body: await r.text() }; }
-  catch (e) { return { err: e.message }; } finally { clearTimeout(t); }
+  let last = { err: 'unknown' };
+  // Retry transient throttling (429 / 5xx / timeout) with backoff — individual
+  // fetches succeed fine, it's sustained load that gets rate-limited.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
+    try {
+      const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: accept }, redirect: 'follow', signal: c.signal });
+      clearTimeout(t);
+      if ((r.status === 429 || r.status >= 500) && attempt < 2) { last = { status: r.status }; await sleep(1200 * (attempt + 1)); continue; }
+      return { status: r.status, ct: r.headers.get('content-type') || '', body: await r.text() };
+    } catch (e) {
+      clearTimeout(t); last = { err: e.message };
+      if (attempt < 2) { await sleep(1200 * (attempt + 1)); continue; }
+    }
+  }
+  return last;
 }
 async function getBuf(url, ms = 20000) {
   const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
@@ -236,7 +248,7 @@ async function main() {
   // + blocklist), e.g. don't add "Next-Level Moussaka" when a moussaka exists.
   const dishes = new DishSet([...ex.map((r) => r.title), ...blocked.titles]);
 
-  let urls = await collectUrls(POPULAR ? 2000 : TARGET * 6);
+  let urls = await collectUrls(POPULAR ? 9000 : TARGET * 12);
   if (POPULAR) urls = orderByPopular(urls);
   console.log(`Discovered ${urls.length} candidate URLs; importing up to ${TARGET} ${POPULAR ? 'popular ' : ''}dinners${DRY ? ' (DRY)' : ''} · blocklist ${blocked.titles.length}.\n`);
 
